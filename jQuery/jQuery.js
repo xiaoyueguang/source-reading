@@ -209,6 +209,7 @@ jQuery.fn = jQuery.prototype = {
 	splice: arr.splice
 };
 // 定义jQuery扩展方法, 方便开发者扩展功能
+// TODO
 jQuery.extend = jQuery.fn.extend = function() {
 	var options, name, src, copy, copyIsArray, clone,
 		target = arguments[ 0 ] || {},
@@ -217,6 +218,7 @@ jQuery.extend = jQuery.fn.extend = function() {
 		deep = false;
 
 	// Handle a deep copy situation
+	// 当第一个参数类型为 Boolean 时候, 转为深度复制
 	if ( typeof target === "boolean" ) {
 		deep = target;
 
@@ -226,11 +228,13 @@ jQuery.extend = jQuery.fn.extend = function() {
 	}
 
 	// Handle case when target is a string or something (possible in deep copy)
+	// 处理目标为字符串或其它类型时
 	if ( typeof target !== "object" && !jQuery.isFunction( target ) ) {
 		target = {};
 	}
 
 	// Extend jQuery itself if only one argument is passed
+	// 只有一个参数时
 	if ( i === length ) {
 		target = this;
 		i--;
@@ -239,6 +243,7 @@ jQuery.extend = jQuery.fn.extend = function() {
 	for ( ; i < length; i++ ) {
 
 		// Only deal with non-null/undefined values
+		// 只处理非空值
 		if ( ( options = arguments[ i ] ) != null ) {
 
 			// Extend the base object
@@ -247,11 +252,13 @@ jQuery.extend = jQuery.fn.extend = function() {
 				copy = options[ name ];
 
 				// Prevent never-ending loop
+				// 值相同则进入下一循环
 				if ( target === copy ) {
 					continue;
 				}
 
 				// Recurse if we're merging plain objects or arrays
+				// TODO isPlainObject 方法
 				if ( deep && copy && ( jQuery.isPlainObject( copy ) ||
 					( copyIsArray = jQuery.isArray( copy ) ) ) ) {
 
