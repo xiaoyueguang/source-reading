@@ -372,12 +372,12 @@ jQuery.extend( {
 			return obj + "";
 		}
 
-		debugger;
 		// Support: Android <=2.3 only (functionish RegExp)
 		return typeof obj === "object" || typeof obj === "function" ?
 			// 当typeof 为 object 或 function时, 需要另行区分.
 			// typeof [], typeof /ff/, typeof {} 均返回object
 			// toString.call 将内容转为 [object XXXXX]的格式
+			// TODO: toString.call
 			class2type[ toString.call( obj ) ] || "object" :
 			typeof obj;
 	},
@@ -399,18 +399,20 @@ jQuery.extend( {
 	nodeName: function( elem, name ) {
 		return elem.nodeName && elem.nodeName.toLowerCase() === name.toLowerCase();
 	},
-
+	// 循环
 	each: function( obj, callback ) {
 		var length, i = 0;
-
+		// obj类似数组结构时
 		if ( isArrayLike( obj ) ) {
 			length = obj.length;
 			for ( ; i < length; i++ ) {
+				// 通过回调返回来控制是否跳出循环, 回调里参数为 index, obj[index]
 				if ( callback.call( obj[ i ], i, obj[ i ] ) === false ) {
 					break;
 				}
 			}
 		} else {
+			// obj为对象时
 			for ( i in obj ) {
 				if ( callback.call( obj[ i ], i, obj[ i ] ) === false ) {
 					break;
@@ -422,6 +424,7 @@ jQuery.extend( {
 	},
 
 	// Support: Android <=4.0 only
+	// 移除字符串中空白字符
 	trim: function( text ) {
 		return text == null ?
 			"" :
@@ -429,6 +432,7 @@ jQuery.extend( {
 	},
 
 	// results is for internal usage only
+	// 传入任何值, 返回一个合并处理后的数组
 	makeArray: function( arr, results ) {
 		var ret = results || [];
 
@@ -445,13 +449,14 @@ jQuery.extend( {
 
 		return ret;
 	},
-
+	// 返回elem元素在arr数组里的序号.没有则返回-1, i为开始序号
 	inArray: function( elem, arr, i ) {
 		return arr == null ? -1 : indexOf.call( arr, elem, i );
 	},
 
 	// Support: Android <=4.0 only, PhantomJS 1 only
 	// push.apply(_, arraylike) throws on ancient WebKit
+	// 合并两个类数组类型, 返回第一个参数
 	merge: function( first, second ) {
 		var len = +second.length,
 			j = 0,
@@ -465,7 +470,7 @@ jQuery.extend( {
 
 		return first;
 	},
-
+	
 	grep: function( elems, callback, invert ) {
 		var callbackInverse,
 			matches = [],
