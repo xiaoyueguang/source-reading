@@ -74,7 +74,7 @@ var ObjectFunctionString = fnToString.call( Object );
 var support = {};
 
 
-// 在head标签里创建一个script标签, 并将代码放入内执行.
+// 在head标签里创建一个script标签, 并将代码放入内执行.执行完毕后再移除
 	function DOMEval( code, doc ) {
 		doc = doc || document;
 
@@ -288,86 +288,102 @@ jQuery.extend = jQuery.fn.extend = function() {
 jQuery.extend( {
 
 	// Unique for each copy of jQuery on the page
+	// 生成一个唯一的jQuery标识码
 	expando: "jQuery" + ( version + Math.random() ).replace( /\D/g, "" ),
 
 	// Assume jQuery is ready without the ready module
+	// 判断jQuery是否初始化
 	isReady: true,
-
+	// 封装error方法.抛出错误
 	error: function( msg ) {
 		throw new Error( msg );
 	},
-
+	//	TODO
 	noop: function() {},
-
+	// 判断是否为函数方法
 	isFunction: function( obj ) {
 		return jQuery.type( obj ) === "function";
 	},
-
+	// 判断是否为数组
 	isArray: Array.isArray,
-
+	// 判断是否为window
+	// window === window.window 为true, 则表明该对象为window
 	isWindow: function( obj ) {
 		return obj != null && obj === obj.window;
 	},
-
+	// 判断是否为纯数字
+	// 1, '11' 则返回true. '1f'则返回false
 	isNumeric: function( obj ) {
 
 		// As of jQuery 3.0, isNumeric is limited to
 		// strings and numbers (primitives or objects)
 		// that can be coerced to finite numbers (gh-2662)
+		// 获取类型
 		var type = jQuery.type( obj );
 		return ( type === "number" || type === "string" ) &&
 
 			// parseFloat NaNs numeric-cast false positives ("")
 			// ...but misinterprets leading-number strings, particularly hex literals ("0x...")
 			// subtraction forces infinities to NaN
+			// 因为JavaScript语言的特性, 仅仅判断类型是否为number 或 string是不够的
+			// 所以这里通过 减 运算, 根据结果是否为NaN来判断obj里是否含有其它字符
 			!isNaN( obj - parseFloat( obj ) );
 	},
-
+	// 判断是否为构造函数创建的对象
 	isPlainObject: function( obj ) {
 		var proto, Ctor;
 
 		// Detect obvious negatives
 		// Use toString instead of jQuery.type to catch host objects
+		// 判断是否为对象
 		if ( !obj || toString.call( obj ) !== "[object Object]" ) {
 			return false;
 		}
-
+		// 获取原型
 		proto = getProto( obj );
 
 		// Objects with no prototype (e.g., `Object.create( null )`) are plain
+		// 判断是否有原型
 		if ( !proto ) {
 			return true;
 		}
 
 		// Objects with prototype are plain iff they were constructed by a global Object function
+		// TODO: 需要了解原型
 		Ctor = hasOwn.call( proto, "constructor" ) && proto.constructor;
 		return typeof Ctor === "function" && fnToString.call( Ctor ) === ObjectFunctionString;
 	},
-
+	// 是否为空对象
 	isEmptyObject: function( obj ) {
 
 		/* eslint-disable no-unused-vars */
 		// See https://github.com/eslint/eslint/issues/6125
 		var name;
-
+		// 通过循环判断, 能循环不为空对象
 		for ( name in obj ) {
 			return false;
 		}
 		return true;
 	},
-
+	// 获取对象的类型
 	type: function( obj ) {
 		if ( obj == null ) {
+			// null 返回 'null', undefined 返回 'undefined'
 			return obj + "";
 		}
 
+		debugger;
 		// Support: Android <=2.3 only (functionish RegExp)
 		return typeof obj === "object" || typeof obj === "function" ?
+			// 当typeof 为 object 或 function时, 需要另行区分.
+			// typeof [], typeof /ff/, typeof {} 均返回object
+			// toString.call 将内容转为 [object XXXXX]的格式
 			class2type[ toString.call( obj ) ] || "object" :
 			typeof obj;
 	},
 
 	// Evaluates a script in a global context
+	// 全局执行一个方法
 	globalEval: function( code ) {
 		DOMEval( code );
 	},
@@ -375,10 +391,11 @@ jQuery.extend( {
 	// Convert dashed to camelCase; used by the css and data modules
 	// Support: IE <=9 - 11, Edge 12 - 13
 	// Microsoft forgot to hump their vendor prefix (#9572)
+	// 分别处理css前缀   -ms-flex => msFlex, -webkit-flex => WebkitFlex. IE浏览器首字母不需要大写
 	camelCase: function( string ) {
 		return string.replace( rmsPrefix, "ms-" ).replace( rdashAlpha, fcamelCase );
 	},
-
+	// 判断元素节点名称是否正确
 	nodeName: function( elem, name ) {
 		return elem.nodeName && elem.nodeName.toLowerCase() === name.toLowerCase();
 	},
