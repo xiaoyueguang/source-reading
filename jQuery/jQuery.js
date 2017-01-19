@@ -470,36 +470,42 @@ jQuery.extend( {
 
 		return first;
 	},
-	
+	// 判断数组里的元素，返回一个符合条件的元素数组
 	grep: function( elems, callback, invert ) {
 		var callbackInverse,
 			matches = [],
 			i = 0,
 			length = elems.length,
+			// 将invert 转为 boolean。 默认为!undefined => true
 			callbackExpect = !invert;
 
 		// Go through the array, only saving the items
 		// that pass the validator function
 		for ( ; i < length; i++ ) {
+			// 回调函数判断 boolean
 			callbackInverse = !callback( elems[ i ], i );
 			if ( callbackInverse !== callbackExpect ) {
+				// 返回结果的保存到数组里
 				matches.push( elems[ i ] );
 			}
 		}
-
+		// 返回该数组
 		return matches;
 	},
 
 	// arg is for internal usage only
+	// 对elems数组执行方法, 并返回一个被处理后的数组
 	map: function( elems, callback, arg ) {
 		var length, value,
 			i = 0,
 			ret = [];
 
 		// Go through the array, translating each of the items to their new values
+		// 数组或者类数组
 		if ( isArrayLike( elems ) ) {
 			length = elems.length;
 			for ( ; i < length; i++ ) {
+				// 处理数据并返回
 				value = callback( elems[ i ], i, arg );
 
 				if ( value != null ) {
@@ -508,6 +514,7 @@ jQuery.extend( {
 			}
 
 		// Go through every key on the object,
+		// 对象
 		} else {
 			for ( i in elems ) {
 				value = callback( elems[ i ], i, arg );
@@ -523,6 +530,7 @@ jQuery.extend( {
 	},
 
 	// A global GUID counter for objects
+	// 全局ID, 为下面的代理方法提供全局ID
 	guid: 1,
 
 	// Bind a function to a context, optionally partially applying any
@@ -531,6 +539,7 @@ jQuery.extend( {
 		var tmp, args, proxy;
 
 		if ( typeof context === "string" ) {
+			// 当context为字符串时, 将fn中的该方法赋值给fn, 且context重新引用原fn
 			tmp = fn[ context ];
 			context = fn;
 			fn = tmp;
@@ -538,6 +547,7 @@ jQuery.extend( {
 
 		// Quick check to determine if target is callable, in the spec
 		// this throws a TypeError, but we will just return undefined.
+		// 判断是否为方法
 		if ( !jQuery.isFunction( fn ) ) {
 			return undefined;
 		}
@@ -553,7 +563,7 @@ jQuery.extend( {
 
 		return proxy;
 	},
-
+	// 当前时间
 	now: Date.now,
 
 	// jQuery.support is not used in Core but other projects attach their
