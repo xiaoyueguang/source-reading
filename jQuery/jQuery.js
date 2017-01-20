@@ -535,6 +535,7 @@ jQuery.extend( {
 
 	// Bind a function to a context, optionally partially applying any
 	// arguments.
+	// TODO
 	proxy: function( fn, context ) {
 		var tmp, args, proxy;
 
@@ -568,35 +569,45 @@ jQuery.extend( {
 
 	// jQuery.support is not used in Core but other projects attach their
 	// properties to it so it needs to exist.
+	// 查看支持的属性
 	support: support
 } );
-
+// 判断系统是否含有 Symbol
 if ( typeof Symbol === "function" ) {
+	// 默认的遍历器方法
+	// TODO. 还不明白这里用处
 	jQuery.fn[ Symbol.iterator ] = arr[ Symbol.iterator ];
 }
 
 // Populate the class2type map
+// 给class2type添加所有的对象类型
 jQuery.each( "Boolean Number String Function Array Date RegExp Object Error Symbol".split( " " ),
 function( i, name ) {
 	class2type[ "[object " + name + "]" ] = name.toLowerCase();
 } );
-
+// 判断是否类数组
 function isArrayLike( obj ) {
 
 	// Support: real iOS 8.2 only (not reproducible in simulator)
 	// `in` check used to prevent JIT error (gh-2145)
 	// hasOwn isn't used here due to false negatives
 	// regarding Nodelist length in IE
+	// 取出长度.
 	var length = !!obj && "length" in obj && obj.length,
+		// 类型
 		type = jQuery.type( obj );
-
+	// 当判断的对象为方法或为window对象时,返回false
 	if ( type === "function" || jQuery.isWindow( obj ) ) {
 		return false;
 	}
-
+	// 类型为数组 或 长度为0 或 (长度类型为number 且 长度大于0 且 length - 1 在该对象内)
+	// 例子: isArrayLike([]) => true
+	// isArrayLike({1:1, b:2, length:1}) => false. 因为该对象没有属性 0
+	// isArrayLike({1:1, b:2, length:2}) => true. 该对象为 {0: undefined, 1: 1, b:2, length: 2}
 	return type === "array" || length === 0 ||
 		typeof length === "number" && length > 0 && ( length - 1 ) in obj;
 }
+// Sizzle 选择器引擎开始
 var Sizzle =
 /*!
  * Sizzle CSS Selector Engine v2.3.3
@@ -609,7 +620,7 @@ var Sizzle =
  * Date: 2016-08-08
  */
 (function( window ) {
-
+// 通过一个闭包 将一些变量创建在局部作用域, 避免了泄漏
 var i,
 	support,
 	Expr,
@@ -666,25 +677,28 @@ var i,
 		}
 		return -1;
 	},
-
+	// 标签上可能会涉及到的开关
 	booleans = "checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped",
 
 	// Regular expressions
 
 	// http://www.w3.org/TR/css3-selectors/#whitespace
+	// 选择器里出现的空白字符
 	whitespace = "[\\x20\\t\\r\\n\\f]",
 
 	// http://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
+	// TODO
 	identifier = "(?:\\\\.|[\\w-]|[^\0-\\xa0])+",
 
 	// Attribute selectors: http://www.w3.org/TR/selectors/#attribute-selectors
+	// 属性选择器 [data-xxx]
 	attributes = "\\[" + whitespace + "*(" + identifier + ")(?:" + whitespace +
 		// Operator (capture 2)
 		"*([*^$|!~]?=)" + whitespace +
 		// "Attribute values must be CSS identifiers [capture 5] or strings [capture 3 or capture 4]"
 		"*(?:'((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\"|(" + identifier + "))|)" + whitespace +
 		"*\\]",
-
+	// 伪类选择器
 	pseudos = ":(" + identifier + ")(?:\\((" +
 		// To reduce the number of selectors needing tokenize in the preFilter, prefer arguments:
 		// 1. quoted (capture 3; capture 4 or capture 5)
@@ -696,29 +710,40 @@ var i,
 		")\\)|)",
 
 	// Leading and non-escaped trailing whitespace, capturing some non-whitespace characters preceding the latter
+	// 正则抓取 ' +' 字符
 	rwhitespace = new RegExp( whitespace + "+", "g" ),
+	// 正则抓取 空白字符
 	rtrim = new RegExp( "^" + whitespace + "+|((?:^|[^\\\\])(?:\\\\.)*)" + whitespace + "+$", "g" ),
-
+	// 正则抓取 ' , ' 包含','字符串
 	rcomma = new RegExp( "^" + whitespace + "*," + whitespace + "*" ),
+	// 正则 关系选择器
 	rcombinators = new RegExp( "^" + whitespace + "*([>+~]|" + whitespace + ")" + whitespace + "*" ),
-
+	// TODO
 	rattributeQuotes = new RegExp( "=" + whitespace + "*([^\\]'\"]*?)" + whitespace + "*\\]", "g" ),
 
 	rpseudo = new RegExp( pseudos ),
 	ridentifier = new RegExp( "^" + identifier + "$" ),
 
 	matchExpr = {
+		// id选择器
 		"ID": new RegExp( "^#(" + identifier + ")" ),
+		// class选择器
 		"CLASS": new RegExp( "^\\.(" + identifier + ")" ),
+		// 标签选择器
 		"TAG": new RegExp( "^(" + identifier + "|[*])" ),
+		// 属性选择器
 		"ATTR": new RegExp( "^" + attributes ),
+
 		"PSEUDO": new RegExp( "^" + pseudos ),
+		// 子选择器
 		"CHILD": new RegExp( "^:(only|first|last|nth|nth-last)-(child|of-type)(?:\\(" + whitespace +
 			"*(even|odd|(([+-]|)(\\d*)n|)" + whitespace + "*(?:([+-]|)" + whitespace +
 			"*(\\d+)|))" + whitespace + "*\\)|)", "i" ),
+		// 标签里含有一些类似开关的属性, 比如checked readonly 之类
 		"bool": new RegExp( "^(?:" + booleans + ")$", "i" ),
 		// For use in libraries implementing .is()
 		// We use this for POS matching in `select`
+		// TODO
 		"needsContext": new RegExp( "^" + whitespace + "*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\(" +
 			whitespace + "*((?:-\\d)?\\d*)" + whitespace + "*\\)|)(?=[^-]|$)", "i" )
 	},
@@ -729,12 +754,14 @@ var i,
 	rnative = /^[^{]+\{\s*\[native \w/,
 
 	// Easily-parseable/retrievable ID or TAG or CLASS selectors
+	// 单个ID或标签或类名时 快速检索
 	rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/,
-
+	// 兄弟选择器
 	rsibling = /[+~]/,
 
 	// CSS escapes
 	// http://www.w3.org/TR/CSS21/syndata.html#escaped-characters
+	// CSS 转义
 	runescape = new RegExp( "\\\\([\\da-f]{1,6}" + whitespace + "?|(" + whitespace + ")|.)", "ig" ),
 	funescape = function( _, escaped, escapedWhitespace ) {
 		var high = "0x" + escaped - 0x10000;
@@ -783,7 +810,8 @@ var i,
 		},
 		{ dir: "parentNode", next: "legend" }
 	);
-
+	console.log(matchExpr.bool.test('checked'))
+debugger
 // Optimize for push.apply( _, NodeList )
 try {
 	push.apply(
@@ -2852,7 +2880,7 @@ return Sizzle;
 
 })( window );
 
-
+// Sizzle 选择器引擎结束
 
 jQuery.find = Sizzle;
 jQuery.expr = Sizzle.selectors;
