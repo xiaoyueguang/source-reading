@@ -645,6 +645,7 @@ var i,
 
 	// Instance-specific data
 	expando = "sizzle" + 1 * new Date(),
+	// document
 	preferredDoc = window.document,
 	dirruns = 0,
 	done = 0,
@@ -750,7 +751,7 @@ var i,
 
 	rinputs = /^(?:input|select|textarea|button)$/i,
 	rheader = /^h\d$/i,
-
+	// 判断是否为原生 比如 function xxxx { [native code] }
 	rnative = /^[^{]+\{\s*\[native \w/,
 
 	// Easily-parseable/retrievable ID or TAG or CLASS selectors
@@ -779,6 +780,7 @@ var i,
 
 	// CSS string/identifier serialization
 	// https://drafts.csswg.org/cssom/#common-serializing-idioms
+	// CSS序列化
 	rcssescape = /([\0-\x1f\x7f]|^-?\d)|^-$|[^\0-\x1f\x7f-\uFFFF\w-]/g,
 	fcssescape = function( ch, asCodePoint ) {
 		if ( asCodePoint ) {
@@ -810,9 +812,8 @@ var i,
 		},
 		{ dir: "parentNode", next: "legend" }
 	);
-	console.log(matchExpr.bool.test('checked'))
-debugger
 // Optimize for push.apply( _, NodeList )
+// 将document根节点的子节点推入arr, TODO: 意义不明
 try {
 	push.apply(
 		(arr = slice.call( preferredDoc.childNodes )),
@@ -841,16 +842,28 @@ try {
 	};
 }
 
+/**
+ * Sizzle 主函数
+ * 
+ * @param {string} selector css选择器
+ * @param {any} context
+ * @param {any} results
+ * @param {any} seed 默认为空
+ * @returns
+ */
+window.$1 = Sizzle
 function Sizzle( selector, context, results, seed ) {
 	var m, i, elem, nid, match, groups, newSelector,
 		newContext = context && context.ownerDocument,
 
 		// nodeType defaults to 9, since context defaults to document
 		nodeType = context ? context.nodeType : 9;
-
+	// 结果默认为空
 	results = results || [];
 
 	// Return early from calls with invalid selector or context
+	// 选择器无效时 直接返回结果
+	// nodeType 不为以下时 1 元素 9 document 11 document片段, 直接返回空
 	if ( typeof selector !== "string" || !selector ||
 		nodeType !== 1 && nodeType !== 9 && nodeType !== 11 ) {
 
@@ -858,34 +871,40 @@ function Sizzle( selector, context, results, seed ) {
 	}
 
 	// Try to shortcut find operations (as opposed to filters) in HTML documents
+	// 尝试在 html里快速查找
 	if ( !seed ) {
-
+		// 上下文存在则返回该上下文的 document属性或者本身. 并判断是否为document
+		// 如果不是 则设置document
 		if ( ( context ? context.ownerDocument || context : preferredDoc ) !== document ) {
+			// TODO: 未知
 			setDocument( context );
 		}
 		context = context || document;
-
+		// 判断document是否为HTML
 		if ( documentIsHTML ) {
 
 			// If the selector is sufficiently simple, try using a "get*By*" DOM method
 			// (excepting DocumentFragment context, where the methods don't exist)
+			// 判断选择器字符串是否符合快速查找, 节省性能
 			if ( nodeType !== 11 && (match = rquickExpr.exec( selector )) ) {
-
-				// ID selector
+				// match获取到后, 为数组. [选择器字符串, 抓取到的id, 抓取到的标签名, 抓取到的类名]
+				// ID selector ID选择器
 				if ( (m = match[1]) ) {
-
 					// Document context
+					// 判断是否为document
 					if ( nodeType === 9 ) {
+						// 根据ID查找dom
 						if ( (elem = context.getElementById( m )) ) {
-
 							// Support: IE, Opera, Webkit
 							// TODO: identify versions
 							// getElementById can match elements by name instead of ID
+							// getElementById可能会抓取到不符合的元素, 需要取出该元素的ID进行判断
 							if ( elem.id === m ) {
 								results.push( elem );
 								return results;
 							}
 						} else {
+							// 没检索到则返回空
 							return results;
 						}
 
@@ -895,6 +914,7 @@ function Sizzle( selector, context, results, seed ) {
 						// Support: IE, Opera, Webkit
 						// TODO: identify versions
 						// getElementById can match elements by name instead of ID
+						// 原上下文不为document时, 则调用document
 						if ( newContext && (elem = newContext.getElementById( m )) &&
 							contains( context, elem ) &&
 							elem.id === m ) {
@@ -905,20 +925,24 @@ function Sizzle( selector, context, results, seed ) {
 					}
 
 				// Type selector
+				// 标签选择器
 				} else if ( match[2] ) {
+					// 将整个标签的数组放入数组里
+					// TODO: results.push(context.getElementsByTagName(selector)) 与下面结果不一样...
 					push.apply( results, context.getElementsByTagName( selector ) );
 					return results;
-
 				// Class selector
+				// 类名选择器
 				} else if ( (m = match[3]) && support.getElementsByClassName &&
 					context.getElementsByClassName ) {
-
 					push.apply( results, context.getElementsByClassName( m ) );
 					return results;
 				}
 			}
-
 			// Take advantage of querySelectorAll
+			// 非简单字符串时
+			// 判断是否支持querySelectorAll
+			// TODO: 2017/1/23 未完成
 			if ( support.qsa &&
 				!compilerCache[ selector + " " ] &&
 				(!rbuggyQSA || !rbuggyQSA.test( selector )) ) {
