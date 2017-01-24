@@ -942,11 +942,12 @@ function Sizzle( selector, context, results, seed ) {
 			// Take advantage of querySelectorAll
 			// 非简单字符串时
 			// 判断是否支持querySelectorAll
-			// TODO: 2017/1/23 未完成
 			if ( support.qsa &&
+				// 缓存
 				!compilerCache[ selector + " " ] &&
+				// 正则判断 TODO
 				(!rbuggyQSA || !rbuggyQSA.test( selector )) ) {
-
+				// 类型不为元素
 				if ( nodeType !== 1 ) {
 					newContext = context;
 					newSelector = selector;
@@ -955,23 +956,28 @@ function Sizzle( selector, context, results, seed ) {
 				// Thanks to Andrew Dupont for this workaround technique
 				// Support: IE <=8
 				// Exclude object elements
+				// 当IE8或以下浏览器不支持 querySelectorAll时.
+				// TODO: IE8以下的辣鸡 不看了...
 				} else if ( context.nodeName.toLowerCase() !== "object" ) {
-
 					// Capture the context ID, setting it first if necessary
+					// 获取context的ID
 					if ( (nid = context.getAttribute( "id" )) ) {
+						// 字符编码替换. 可能IE不太一样
 						nid = nid.replace( rcssescape, fcssescape );
 					} else {
+						// 替换一个单一的值?
 						context.setAttribute( "id", (nid = expando) );
 					}
-
 					// Prefix every selector in the list
+					// 处理选择器 将选择器字符串转为包含若干选择器的数组
 					groups = tokenize( selector );
 					i = groups.length;
 					while ( i-- ) {
+						// 字符串转为 #id xxxx
 						groups[i] = "#" + nid + " " + toSelector( groups[i] );
 					}
+					// 新选择器转为多个选择器
 					newSelector = groups.join( "," );
-
 					// Expand context for sibling selectors
 					newContext = rsibling.test( selector ) && testContext( context.parentNode ) ||
 						context;
@@ -1004,11 +1010,13 @@ function Sizzle( selector, context, results, seed ) {
  *	property name the (space-suffixed) string and (if the cache is larger than Expr.cacheLength)
  *	deleting the oldest entry
  */
+// 利用闭包创建一个缓存, 将数据key缓存到限定长度的私有keys里, 并返回value值, 但是并不保存value值.
 function createCache() {
 	var keys = [];
 
 	function cache( key, value ) {
 		// Use (key + " ") to avoid collision with native prototype properties (see Issue #157)
+		// TODO: Expr 是啥
 		if ( keys.push( key + " " ) > Expr.cacheLength ) {
 			// Only keep the most recent entries
 			delete cache[ keys.shift() ];
@@ -1022,6 +1030,7 @@ function createCache() {
  * Mark a function for special use by Sizzle
  * @param {Function} fn The function to mark
  */
+// 将一个函数打上特殊的sizzle标签
 function markFunction( fn ) {
 	fn[ expando ] = true;
 	return fn;
@@ -1031,19 +1040,23 @@ function markFunction( fn ) {
  * Support testing using an element
  * @param {Function} fn Passed the created element and returns a boolean result
  */
+// 测试: 断言. 
 function assert( fn ) {
 	var el = document.createElement("fieldset");
 
 	try {
+		// try 判断方法是否正常执行
 		return !!fn( el );
 	} catch (e) {
 		return false;
 	} finally {
 		// Remove from its parent by default
+		// 如果该被插入到页面里, 则去父组件里删除该子组件
 		if ( el.parentNode ) {
 			el.parentNode.removeChild( el );
 		}
 		// release memory in IE
+		// 释放内存
 		el = null;
 	}
 }
@@ -1053,6 +1066,7 @@ function assert( fn ) {
  * @param {String} attrs Pipe-separated list of attributes
  * @param {Function} handler The method that will be applied
  */
+// 将attrs字符串以 '|'分割, 把handle赋值给Expr.attrHandle的attr
 function addHandle( attrs, handler ) {
 	var arr = attrs.split("|"),
 		i = arr.length;
@@ -1068,17 +1082,18 @@ function addHandle( attrs, handler ) {
  * @param {Element} b
  * @returns {Number} Returns less than 0 if a precedes b, greater than 0 if a follows b
  */
+// 检查兄弟节点的顺序, 低于0 则表示a在b前, 高于0 则表示a在b后
 function siblingCheck( a, b ) {
 	var cur = b && a,
 		diff = cur && a.nodeType === 1 && b.nodeType === 1 &&
 			a.sourceIndex - b.sourceIndex;
-
 	// Use IE sourceIndex if available on both nodes
+	// IE可直接通过sourceIndex来判断前后顺序
 	if ( diff ) {
 		return diff;
 	}
-
 	// Check if b follows a
+	// 非IE状态.a的下一个是否为b, 如果是, 则返回-1
 	if ( cur ) {
 		while ( (cur = cur.nextSibling) ) {
 			if ( cur === b ) {
@@ -1086,7 +1101,7 @@ function siblingCheck( a, b ) {
 			}
 		}
 	}
-
+	// 判断a存在
 	return a ? 1 : -1;
 }
 
@@ -1094,6 +1109,7 @@ function siblingCheck( a, b ) {
  * Returns a function to use in pseudos for input types
  * @param {String} type
  */
+// 返回一个方法, 该判断该元素是否为input, 且类型是否为type
 function createInputPseudo( type ) {
 	return function( elem ) {
 		var name = elem.nodeName.toLowerCase();
@@ -1105,6 +1121,7 @@ function createInputPseudo( type ) {
  * Returns a function to use in pseudos for buttons
  * @param {String} type
  */
+// 返回一个方法, 判断该元素是否为 input或者buttons, 且类型是否为type
 function createButtonPseudo( type ) {
 	return function( elem ) {
 		var name = elem.nodeName.toLowerCase();
@@ -1116,11 +1133,12 @@ function createButtonPseudo( type ) {
  * Returns a function to use in pseudos for :enabled/:disabled
  * @param {Boolean} disabled true for :disabled; false for :enabled
  */
+// 返回一个方法, 判断元素是否使用了 :enabled或:disabled 根据传入的参数来判断对应的状态
+// TODO
 function createDisabledPseudo( disabled ) {
 
 	// Known :disabled false positives: fieldset[disabled] > legend:nth-of-type(n+2) :can-disable
 	return function( elem ) {
-
 		// Only certain elements can match :enabled or :disabled
 		// https://html.spec.whatwg.org/multipage/scripting.html#selector-enabled
 		// https://html.spec.whatwg.org/multipage/scripting.html#selector-disabled
