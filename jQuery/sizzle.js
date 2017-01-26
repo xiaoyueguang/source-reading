@@ -381,6 +381,7 @@ function markFunction( fn ) {
  * Support testing using an element
  * @param {Function} fn Passed the created element and returns a boolean result
  */
+window.assert = assert;
 function assert( fn ) {
 	var el = document.createElement("fieldset");
 

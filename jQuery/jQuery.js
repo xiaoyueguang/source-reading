@@ -1038,9 +1038,9 @@ function markFunction( fn ) {
 
 /**
  * Support testing using an element
+ * 通过创建一个 fieldset, 通过一系列的 方法去判断 浏览器的支持程度, 并添加到 Sizzle.support
  * @param {Function} fn Passed the created element and returns a boolean result
  */
-// 测试: 断言. 
 function assert( fn ) {
 	var el = document.createElement("fieldset");
 
@@ -1050,6 +1050,7 @@ function assert( fn ) {
 	} catch (e) {
 		return false;
 	} finally {
+		// 创建该dom元素后, 即时释放内存
 		// Remove from its parent by default
 		// 如果该被插入到页面里, 则去父组件里删除该子组件
 		if ( el.parentNode ) {
@@ -1296,33 +1297,43 @@ setDocument = Sizzle.setDocument = function( node ) {
 	// Support: IE<8
 	// Verify that getAttribute really returns attributes and not properties
 	// (excepting IE8 booleans)
+	// 利用给元素添加类名, 再获取类名, 来判断是否支持 getAttribute
+
 	support.attributes = assert(function( el ) {
 		el.className = "i";
 		return !el.getAttribute("className");
 	});
 
 	/* getElement(s)By*
+	  判断 document.getElementxxxxxx 方法
 	---------------------------------------------------------------------- */
 
 	// Check if getElementsByTagName("*") returns only elements
+	// 检查 getElementsByTagName("*") 是否只返回元素. IE某些版本会将注释返回, 需要禁用
+	// 通过给元素添加注释子节点, 通过该方法来获取节点下的全部子节点, 能获取到 则返回 false
 	support.getElementsByTagName = assert(function( el ) {
 		el.appendChild( document.createComment("") );
 		return !el.getElementsByTagName("*").length;
 	});
-
 	// Support: IE<9
+	// 判断是否存在 getElementsByClassName 方法
 	support.getElementsByClassName = rnative.test( document.getElementsByClassName );
 
 	// Support: IE<10
 	// Check if getElementById returns elements by name
+	// 判断 getElementById 是否会返回 name 值为 ID 的元素.  IE下会出现该方法通过name去获取
 	// The broken getElementById methods don't pick up programmatically-set names,
+	// 通过 getElementById 来判断 结果并不准确, 采用 getElementsByName 来判断
 	// so use a roundabout getElementsByName test
+	// 通过将元素添加到document下并给与id. 判断 getElementsByName(id)所获取到的长度来判断是否支持'纯净'的getElementById
 	support.getById = assert(function( el ) {
 		docElem.appendChild( el ).id = expando;
+		// 如果通过 getElementsByName 方法 获取到该元素, 即 length >= 1 则返回false
 		return !document.getElementsByName || !document.getElementsByName( expando ).length;
 	});
 
 	// ID filter and find
+	// ID查询, 因为getElementById在不同浏览器下的不同表现, 需要不一样的方式来设置ID选择器
 	if ( support.getById ) {
 		Expr.filter["ID"] = function( id ) {
 			var attrId = id.replace( runescape, funescape );
