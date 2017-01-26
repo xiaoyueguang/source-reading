@@ -1134,7 +1134,6 @@ function createButtonPseudo( type ) {
  * @param {Boolean} disabled true for :disabled; false for :enabled
  */
 // 返回一个方法, 判断元素是否使用了 :enabled或:disabled 根据传入的参数来判断对应的状态
-// TODO
 function createDisabledPseudo( disabled ) {
 
 	// Known :disabled false positives: fieldset[disabled] > legend:nth-of-type(n+2) :can-disable
@@ -1142,6 +1141,7 @@ function createDisabledPseudo( disabled ) {
 		// Only certain elements can match :enabled or :disabled
 		// https://html.spec.whatwg.org/multipage/scripting.html#selector-enabled
 		// https://html.spec.whatwg.org/multipage/scripting.html#selector-disabled
+		// 判断该元素是否在 form元素 里
 		if ( "form" in elem ) {
 
 			// Check for inherited disabledness on relevant non-disabled elements:
@@ -1151,9 +1151,11 @@ function createDisabledPseudo( disabled ) {
 			// * option elements in a disabled optgroup
 			//   https://html.spec.whatwg.org/multipage/forms.html#concept-option-disabled
 			// All such elements have a "form" property.
+			// 当需要判断 enabled 时
 			if ( elem.parentNode && elem.disabled === false ) {
 
 				// Option elements defer to a parent optgroup if present
+				// 判断 optgroup以及options
 				if ( "label" in elem ) {
 					if ( "label" in elem.parentNode ) {
 						return elem.parentNode.disabled === disabled;
@@ -1164,43 +1166,54 @@ function createDisabledPseudo( disabled ) {
 
 				// Support: IE 6 - 11
 				// Use the isDisabled shortcut property to check for disabled fieldset ancestors
+				// 兼容IE6 - 11 通过判断 isDisabled
 				return elem.isDisabled === disabled ||
 
 					// Where there is no isDisabled, check manually
 					/* jshint -W018 */
+					// 如果没有 isDisabled 手动判断 fieldset
 					elem.isDisabled !== !disabled &&
 						disabledAncestor( elem ) === disabled;
 			}
-
+			//	判断该元素上是否存在 disabled
 			return elem.disabled === disabled;
 
 		// Try to winnow out elements that can't be disabled before trusting the disabled property.
 		// Some victims get caught in our net (label, legend, menu, track), but it shouldn't
 		// even exist on them, let alone have a boolean value.
+		// label, legend, menu, track 四种标签判断
 		} else if ( "label" in elem ) {
 			return elem.disabled === disabled;
 		}
 
 		// Remaining elements are neither :enabled nor :disabled
+		// 排除以上情况后 皆返回false
 		return false;
 	};
 }
 
 /**
  * Returns a function to use in pseudos for positionals
+ * 传入一个方法, 返回一个方法, 根据 位置修饰符(如: last, first eq even等)来返回对应的元素
  * @param {Function} fn
  */
 function createPositionalPseudo( fn ) {
 	return markFunction(function( argument ) {
 		argument = +argument;
+		// seed. 抓取的所有元素
 		return markFunction(function( seed, matches ) {
 			var j,
+			// fn为传入的方法. 参数为 空白, 长度, 以及参数. 返回一个数组, 里面包括需要提取的序号
 				matchIndexes = fn( [], seed.length, argument ),
 				i = matchIndexes.length;
-
 			// Match elements found at the specified indexes
+			// 根据matchIndexs数组, 将所需要的元素 从 seed里 循环提取出来
+			
 			while ( i-- ) {
+				// 判断该位置是否提取过
 				if ( seed[ (j = matchIndexes[i]) ] ) {
+					// 当 seed 上序号为 j 的元素提取到 matches里时, 把 seed 上序号为 j 的元素改为 false.
+					// 防止提取多次导致结果不准确
 					seed[j] = !(matches[j] = seed[j]);
 				}
 			}
@@ -1210,30 +1223,39 @@ function createPositionalPseudo( fn ) {
 
 /**
  * Checks a node for validity as a Sizzle context
+ * 检查一个节点的上下文, 判断其是否是否为节点
  * @param {Element|Object=} context
  * @returns {Element|Object|Boolean} The input node if acceptable, otherwise a falsy value
+ * 如果为节点且该节点有getElementsByTagName方法, 否则返回 false
  */
 function testContext( context ) {
 	return context && typeof context.getElementsByTagName !== "undefined" && context;
 }
 
 // Expose support vars for convenience
+// 检查浏览器的支持功能
 support = Sizzle.support = {};
 
 /**
  * Detects XML nodes
+ * 判断一个节点是否为 XML 节点
  * @param {Element|Object} elem An element or a document
+ * 传入一个 元素
  * @returns {Boolean} True iff elem is a non-HTML XML node
+ * 当传进去的为 xml 时 则返回true
  */
 isXML = Sizzle.isXML = function( elem ) {
 	// documentElement is verified for cases where it doesn't yet exist
 	// (such as loading iframes in IE - #4833)
+	// 判断elem 是否存在 ownerDocument 或者 documentElement 是否同时存在, 并且赋值给该变量
 	var documentElement = elem && (elem.ownerDocument || elem).documentElement;
+	// 判断该根节点标签名是否为 html.
 	return documentElement ? documentElement.nodeName !== "HTML" : false;
 };
 
 /**
  * Sets document-related variables once based on the current document
+ * 返回当前document, 并设置Sezzle闭包里的document
  * @param {Element|Object} [doc] An element or document object to use to set the document
  * @returns {Object} Returns the current document
  */
@@ -1242,17 +1264,19 @@ setDocument = Sizzle.setDocument = function( node ) {
 		doc = node ? node.ownerDocument || node : preferredDoc;
 
 	// Return early if doc is invalid or already selected
+	// doc 为 document 时, 或 doc 非document时
 	if ( doc === document || doc.nodeType !== 9 || !doc.documentElement ) {
 		return document;
 	}
-
 	// Update global variables
+	// 更新Sizzle下的变量 document
 	document = doc;
 	docElem = document.documentElement;
 	documentIsHTML = !isXML( document );
 
 	// Support: IE 9-11, Edge
 	// Accessing iframe documents after unload throws "permission denied" errors (jQuery #13936)
+	// 修正 iframe 标签移除后会 报 permission denied 错. 需要移除 unload 事件
 	if ( preferredDoc !== document &&
 		(subWindow = document.defaultView) && subWindow.top !== subWindow ) {
 
@@ -2239,19 +2263,23 @@ Expr = Sizzle.selectors = {
 
 		// Position-in-collection
 		"first": createPositionalPseudo(function() {
+			// 返回第0个元素
 			return [ 0 ];
 		}),
 
 		"last": createPositionalPseudo(function( matchIndexes, length ) {
+			// 直接返回长度 - 1, 即最后个
 			return [ length - 1 ];
 		}),
 
 		"eq": createPositionalPseudo(function( matchIndexes, length, argument ) {
+			//	argument 为 eq()中的值
 			return [ argument < 0 ? argument + length : argument ];
 		}),
 
 		"even": createPositionalPseudo(function( matchIndexes, length ) {
 			var i = 0;
+			// 循环取出偶数个元素
 			for ( ; i < length; i += 2 ) {
 				matchIndexes.push( i );
 			}
@@ -2260,6 +2288,7 @@ Expr = Sizzle.selectors = {
 
 		"odd": createPositionalPseudo(function( matchIndexes, length ) {
 			var i = 1;
+			// 循环取出奇数个元素
 			for ( ; i < length; i += 2 ) {
 				matchIndexes.push( i );
 			}
@@ -2267,15 +2296,20 @@ Expr = Sizzle.selectors = {
 		}),
 
 		"lt": createPositionalPseudo(function( matchIndexes, length, argument ) {
+			// argument 为 lt() 里的数据
+			// 小于0时 则从后往前数
 			var i = argument < 0 ? argument + length : argument;
+			// 低于该值的都提取出来
 			for ( ; --i >= 0; ) {
 				matchIndexes.push( i );
 			}
+
 			return matchIndexes;
 		}),
 
 		"gt": createPositionalPseudo(function( matchIndexes, length, argument ) {
 			var i = argument < 0 ? argument + length : argument;
+			// 高于该值的提取出来
 			for ( ; ++i < length; ) {
 				matchIndexes.push( i );
 			}
