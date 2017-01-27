@@ -1335,9 +1335,11 @@ setDocument = Sizzle.setDocument = function( node ) {
 	// ID filter and find
 	// ID查询, 因为getElementById在不同浏览器下的不同表现, 需要不一样的方式来设置ID选择器
 	if ( support.getById ) {
+		// TODO: Expr.filter Expr.find 方法还不明确是什么作用
 		Expr.filter["ID"] = function( id ) {
 			var attrId = id.replace( runescape, funescape );
 			return function( elem ) {
+				//	判断元素ID是否为传进来的ID
 				return elem.getAttribute("id") === attrId;
 			};
 		};
@@ -1359,19 +1361,17 @@ setDocument = Sizzle.setDocument = function( node ) {
 
 		// Support: IE 6 - 7 only
 		// getElementById is not reliable as a find shortcut
+		// 当IE6 IE7 的 getElementById 有问题时, 则先通过getElementById判断抓取的元素ID是否为目标ID时, 若不是, 则通过 getElementsByName 方法循环查找
 		Expr.find["ID"] = function( id, context ) {
 			if ( typeof context.getElementById !== "undefined" && documentIsHTML ) {
 				var node, i, elems,
 					elem = context.getElementById( id );
-
 				if ( elem ) {
-
 					// Verify the id attribute
 					node = elem.getAttributeNode("id");
 					if ( node && node.value === id ) {
 						return [ elem ];
 					}
-
 					// Fall back on getElementsByName
 					elems = context.getElementsByName( id );
 					i = 0;
@@ -1382,13 +1382,12 @@ setDocument = Sizzle.setDocument = function( node ) {
 						}
 					}
 				}
-
 				return [];
 			}
 		};
 	}
-
 	// Tag
+	// 根据标签来查找. 因为IE有可能会把注释返回, 因此做下区分
 	Expr.find["TAG"] = support.getElementsByTagName ?
 		function( tag, context ) {
 			if ( typeof context.getElementsByTagName !== "undefined" ) {
@@ -1408,6 +1407,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 				results = context.getElementsByTagName( tag );
 
 			// Filter out possible comments
+			// 筛选出元素集合
 			if ( tag === "*" ) {
 				while ( (elem = results[i++]) ) {
 					if ( elem.nodeType === 1 ) {
@@ -1421,6 +1421,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 		};
 
 	// Class
+	// 类名查找
 	Expr.find["CLASS"] = support.getElementsByClassName && function( className, context ) {
 		if ( typeof context.getElementsByClassName !== "undefined" && documentIsHTML ) {
 			return context.getElementsByClassName( className );
@@ -1428,6 +1429,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 	};
 
 	/* QSA/matchesSelector
+	querySelectorAll选择器
 	---------------------------------------------------------------------- */
 
 	// QSA and matchesSelector support
@@ -1441,7 +1443,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 	// So, we allow :focus to pass through QSA all the time to avoid the IE error
 	// See https://bugs.jquery.com/ticket/13378
 	rbuggyQSA = [];
-
+	// 判断是否支持 qsa
 	if ( (support.qsa = rnative.test( document.querySelectorAll )) ) {
 		// Build QSA regex
 		// Regex strategy adopted from Diego Perini
@@ -1451,6 +1453,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 			// setting a boolean content attribute,
 			// since its presence should be enough
 			// https://bugs.jquery.com/ticket/12359
+			// 测试IE的兼容性
 			docElem.appendChild( el ).innerHTML = "<a id='" + expando + "'></a>" +
 				"<select id='" + expando + "-\r\\' msallowcapture=''>" +
 				"<option selected=''></option></select>";
