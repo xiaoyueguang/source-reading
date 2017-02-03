@@ -1565,13 +1565,17 @@ setDocument = Sizzle.setDocument = function( node ) {
 
 	/* Contains
 	---------------------------------------------------------------------- */
+	// 判断是否拥有 compareDocumentPosition 方法 (判断dom相对于另一个dom的位置)
 	hasCompare = rnative.test( docElem.compareDocumentPosition );
 
 	// Element contains another
 	// Purposefully self-exclusive
 	// As in, an element does not contain itself
+	// 重写 contains方法, 该方法判断 b节点是否在 a节点内
+	// 判断是否拥有 compareDocumentPosition 方法或 contains 方法 (contains 用来判断元素是否在另一个元素内)
 	contains = hasCompare || rnative.test( docElem.contains ) ?
 		function( a, b ) {
+			// 该方法采用 递归 不停的将 b节点取父元素, 然后判断该父元素是否在 a节点内
 			var adown = a.nodeType === 9 ? a.documentElement : a,
 				bup = b && b.parentNode;
 			return a === bup || !!( bup && bup.nodeType === 1 && (
@@ -1581,6 +1585,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 			));
 		} :
 		function( a, b ) {
+			// 直接在 b节点上不停的取父元素, 直到该父元素与 a节点相等, 返回 true, 否则返回 false
 			if ( b ) {
 				while ( (b = b.parentNode) ) {
 					if ( b === a ) {
@@ -1595,22 +1600,29 @@ setDocument = Sizzle.setDocument = function( node ) {
 	---------------------------------------------------------------------- */
 
 	// Document order sorting
+	// 重写 sortOrder方法 用来比较
+	// a节点在 b节点前则返回 -1
+	// b节点在 a节点前则返回 1
+	// 两者相同则为0
 	sortOrder = hasCompare ?
 	function( a, b ) {
 
 		// Flag for duplicate removal
+		// a节点 和 b节点相同时 返回0
 		if ( a === b ) {
 			hasDuplicate = true;
 			return 0;
 		}
 
 		// Sort on method existence if only one input has compareDocumentPosition
+		// 如果 compareDocumentPosition方法存在, 则排序方法存在
 		var compare = !a.compareDocumentPosition - !b.compareDocumentPosition;
 		if ( compare ) {
 			return compare;
 		}
 
 		// Calculate position if both inputs belong to the same document
+		// 判断两个元素是否在同一 document 上下文内, 是 则比较位置. 否 则返回1
 		compare = ( a.ownerDocument || a ) === ( b.ownerDocument || b ) ?
 			a.compareDocumentPosition( b ) :
 
@@ -1618,10 +1630,13 @@ setDocument = Sizzle.setDocument = function( node ) {
 			1;
 
 		// Disconnected nodes
+		// 不在同一个上下文的时候判断
+		// 位与运算
 		if ( compare & 1 ||
 			(!support.sortDetached && b.compareDocumentPosition( a ) === compare) ) {
 
 			// Choose the first element that is related to our preferred document
+			// 
 			if ( a === document || a.ownerDocument === preferredDoc && contains(preferredDoc, a) ) {
 				return -1;
 			}
@@ -1639,6 +1654,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 	} :
 	function( a, b ) {
 		// Exit early if the nodes are identical
+		// 当两个元素相同时, 及时退出返回0
 		if ( a === b ) {
 			hasDuplicate = true;
 			return 0;
@@ -1652,6 +1668,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 			bp = [ b ];
 
 		// Parentless nodes are either documents or disconnected
+		// 不存在父节点时
 		if ( !aup || !bup ) {
 			return a === document ? -1 :
 				b === document ? 1 :
@@ -1662,11 +1679,13 @@ setDocument = Sizzle.setDocument = function( node ) {
 				0;
 
 		// If the nodes are siblings, we can do a quick check
+		// 如果 a节点和 b节点的父节点一样时, 通过兄弟节点快速检查
 		} else if ( aup === bup ) {
 			return siblingCheck( a, b );
 		}
 
 		// Otherwise we need full lists of their ancestors for comparison
+		// 通过 a节点 和 b节点的 完整祖先节点判断
 		cur = a;
 		while ( (cur = cur.parentNode) ) {
 			ap.unshift( cur );
@@ -1677,12 +1696,14 @@ setDocument = Sizzle.setDocument = function( node ) {
 		}
 
 		// Walk down the tree looking for a discrepancy
+		// 在树上寻找差异
 		while ( ap[i] === bp[i] ) {
 			i++;
 		}
 
 		return i ?
 			// Do a sibling check if the nodes have a common ancestor
+			// 如果为兄弟节点, 则通过 siblingCheck方法快速判断
 			siblingCheck( ap[i], bp[i] ) :
 
 			// Otherwise nodes in our document sort first
@@ -1693,7 +1714,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 
 	return document;
 };
-
+// TODO
 Sizzle.matches = function( expr, elements ) {
 	return Sizzle( expr, null, null, elements );
 };
