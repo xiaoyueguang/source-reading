@@ -724,7 +724,7 @@ var i,
 
 	rpseudo = new RegExp( pseudos ),
 	ridentifier = new RegExp( "^" + identifier + "$" ),
-
+	// 正则表达式集合
 	matchExpr = {
 		// id选择器
 		"ID": new RegExp( "^#(" + identifier + ")" ),
@@ -1016,7 +1016,7 @@ function createCache() {
 
 	function cache( key, value ) {
 		// Use (key + " ") to avoid collision with native prototype properties (see Issue #157)
-		// TODO: Expr 是啥
+		// 当keys长度超过配置的缓存长度时, 删除第一个元素. 控制长度, 防止内存占用过大
 		if ( keys.push( key + " " ) > Expr.cacheLength ) {
 			// Only keep the most recent entries
 			delete cache[ keys.shift() ];
@@ -1771,7 +1771,7 @@ Sizzle.attr = function( elem, name ) {
 	if ( ( elem.ownerDocument || elem ) !== document ) {
 		setDocument( elem );
 	}
-
+	// TODO Expr.attrHandle 干什么用的? 空函数
 	var fn = Expr.attrHandle[ name.toLowerCase() ],
 		// Don't get fooled by Object.prototype properties (jQuery #13807)
 		val = fn && hasOwn.call( Expr.attrHandle, name.toLowerCase() ) ?
@@ -1786,11 +1786,11 @@ Sizzle.attr = function( elem, name ) {
 				val.value :
 				null;
 };
-
+// 转义字符串中的 空格
 Sizzle.escape = function( sel ) {
 	return (sel + "").replace( rcssescape, fcssescape );
 };
-
+// 抛出错误
 Sizzle.error = function( msg ) {
 	throw new Error( "Syntax error, unrecognized expression: " + msg );
 };
@@ -1799,6 +1799,7 @@ Sizzle.error = function( msg ) {
  * Document sorting and removing duplicates
  * @param {ArrayLike} results
  */
+// 排序 并去掉重复项
 Sizzle.uniqueSort = function( results ) {
 	var elem,
 		duplicates = [],
@@ -1808,8 +1809,9 @@ Sizzle.uniqueSort = function( results ) {
 	// Unless we *know* we can detect duplicates, assume their presence
 	hasDuplicate = !support.detectDuplicates;
 	sortInput = !support.sortStable && results.slice( 0 );
+	// 先进行排序
 	results.sort( sortOrder );
-
+	// 再去重复
 	if ( hasDuplicate ) {
 		while ( (elem = results[i++]) ) {
 			if ( elem === results[ i ] ) {
@@ -1832,6 +1834,7 @@ Sizzle.uniqueSort = function( results ) {
  * Utility function for retrieving the text value of an array of DOM nodes
  * @param {Array|Element} elem
  */
+// 获取 DOM元素 的文字. elem为元素或元素集合数组
 getText = Sizzle.getText = function( elem ) {
 	var node,
 		ret = "",
@@ -1840,6 +1843,7 @@ getText = Sizzle.getText = function( elem ) {
 
 	if ( !nodeType ) {
 		// If no nodeType, this is expected to be an array
+		// 如果没有该属性, 表明这个可能是个数组
 		while ( (node = elem[i++]) ) {
 			// Do not traverse comment nodes
 			ret += getText( node );
@@ -1847,43 +1851,51 @@ getText = Sizzle.getText = function( elem ) {
 	} else if ( nodeType === 1 || nodeType === 9 || nodeType === 11 ) {
 		// Use textContent for elements
 		// innerText usage removed for consistency of new lines (jQuery #11153)
+		// 直接通过 textContent 获取元素下的文字
 		if ( typeof elem.textContent === "string" ) {
 			return elem.textContent;
 		} else {
 			// Traverse its children
+			// 遍历子元素
 			for ( elem = elem.firstChild; elem; elem = elem.nextSibling ) {
 				ret += getText( elem );
 			}
 		}
 	} else if ( nodeType === 3 || nodeType === 4 ) {
+		// 当类型为 CDATASection 或者 Text时 直接返回该 nodeValue
 		return elem.nodeValue;
 	}
 	// Do not include comment or processing instruction nodes
-
+	// 默认返回 ''
 	return ret;
 };
 
 Expr = Sizzle.selectors = {
 
 	// Can be adjusted by the user
+	// 缓存的长度
 	cacheLength: 50,
-
+	// 给方法标记一个标记
 	createPseudo: markFunction,
-
+	// 正则表达式集合
 	match: matchExpr,
-
+	// TODO 不知道干嘛
 	attrHandle: {},
-
+	// 表示查找.
+	// 目前一共有三个方法 CLASS, ID, TAG
+	// 参数为 (待查找的字符串, DOM上下文)
+	// 返回一个数组, 该数组包含 DOM上下文 所找到的对应的元素集合
 	find: {},
-
+	// 关系 父子节点 以及 兄弟节点
 	relative: {
 		">": { dir: "parentNode", first: true },
 		" ": { dir: "parentNode" },
 		"+": { dir: "previousSibling", first: true },
 		"~": { dir: "previousSibling" }
 	},
-
+	// 预处理器
 	preFilter: {
+		// TODO
 		"ATTR": function( match ) {
 			match[1] = match[1].replace( runescape, funescape );
 
