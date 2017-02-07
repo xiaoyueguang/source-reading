@@ -1714,26 +1714,33 @@ setDocument = Sizzle.setDocument = function( node ) {
 
 	return document;
 };
-// TODO
+// 判断该元素是否符合 expr
 Sizzle.matches = function( expr, elements ) {
 	return Sizzle( expr, null, null, elements );
 };
-
+// 判断该元素是否符合 expr
+// 比如 <div class="app" id="app"/>
+// Sizzle.matchesSelector(document.getElementById('app'), '#app') => true
+// Sizzle.matchesSelector(document.getElementById('app'), '.app') => true
+// Sizzle.matchesSelector(document.getElementById('app'), 'div') => true
 Sizzle.matchesSelector = function( elem, expr ) {
 	// Set document vars if needed
+	// 设置document文档
 	if ( ( elem.ownerDocument || elem ) !== document ) {
 		setDocument( elem );
 	}
 
 	// Make sure that attribute selectors are quoted
+	// 确保这些属性选择器被引用了
 	expr = expr.replace( rattributeQuotes, "='$1']" );
-
+	// 检查浏览器的支持程度来判断是否启用原生 matchesSelector
 	if ( support.matchesSelector && documentIsHTML &&
 		!compilerCache[ expr + " " ] &&
 		( !rbuggyMatches || !rbuggyMatches.test( expr ) ) &&
 		( !rbuggyQSA     || !rbuggyQSA.test( expr ) ) ) {
 
 		try {
+			// 在当前元素上判断 expr 是否符合
 			var ret = matches.call( elem, expr );
 
 			// IE 9's matchesSelector returns false on disconnected nodes
@@ -1745,20 +1752,22 @@ Sizzle.matchesSelector = function( elem, expr ) {
 			}
 		} catch (e) {}
 	}
-
+	// 不支持原生 matchesSelector 则采用 Sizzle内置的方法来判断
 	return Sizzle( expr, document, null, [ elem ] ).length > 0;
 };
-
+// 判断元素 elem 是否在 context 里
 Sizzle.contains = function( context, elem ) {
 	// Set document vars if needed
+	// 设置document文档
 	if ( ( context.ownerDocument || context ) !== document ) {
 		setDocument( context );
 	}
 	return contains( context, elem );
 };
-
+// 获取elem元素上的属性
 Sizzle.attr = function( elem, name ) {
 	// Set document vars if needed
+	// 设置document文档
 	if ( ( elem.ownerDocument || elem ) !== document ) {
 		setDocument( elem );
 	}
