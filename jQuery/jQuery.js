@@ -1895,7 +1895,11 @@ Expr = Sizzle.selectors = {
 	},
 	// 预处理器
 	preFilter: {
-		// TODO
+		// 属性预处理器
+		// match {Array} 选择器经由 matchExpr.ATTR.exec 执行后所返回的数组
+		// 返回一个数组: [原选择器, 属性名, 操作符, 属性值]
+		// Sizzle.selectors.preFilter.ATTR(Sizzle.selectors.match.ATTR.exec('[name=LiLei]'))
+		// ["[name=LiLei]", "name", "=", "LiLei"]
 		"ATTR": function( match ) {
 			match[1] = match[1].replace( runescape, funescape );
 
@@ -1908,7 +1912,11 @@ Expr = Sizzle.selectors = {
 
 			return match.slice( 0, 4 );
 		},
-
+		// 子选择器预处理器
+		// match {Array} 选择器经由 matchExpr.CHILD.exec 执行后所返回的数组
+		// 返回一个数组: [原选择器, 子选择器类型前缀, 子选择器类型后缀, '参数', '', '', '', '', 参数]
+		// Sizzle.selectors.match.CHILD.exec(':nth-of-type(1)')
+		// [":nth-of-type(1)", "nth", "of-type", "1", "", undefined, undefined, "", "1"]
 		"CHILD": function( match ) {
 			/* matches from matchExpr["CHILD"]
 				1 type (only|nth|...)
@@ -1940,7 +1948,11 @@ Expr = Sizzle.selectors = {
 
 			return match;
 		},
-
+		// 伪类选择器预处理器
+		// match {Array} 选择器经由 matchExpr.PSEUDO.exec 执行后所返回的数组
+		// 返回一个数组: [原选择器, 伪类的名称, 伪类的参数]
+		// Sizzle.selectors.preFilter.PSEUDO(Sizzle.selectors.match.PSEUDO.exec(':contains("contains")'))
+		// [":contains("contains")", "contains", "contains"]
 		"PSEUDO": function( match ) {
 			var excess,
 				unquoted = !match[6] && match[2];
@@ -1969,9 +1981,10 @@ Expr = Sizzle.selectors = {
 			return match.slice( 0, 3 );
 		}
 	},
-
+	// 过滤函数
+	// @return {Function}.将 elem元素 传入该方法, 判断该元素是否符合
 	filter: {
-
+		// 传入标签值, 返回一个函数, 判断传入的 elem元素 是否符合该标签
 		"TAG": function( nodeNameSelector ) {
 			var nodeName = nodeNameSelector.replace( runescape, funescape ).toLowerCase();
 			return nodeNameSelector === "*" ?
@@ -1980,7 +1993,7 @@ Expr = Sizzle.selectors = {
 					return elem.nodeName && elem.nodeName.toLowerCase() === nodeName;
 				};
 		},
-
+		// 传入类名, 返回一个函数, 判断传入的 elem元素 是否符合该类名
 		"CLASS": function( className ) {
 			var pattern = classCache[ className + " " ];
 
@@ -1990,7 +2003,7 @@ Expr = Sizzle.selectors = {
 					return pattern.test( typeof elem.className === "string" && elem.className || typeof elem.getAttribute !== "undefined" && elem.getAttribute("class") || "" );
 				});
 		},
-
+		// 传入属性,操作符以及属性值 返回一个函数, 判断传入的 elem元素 是否符合
 		"ATTR": function( name, operator, check ) {
 			return function( elem ) {
 				var result = Sizzle.attr( elem, name );
@@ -2003,7 +2016,7 @@ Expr = Sizzle.selectors = {
 				}
 
 				result += "";
-
+				// 根据不同的操作符, 来执行不同的判断方式
 				return operator === "=" ? result === check :
 					operator === "!=" ? result !== check :
 					operator === "^=" ? check && result.indexOf( check ) === 0 :
@@ -2014,7 +2027,8 @@ Expr = Sizzle.selectors = {
 					false;
 			};
 		},
-
+		// 传入 子选择器类型, 
+		// TODO
 		"CHILD": function( type, what, argument, first, last ) {
 			var simple = type.slice( 0, 3 ) !== "nth",
 				forward = type.slice( -4 ) !== "last",
@@ -2143,19 +2157,23 @@ Expr = Sizzle.selectors = {
 					}
 				};
 		},
-
+		// 传入伪类 以及参数, 返回一个函数, 判断 elem元素 是否符合
 		"PSEUDO": function( pseudo, argument ) {
 			// pseudo-class names are case-insensitive
 			// http://www.w3.org/TR/selectors/#pseudo-classes
 			// Prioritize by case sensitivity in case custom pseudos are added with uppercase letters
 			// Remember that setFilters inherits from pseudos
+			// setFilters继承自 下面的 pseudos
 			var args,
+				// 获取该方法. 没有则报错
 				fn = Expr.pseudos[ pseudo ] || Expr.setFilters[ pseudo.toLowerCase() ] ||
 					Sizzle.error( "unsupported pseudo: " + pseudo );
 
 			// The user may use createPseudo to indicate that
 			// arguments are needed to create the filter function
 			// just as Sizzle does
+			// 用户可通过 createPseudo 来自定义的过滤器功能
+			// TODO 如何自定义?
 			if ( fn[ expando ] ) {
 				return fn( argument );
 			}
@@ -2181,7 +2199,7 @@ Expr = Sizzle.selectors = {
 			return fn;
 		}
 	},
-
+	// 伪类的过滤函数.
 	pseudos: {
 		// Potentially complex pseudos
 		"not": markFunction(function( selector ) {
