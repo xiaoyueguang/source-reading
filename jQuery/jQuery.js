@@ -2200,14 +2200,17 @@ Expr = Sizzle.selectors = {
 		}
 	},
 	// 伪类的过滤函数.
+	// 根据伪类的参数, 返回一个全新的方法, 该方法判断是否符合, 返回 Boolean
 	pseudos: {
 		// Potentially complex pseudos
+		// :not 传入一个 选择器, 内部判断是否 为 :not. 返回 Boolean
 		"not": markFunction(function( selector ) {
 			// Trim the selector passed to compile
 			// to avoid treating leading and trailing
 			// spaces as combinators
 			var input = [],
 				results = [],
+				// TODO 方法
 				matcher = compile( selector.replace( rtrim, "$1" ) );
 
 			return matcher[ expando ] ?
@@ -2231,13 +2234,13 @@ Expr = Sizzle.selectors = {
 					return !results.pop();
 				};
 		}),
-
+		// 传入选择器, 判断 elem 下时候有符合该选择器的元素数量,
 		"has": markFunction(function( selector ) {
 			return function( elem ) {
 				return Sizzle( selector, elem ).length > 0;
 			};
 		}),
-
+		// 传入文本, 判断 elem下是否有该文本
 		"contains": markFunction(function( text ) {
 			text = text.replace( runescape, funescape );
 			return function( elem ) {
@@ -2252,8 +2255,10 @@ Expr = Sizzle.selectors = {
 		// The matching of C against the element's language value is performed case-insensitively.
 		// The identifier C does not have to be a valid language name."
 		// http://www.w3.org/TR/selectors/#lang-pseudo
+		// 传入一个lang值, 判断传入的 elem元素 是否为该 lang 语言
 		"lang": markFunction( function( lang ) {
 			// lang value must be a valid identifier
+			// lang 必须是有效的
 			if ( !ridentifier.test(lang || "") ) {
 				Sizzle.error( "unsupported lang: " + lang );
 			}
@@ -2272,42 +2277,50 @@ Expr = Sizzle.selectors = {
 				return false;
 			};
 		}),
-
+		// 判断该元素上的id 是否为 hash
+		// p:target 是指 p的 id 与 location.hash 相同时, 会启用该选择器下的样式
 		// Miscellaneous
 		"target": function( elem ) {
 			var hash = window.location && window.location.hash;
 			return hash && hash.slice( 1 ) === elem.id;
 		},
-
+		// :root 根元素
+		// 判断该 elem元素 是否为 html根元素
 		"root": function( elem ) {
 			return elem === docElem;
 		},
-
+		// :focus 获取焦点
+		// 判断该 elem元素 是否获取焦点
 		"focus": function( elem ) {
+			// document.activeElement 为 取得焦点的 DOM, 没有则默认为 body
+			// document.hasFocus() 可返回当前页面是否获取焦点
+			// a标签 也会获取到该状态
 			return elem === document.activeElement && (!document.hasFocus || document.hasFocus()) && !!(elem.type || elem.href || ~elem.tabIndex);
 		},
-
 		// Boolean properties
+		// 通过 createDisabledPseudo 返回一个闭包. 提高代码重用性
 		"enabled": createDisabledPseudo( false ),
 		"disabled": createDisabledPseudo( true ),
-
+		// 判断该 elem元素 是否为 单选, 多选 以及 下拉 的选项并且是否选中 返回一个Boolean
 		"checked": function( elem ) {
 			// In CSS3, :checked should return both checked and selected elements
 			// http://www.w3.org/TR/2011/REC-css3-selectors-20110929/#checked
+			// :checked 返回 单选 多选 以及 select 选中的值
 			var nodeName = elem.nodeName.toLowerCase();
 			return (nodeName === "input" && !!elem.checked) || (nodeName === "option" && !!elem.selected);
 		},
-
+		// 传入一个 elem元素, 判断是否被选中.
 		"selected": function( elem ) {
 			// Accessing this property makes selected-by-default
 			// options in Safari work properly
+			// 判断是否有父元素, 且该父元素拥有 selectedIndex 属性
 			if ( elem.parentNode ) {
 				elem.parentNode.selectedIndex;
 			}
 
 			return elem.selected === true;
 		},
-
+		// TODO
 		// Contents
 		"empty": function( elem ) {
 			// http://www.w3.org/TR/selectors/#empty-pseudo

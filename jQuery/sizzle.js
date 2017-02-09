@@ -1433,6 +1433,7 @@ Expr = Sizzle.selectors = {
 			var input = [],
 				results = [],
 				matcher = compile( selector.replace( rtrim, "$1" ) );
+				debugger
 
 			return matcher[ expando ] ?
 				markFunction(function( seed, matches, context, xml ) {
