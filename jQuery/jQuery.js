@@ -748,8 +748,9 @@ var i,
 		"needsContext": new RegExp( "^" + whitespace + "*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\(" +
 			whitespace + "*((?:-\\d)?\\d*)" + whitespace + "*\\)|)(?=[^-]|$)", "i" )
 	},
-
+	// input元素
 	rinputs = /^(?:input|select|textarea|button)$/i,
+	// header元素
 	rheader = /^h\d$/i,
 	// 判断是否为原生 比如 function xxxx { [native code] }
 	rnative = /^[^{]+\{\s*\[native \w/,
@@ -2320,39 +2321,41 @@ Expr = Sizzle.selectors = {
 
 			return elem.selected === true;
 		},
-		// TODO
+		// 判断该 elem元素 下是否还有子元素, 没有子元素则返回 true
 		// Contents
 		"empty": function( elem ) {
 			// http://www.w3.org/TR/selectors/#empty-pseudo
 			// :empty is negated by element (1) or content nodes (text: 3; cdata: 4; entity ref: 5),
 			//   but not by others (comment: 8; processing instruction: 7; etc.)
 			// nodeType < 6 works because attributes (2) do not appear as children
+			// 设置 elem元素 为第一个子元素, 该 elem元素存在时, 则把下一个元素复制给 该变量
 			for ( elem = elem.firstChild; elem; elem = elem.nextSibling ) {
+				// 有元素或则文字 则返回false
 				if ( elem.nodeType < 6 ) {
 					return false;
 				}
 			}
 			return true;
 		},
-
+		// 判断该 elem元素 是否含有子元素. 有则返回 true
 		"parent": function( elem ) {
 			return !Expr.pseudos["empty"]( elem );
 		},
-
+		// 判断该元素是否为 header元素
 		// Element/input types
 		"header": function( elem ) {
 			return rheader.test( elem.nodeName );
 		},
-
+		// 判断是否为 input元素
 		"input": function( elem ) {
 			return rinputs.test( elem.nodeName );
 		},
-
+		// 判断是否为 按钮
 		"button": function( elem ) {
 			var name = elem.nodeName.toLowerCase();
 			return name === "input" && elem.type === "button" || name === "button";
 		},
-
+		// 判断 elem元素 的type值是否为text
 		"text": function( elem ) {
 			var attr;
 			return elem.nodeName.toLowerCase() === "input" &&
@@ -2362,15 +2365,16 @@ Expr = Sizzle.selectors = {
 				// New HTML5 attribute values (e.g., "search") appear with elem.type === "text"
 				( (attr = elem.getAttribute("type")) == null || attr.toLowerCase() === "text" );
 		},
-
+		// 判断位置的伪类
 		// Position-in-collection
+		// 通过 createDisabledPseudo 返回一个闭包. 提高代码重用性
 		"first": createPositionalPseudo(function() {
 			// 返回第0个元素
 			return [ 0 ];
 		}),
 
+		// 直接返回长度 - 1, 即最后个
 		"last": createPositionalPseudo(function( matchIndexes, length ) {
-			// 直接返回长度 - 1, 即最后个
 			return [ length - 1 ];
 		}),
 
