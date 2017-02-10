@@ -724,7 +724,7 @@ var i,
 
 	rpseudo = new RegExp( pseudos ),
 	ridentifier = new RegExp( "^" + identifier + "$" ),
-	// 正则表达式集合
+	// 正则表达式集合. 进抓取^ 开头符合的部分
 	matchExpr = {
 		// id选择器
 		"ID": new RegExp( "^#(" + identifier + ")" ),
@@ -2372,17 +2372,16 @@ Expr = Sizzle.selectors = {
 			// 返回第0个元素
 			return [ 0 ];
 		}),
-
 		// 直接返回长度 - 1, 即最后个
 		"last": createPositionalPseudo(function( matchIndexes, length ) {
 			return [ length - 1 ];
 		}),
-
+		// 根据argument 返回数组中对应位置的元素
 		"eq": createPositionalPseudo(function( matchIndexes, length, argument ) {
 			//	argument 为 eq()中的值
 			return [ argument < 0 ? argument + length : argument ];
 		}),
-
+		// 返回偶数个元素
 		"even": createPositionalPseudo(function( matchIndexes, length ) {
 			var i = 0;
 			// 循环取出偶数个元素
@@ -2391,7 +2390,7 @@ Expr = Sizzle.selectors = {
 			}
 			return matchIndexes;
 		}),
-
+		// 返回奇数个元素
 		"odd": createPositionalPseudo(function( matchIndexes, length ) {
 			var i = 1;
 			// 循环取出奇数个元素
@@ -2400,7 +2399,7 @@ Expr = Sizzle.selectors = {
 			}
 			return matchIndexes;
 		}),
-
+		// 返回小于 该 argument 的元素
 		"lt": createPositionalPseudo(function( matchIndexes, length, argument ) {
 			// argument 为 lt() 里的数据
 			// 小于0时 则从后往前数
@@ -2412,7 +2411,7 @@ Expr = Sizzle.selectors = {
 
 			return matchIndexes;
 		}),
-
+		// 返回大于该 argument 的元素
 		"gt": createPositionalPseudo(function( matchIndexes, length, argument ) {
 			var i = argument < 0 ? argument + length : argument;
 			// 高于该值的提取出来
@@ -2423,49 +2422,71 @@ Expr = Sizzle.selectors = {
 		})
 	}
 };
-
+// :nth 等同于 :eq
 Expr.pseudos["nth"] = Expr.pseudos["eq"];
-
 // Add button/input type pseudos
+// 根据input的类型, 循环添加 表单 伪类
 for ( i in { radio: true, checkbox: true, file: true, password: true, image: true } ) {
+	// createInputPseudo 方法返回一个闭包, 接受一个 elem元素, 判断是否符合该 type
 	Expr.pseudos[ i ] = createInputPseudo( i );
 }
+// 根据按钮的类型, 循环添加 按钮 伪类
 for ( i in { submit: true, reset: true } ) {
+	// createButtonPseudo 方法返回一个闭包, 接受一个 elem元素, 判断是否符合该 type
 	Expr.pseudos[ i ] = createButtonPseudo( i );
 }
-
 // Easy API for creating new setFilters
+// TODO: 不知道这里是为了什么创建该构造函数, 感觉没有意义. 一模一样并且调用的时候跟 Expr.pseudos 一起调用, 感觉有点多余?
 function setFilters() {}
+// pseudos 赋值给 filters属性
 setFilters.prototype = Expr.filters = Expr.pseudos;
 Expr.setFilters = new setFilters();
-
+/*
+ * 将选择器进行分组, 返回一个数组, 包含被细化后的选择器
+ * parseOnly 解析, 返回选择器最终处理完后所剩余的字符长度, 如果错误, 则返回错误的字符长度
+ * 思路: 将传入的 选择器检查缓存, 有缓存则直接返回.
+ * 将选择器放入一个 while 循环, 该循环中止条件为 字符串为空或抓取不到任何信息
+ * 每次循环, 都是从左边开始检查, 都要进行 兄弟节点检查, 伪类检查 以及 过滤器检查.
+ * 每次检查完毕后, 都将移除对应的字符串, 并将结果 放入 groups
+ * 首先 先判断是否为兄弟节点,并将 matched 设置为 false.开始抓取信息
+ * 其次 抓取伪类, 抓取到的放入 tokens 数组
+ * 然后 根据 Expr.filter循环抓取ID CLASS 等信息, 抓取到的放入 tokens 数组
+ * 最后 检查 matched, 如果上面两个步骤都没有抓取到信息, 则表明循环可以结束了.
+ * 检查最后处理过的字符串, 如果还有字符, 则表明该 选择器是无效的, 根据一开始传入的 parseOnly 返回长度或报错
+*/
 tokenize = Sizzle.tokenize = function( selector, parseOnly ) {
 	var matched, match, tokens, type,
 		soFar, groups, preFilters,
 		cached = tokenCache[ selector + " " ];
-
+	// 检查选择器是否有缓存, 有缓存则直接返回
 	if ( cached ) {
 		return parseOnly ? 0 : cached.slice( 0 );
 	}
 
 	soFar = selector;
+	// 缓存数据, 最后会从这里返回结果
 	groups = [];
+	// 预处理器, 专门用来细分选择器
 	preFilters = Expr.preFilter;
 
 	while ( soFar ) {
 
 		// Comma and first run
+		// 判断是否有 , 即选择器里包含兄弟节点, 需要 在groups 放入一个新数组
 		if ( !matched || (match = rcomma.exec( soFar )) ) {
 			if ( match ) {
 				// Don't consume trailing commas as valid
+				// 去掉选择器里排在最前面的
 				soFar = soFar.slice( match[0].length ) || soFar;
 			}
+			// 将token设置为空, 开始抓取
 			groups.push( (tokens = []) );
 		}
 
 		matched = false;
 
 		// Combinators
+		// 关系选择器
 		if ( (match = rcombinators.exec( soFar )) ) {
 			matched = match.shift();
 			tokens.push({
@@ -2473,11 +2494,13 @@ tokenize = Sizzle.tokenize = function( selector, parseOnly ) {
 				// Cast descendant combinators to space
 				type: match[0].replace( rtrim, " " )
 			});
+			// 去掉选择器里排在最前面的关系选择器
 			soFar = soFar.slice( matched.length );
 		}
-
 		// Filters
+		// 过滤
 		for ( type in Expr.filter ) {
+			// 循环判断头部 是否符合 matchExpr 的某种类型, 符合的话 在通过预处理器, 来抓取信息
 			if ( (match = matchExpr[ type ].exec( soFar )) && (!preFilters[ type ] ||
 				(match = preFilters[ type ]( match ))) ) {
 				matched = match.shift();
@@ -2486,10 +2509,11 @@ tokenize = Sizzle.tokenize = function( selector, parseOnly ) {
 					type: type,
 					matches: match
 				});
+				// 去掉选择器里排在最前面的字段
 				soFar = soFar.slice( matched.length );
 			}
 		}
-
+		// 没抓取到的话 中止 可能里面含有非法字符以及错误的选择器
 		if ( !matched ) {
 			break;
 		}
@@ -2501,11 +2525,13 @@ tokenize = Sizzle.tokenize = function( selector, parseOnly ) {
 	return parseOnly ?
 		soFar.length :
 		soFar ?
+			// 如果 整个选择器经过处理后还留有字符, 表明该选择器为错误 跑出一个错误
 			Sizzle.error( selector ) :
 			// Cache the tokens
+			// 缓存该选择器
 			tokenCache( selector, groups ).slice( 0 );
 };
-
+// TODO
 function toSelector( tokens ) {
 	var i = 0,
 		len = tokens.length,

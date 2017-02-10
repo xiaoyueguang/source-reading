@@ -1649,7 +1649,6 @@ tokenize = Sizzle.tokenize = function( selector, parseOnly ) {
 	soFar = selector;
 	groups = [];
 	preFilters = Expr.preFilter;
-
 	while ( soFar ) {
 
 		// Comma and first run
@@ -1658,7 +1657,9 @@ tokenize = Sizzle.tokenize = function( selector, parseOnly ) {
 				// Don't consume trailing commas as valid
 				soFar = soFar.slice( match[0].length ) || soFar;
 			}
+			debugger
 			groups.push( (tokens = []) );
+			debugger
 		}
 
 		matched = false;
