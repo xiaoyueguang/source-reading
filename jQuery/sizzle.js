@@ -1657,9 +1657,7 @@ tokenize = Sizzle.tokenize = function( selector, parseOnly ) {
 				// Don't consume trailing commas as valid
 				soFar = soFar.slice( match[0].length ) || soFar;
 			}
-			debugger
 			groups.push( (tokens = []) );
-			debugger
 		}
 
 		matched = false;
@@ -1716,6 +1714,7 @@ function toSelector( tokens ) {
 }
 
 function addCombinator( matcher, combinator, base ) {
+	// console.log(matcher, combinator, base)
 	var dir = combinator.dir,
 		skip = combinator.next,
 		key = skip || dir,
@@ -1778,8 +1777,10 @@ function addCombinator( matcher, combinator, base ) {
 			return false;
 		};
 }
-
+ab = elementMatcher;
 function elementMatcher( matchers ) {
+	console.log(bb = matchers)
+	debugger
 	return matchers.length > 1 ?
 		function( elem, context, xml ) {
 			var i = matchers.length;

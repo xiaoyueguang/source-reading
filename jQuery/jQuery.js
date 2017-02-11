@@ -846,28 +846,27 @@ try {
 /**
  * Sizzle 主函数
  * 
- * @param {string} selector css选择器
- * @param {any} context
- * @param {any} results
- * @param {any} seed 默认为空
+ * @param {string} selector 选择器, 必须.
+ * @param {any} context 上下文对象, 默认为 document对象
+ * @param {any} results 结果集, 默认为空数组. 将本次查找到的元素放入该数组, 返回结果集
+ * @param {any} seed 种子集, 从这个种子集里判断判断是否有符合 选择器的元素
  * @returns
  */
 window.$1 = Sizzle
 function Sizzle( selector, context, results, seed ) {
 	var m, i, elem, nid, match, groups, newSelector,
+		// 获取该 上下文的 document 对象
 		newContext = context && context.ownerDocument,
-
 		// nodeType defaults to 9, since context defaults to document
+		// nodeType 默认为9, 因为 context 上下文对象默认为 document
 		nodeType = context ? context.nodeType : 9;
 	// 结果默认为空
 	results = results || [];
 
 	// Return early from calls with invalid selector or context
-	// 选择器无效时 直接返回结果
-	// nodeType 不为以下时 1 元素 9 document 11 document片段, 直接返回空
+	// 选择器无效 或 context 上下文对象 非 elem元素或 document对象 时  直接返回空结果
 	if ( typeof selector !== "string" || !selector ||
 		nodeType !== 1 && nodeType !== 9 && nodeType !== 11 ) {
-
 		return results;
 	}
 
@@ -877,7 +876,7 @@ function Sizzle( selector, context, results, seed ) {
 		// 上下文存在则返回该上下文的 document属性或者本身. 并判断是否为document
 		// 如果不是 则设置document
 		if ( ( context ? context.ownerDocument || context : preferredDoc ) !== document ) {
-			// TODO: 未知
+			// 查询之前, 先检查兼容性并设置 document
 			setDocument( context );
 		}
 		context = context || document;
@@ -1257,9 +1256,13 @@ isXML = Sizzle.isXML = function( elem ) {
 
 /**
  * Sets document-related variables once based on the current document
- * 返回当前document, 并设置Sezzle闭包里的document
+ * 这个方法主要是来 设置 document对象, 并根据浏览器的兼容性, 来检查一些方法的支持程度
+ * 比如 getAttribute, getElementsByTagName, getElementsByClassName, getById, qsa, matchesSelector
+ * 并根据各个浏览器的兼容情况, 来设置不同的 find 和 filter 方法.
+ * 并添加一些方法, 比如 contains(包含), sortOrder(排序)
  * @param {Element|Object} [doc] An element or document object to use to set the document
  * @returns {Object} Returns the current document
+ * @returns {Object} 返回当前的 document对象
  */
 setDocument = Sizzle.setDocument = function( node ) {
 	var hasCompare, subWindow,
@@ -1278,7 +1281,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 
 	// Support: IE 9-11, Edge
 	// Accessing iframe documents after unload throws "permission denied" errors (jQuery #13936)
-	// 修正 iframe 标签移除后会 报 permission denied 错. 需要移除 unload 事件
+	// 修正 iframe 标签移除后会 报 permission denied 错. 需要添加 unload 事件
 	if ( preferredDoc !== document &&
 		(subWindow = document.defaultView) && subWindow.top !== subWindow ) {
 
@@ -1299,7 +1302,6 @@ setDocument = Sizzle.setDocument = function( node ) {
 	// Verify that getAttribute really returns attributes and not properties
 	// (excepting IE8 booleans)
 	// 利用给元素添加类名, 再获取类名, 来判断是否支持 getAttribute
-
 	support.attributes = assert(function( el ) {
 		el.className = "i";
 		return !el.getAttribute("className");
@@ -2531,7 +2533,8 @@ tokenize = Sizzle.tokenize = function( selector, parseOnly ) {
 			// 缓存该选择器
 			tokenCache( selector, groups ).slice( 0 );
 };
-// TODO
+// 将上面返回的 tokens 转为 选择器字符串
+// tokens, 非groups
 function toSelector( tokens ) {
 	var i = 0,
 		len = tokens.length,
@@ -2541,7 +2544,7 @@ function toSelector( tokens ) {
 	}
 	return selector;
 }
-
+// TODO: 以下方法比较复杂, 直接从 Sizzle 方法开始解析
 function addCombinator( matcher, combinator, base ) {
 	var dir = combinator.dir,
 		skip = combinator.next,
@@ -2605,7 +2608,7 @@ function addCombinator( matcher, combinator, base ) {
 			return false;
 		};
 }
-
+// TODO
 function elementMatcher( matchers ) {
 	return matchers.length > 1 ?
 		function( elem, context, xml ) {
@@ -2619,7 +2622,7 @@ function elementMatcher( matchers ) {
 		} :
 		matchers[0];
 }
-
+// TODO
 function multipleContexts( selector, contexts, results ) {
 	var i = 0,
 		len = contexts.length;
@@ -2628,7 +2631,7 @@ function multipleContexts( selector, contexts, results ) {
 	}
 	return results;
 }
-
+// TODO
 function condense( unmatched, map, filter, context, xml ) {
 	var elem,
 		newUnmatched = [],
@@ -2649,7 +2652,7 @@ function condense( unmatched, map, filter, context, xml ) {
 
 	return newUnmatched;
 }
-
+// TODO
 function setMatcher( preFilter, selector, matcher, postFilter, postFinder, postSelector ) {
 	if ( postFilter && !postFilter[ expando ] ) {
 		postFilter = setMatcher( postFilter );
@@ -2742,7 +2745,7 @@ function setMatcher( preFilter, selector, matcher, postFilter, postFinder, postS
 		}
 	});
 }
-
+// TODO
 function matcherFromTokens( tokens ) {
 	var checkContext, matcher, j,
 		len = tokens.length,
@@ -2800,7 +2803,7 @@ function matcherFromTokens( tokens ) {
 
 	return elementMatcher( matchers );
 }
-
+// TODO
 function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 	var bySet = setMatchers.length > 0,
 		byElement = elementMatchers.length > 0,
@@ -2911,7 +2914,7 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 		markFunction( superMatcher ) :
 		superMatcher;
 }
-
+// TODO
 compile = Sizzle.compile = function( selector, match /* Internal Use Only */ ) {
 	var i,
 		setMatchers = [],
