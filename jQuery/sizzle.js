@@ -295,7 +295,7 @@ function Sizzle( selector, context, results, seed ) {
 			if ( support.qsa &&
 				!nonnativeSelectorCache[ selector + " " ] &&
 				(!rbuggyQSA || !rbuggyQSA.test( selector )) ) {
-
+				
 				if ( nodeType !== 1 ) {
 					newContext = context;
 					newSelector = selector;
@@ -2129,7 +2129,7 @@ select = Sizzle.select = function( selector, context, results, seed ) {
 	var i, tokens, token, type, find,
 		compiled = typeof selector === "function" && selector,
 		match = !seed && tokenize( (selector = compiled.selector || selector) );
-
+	debugger
 	results = results || [];
 
 	// Try to minimize operations if there is only one selector in the list and no seed

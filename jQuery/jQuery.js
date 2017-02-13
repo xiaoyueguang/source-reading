@@ -845,6 +845,20 @@ try {
 
 /**
  * Sizzle 主函数
+ * 传入选择器, 待查找的上下文对象, 结果集, 待查找的dom集合
+ * 先判断传入的选择器是否正确, 以及待查找的上下文对象是否有效,
+ * 其次判断seed是否存在. 不存在则设定好 document, 开始从html文档里查找
+ * 判断传入的字符串是否符合 快速查找(即是否符合一个标签或一个类名或一个ID), 可节省性能
+ * 若符合快速查找, 则调用对应的 getElement(s)By(Id|ClassName|TagName)查找dom并返回
+ * 
+ * 如果都不符合, 则开始使用 querySelectorAll
+ * 先判断当前上下文是否为 document, 如果不是,
+ * 则给当前的上下文添加一个ID值, 并生成一个全新的 带有该ID值的新选择器
+ * (这里是为了兼容IE8或以下, IE8的 qsa 可能会导致一些问题, 所以加一个随机的ID来解决该问题)
+ * 将字符串 传入 tokenize 方法, 获得一个包含若干选择器的数组.
+ * 将 querySelectorAll 放入 try catch 中, 若能找到结果, 则返回, 报错, 则继续 下一步骤. 同时移除随机ID
+ * 
+ * 当上面的 快速查找 和 querySelectorAll都没执行时 或 有seed种子集合存在, 则需要调用另外的方法select
  * 
  * @param {string} selector 选择器, 必须.
  * @param {any} context 上下文对象, 默认为 document对象
@@ -871,7 +885,7 @@ function Sizzle( selector, context, results, seed ) {
 	}
 
 	// Try to shortcut find operations (as opposed to filters) in HTML documents
-	// 尝试在 html里快速查找
+	// 判断传入的 种子集是否为空, 为空则去种子集里查找, 否则在 html文档里开始查找
 	if ( !seed ) {
 		// 上下文存在则返回该上下文的 document属性或者本身. 并判断是否为document
 		// 如果不是 则设置document
@@ -885,7 +899,7 @@ function Sizzle( selector, context, results, seed ) {
 
 			// If the selector is sufficiently simple, try using a "get*By*" DOM method
 			// (excepting DocumentFragment context, where the methods don't exist)
-			// 判断选择器字符串是否符合快速查找, 节省性能
+			// 判断选择器字符串是否符合快速查找(即是否符合一个标签或一个类名或一个ID), 节省性能
 			if ( nodeType !== 11 && (match = rquickExpr.exec( selector )) ) {
 				// match获取到后, 为数组. [选择器字符串, 抓取到的id, 抓取到的标签名, 抓取到的类名]
 				// ID selector ID选择器
@@ -945,9 +959,9 @@ function Sizzle( selector, context, results, seed ) {
 			if ( support.qsa &&
 				// 缓存
 				!compilerCache[ selector + " " ] &&
-				// 正则判断 TODO
+				// 判断伪类
 				(!rbuggyQSA || !rbuggyQSA.test( selector )) ) {
-				// 类型不为元素
+				// 当 传入的上下文默认为 document时.
 				if ( nodeType !== 1 ) {
 					newContext = context;
 					newSelector = selector;
@@ -960,12 +974,11 @@ function Sizzle( selector, context, results, seed ) {
 				// TODO: IE8以下的辣鸡 不看了...
 				} else if ( context.nodeName.toLowerCase() !== "object" ) {
 					// Capture the context ID, setting it first if necessary
-					// 获取context的ID
+					// 获取传入的 上下文对象 的ID
 					if ( (nid = context.getAttribute( "id" )) ) {
-						// 字符编码替换. 可能IE不太一样
 						nid = nid.replace( rcssescape, fcssescape );
 					} else {
-						// 替换一个单一的值?
+						// 如果没有ID, 则添加一个生成的随机ID
 						context.setAttribute( "id", (nid = expando) );
 					}
 					// Prefix every selector in the list
@@ -973,10 +986,9 @@ function Sizzle( selector, context, results, seed ) {
 					groups = tokenize( selector );
 					i = groups.length;
 					while ( i-- ) {
-						// 字符串转为 #id xxxx
 						groups[i] = "#" + nid + " " + toSelector( groups[i] );
 					}
-					// 新选择器转为多个选择器
+					// 获得一个带有 ID值的 新选择器
 					newSelector = groups.join( "," );
 					// Expand context for sibling selectors
 					newContext = rsibling.test( selector ) && testContext( context.parentNode ) ||
@@ -2948,11 +2960,14 @@ compile = Sizzle.compile = function( selector, match /* Internal Use Only */ ) {
 /**
  * A low-level selection function that works with Sizzle's compiled
  *  selector functions
+ * 一个低级的选择器方法, 与 Sizzle 主方法 一起工作
+ * 传入的参数与 Sizzle 主方法一致
  * @param {String|Function} selector A selector or a pre-compiled
  *  selector function built with Sizzle.compile
- * @param {Element} context
- * @param {Array} [results]
- * @param {Array} [seed] A set of elements to match against
+ * 一个必须的选择器或方法. 该方法由上面的 compile 生成
+ * @param {Element} context 上下文对象 必须
+ * @param {Array} [results] 结果集 非必须
+ * @param {Array} [seed] A set of elements to match against 种子集 非必须
  */
 select = Sizzle.select = function( selector, context, results, seed ) {
 	var i, tokens, token, type, find,
