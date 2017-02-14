@@ -2558,6 +2558,7 @@ function toSelector( tokens ) {
 }
 // TODO: 以下方法比较复杂, 直接从 Sizzle 方法开始解析
 // 从方法 Sizzle.compile 到 matcherFromTokens 再到 这
+// 匹配器. 返回个匹配的方法, 判断目标是否条件是否为true
 function addCombinator( matcher, combinator, base ) {
 	var dir = combinator.dir,
 		skip = combinator.next,
@@ -2621,7 +2622,7 @@ function addCombinator( matcher, combinator, base ) {
 			return false;
 		};
 }
-// TODO
+// 匹配器 匹配是否符合
 function elementMatcher( matchers ) {
 	return matchers.length > 1 ?
 		function( elem, context, xml ) {
@@ -2635,7 +2636,7 @@ function elementMatcher( matchers ) {
 		} :
 		matchers[0];
 }
-// TODO
+// 上下文多个时, 多个查询
 function multipleContexts( selector, contexts, results ) {
 	var i = 0,
 		len = contexts.length;
@@ -2644,7 +2645,7 @@ function multipleContexts( selector, contexts, results ) {
 	}
 	return results;
 }
-// TODO
+// 通过filter过滤函数, 过滤后返回个新数组
 function condense( unmatched, map, filter, context, xml ) {
 	var elem,
 		newUnmatched = [],
@@ -2665,7 +2666,7 @@ function condense( unmatched, map, filter, context, xml ) {
 
 	return newUnmatched;
 }
-// TODO
+// 保存匹配器 
 function setMatcher( preFilter, selector, matcher, postFilter, postFinder, postSelector ) {
 	if ( postFilter && !postFilter[ expando ] ) {
 		postFilter = setMatcher( postFilter );
@@ -2758,7 +2759,7 @@ function setMatcher( preFilter, selector, matcher, postFilter, postFinder, postS
 		}
 	});
 }
-// TODO
+// 生成用于匹配单个选择器组的函数
 function matcherFromTokens( tokens ) {
 	var checkContext, matcher, j,
 		len = tokens.length,
@@ -2816,7 +2817,7 @@ function matcherFromTokens( tokens ) {
 
 	return elementMatcher( matchers );
 }
-// TODO
+// 生成用于匹配单个选择器群组的函数
 function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 	var bySet = setMatchers.length > 0,
 		byElement = elementMatchers.length > 0,
@@ -2928,8 +2929,7 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 		superMatcher;
 }
 // 传入选择器, 以及经过 tokenize 处理后的选择器数组(非必须)
-// 返回一个闭包
-// TODO
+// 生成终极匹配器执行函数
 compile = Sizzle.compile = function( selector, match /* Internal Use Only */ ) {
 	var i,
 		setMatchers = [],
@@ -2942,6 +2942,7 @@ compile = Sizzle.compile = function( selector, match /* Internal Use Only */ ) {
 			match = tokenize( selector );
 		}
 		i = match.length;
+		// 从右边往左边读
 		while ( i-- ) {
 			cached = matcherFromTokens( match[i] );
 			if ( cached[ expando ] ) {
@@ -3050,8 +3051,9 @@ select = Sizzle.select = function( selector, context, results, seed ) {
 };
 
 // One-time assignments
-
+// 只执行一次.
 // Sort stability
+// TODO 
 support.sortStable = expando.split("").sort( sortOrder ).join("") === expando;
 
 // Support: Chrome 14-35+

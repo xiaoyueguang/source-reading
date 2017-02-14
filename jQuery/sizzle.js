@@ -1914,7 +1914,7 @@ function setMatcher( preFilter, selector, matcher, postFilter, postFinder, postS
 		}
 	});
 }
-//  传入选择器数组
+
 function matcherFromTokens( tokens ) {
 	var checkContext, matcher, j,
 		len = tokens.length,
@@ -1938,7 +1938,7 @@ function matcherFromTokens( tokens ) {
 			checkContext = null;
 			return ret;
 		} ];
-	debugger
+
 	for ( ; i < len; i++ ) {
 		if ( (matcher = Expr.relative[ tokens[i].type ]) ) {
 			matchers = [ addCombinator(elementMatcher( matchers ), matcher) ];
@@ -1969,7 +1969,7 @@ function matcherFromTokens( tokens ) {
 			matchers.push( matcher );
 		}
 	}
-
+	debugger
 	return elementMatcher( matchers );
 }
 
