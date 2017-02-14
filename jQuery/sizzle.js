@@ -1777,10 +1777,8 @@ function addCombinator( matcher, combinator, base ) {
 			return false;
 		};
 }
-ab = elementMatcher;
+
 function elementMatcher( matchers ) {
-	console.log(bb = matchers)
-	debugger
 	return matchers.length > 1 ?
 		function( elem, context, xml ) {
 			var i = matchers.length;
@@ -1916,7 +1914,7 @@ function setMatcher( preFilter, selector, matcher, postFilter, postFinder, postS
 		}
 	});
 }
-
+//  传入选择器数组
 function matcherFromTokens( tokens ) {
 	var checkContext, matcher, j,
 		len = tokens.length,
@@ -1940,7 +1938,7 @@ function matcherFromTokens( tokens ) {
 			checkContext = null;
 			return ret;
 		} ];
-
+	debugger
 	for ( ; i < len; i++ ) {
 		if ( (matcher = Expr.relative[ tokens[i].type ]) ) {
 			matchers = [ addCombinator(elementMatcher( matchers ), matcher) ];
@@ -2099,6 +2097,7 @@ compile = Sizzle.compile = function( selector, match /* Internal Use Only */ ) {
 		}
 		i = match.length;
 		while ( i-- ) {
+			debugger
 			cached = matcherFromTokens( match[i] );
 			if ( cached[ expando ] ) {
 				setMatchers.push( cached );
@@ -2152,6 +2151,7 @@ select = Sizzle.select = function( selector, context, results, seed ) {
 
 			selector = selector.slice( tokens.shift().value.length );
 		}
+		debugger
 
 		// Fetch a seed set for right-to-left matching
 		i = matchExpr["needsContext"].test( selector ) ? 0 : tokens.length;

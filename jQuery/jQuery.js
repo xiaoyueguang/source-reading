@@ -2557,6 +2557,7 @@ function toSelector( tokens ) {
 	return selector;
 }
 // TODO: 以下方法比较复杂, 直接从 Sizzle 方法开始解析
+// 从方法 Sizzle.compile 到 matcherFromTokens 再到 这
 function addCombinator( matcher, combinator, base ) {
 	var dir = combinator.dir,
 		skip = combinator.next,
@@ -2926,6 +2927,8 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 		markFunction( superMatcher ) :
 		superMatcher;
 }
+// 传入选择器, 以及经过 tokenize 处理后的选择器数组(非必须)
+// 返回一个闭包
 // TODO
 compile = Sizzle.compile = function( selector, match /* Internal Use Only */ ) {
 	var i,
@@ -2978,36 +2981,42 @@ select = Sizzle.select = function( selector, context, results, seed ) {
 
 	// Try to minimize operations if there is only one selector in the list and no seed
 	// (the latter of which guarantees us context)
+	// match tokenize 返回后的数组
 	if ( match.length === 1 ) {
-
+		// 表面为单个选择器. 不包含 ,
 		// Reduce context if the leading compound selector is an ID
 		tokens = match[0] = match[0].slice( 0 );
+		// 判断是否包含 type为ID. 
 		if ( tokens.length > 2 && (token = tokens[0]).type === "ID" &&
 				context.nodeType === 9 && documentIsHTML && Expr.relative[ tokens[1].type ] ) {
-
+			// 为ID 则直接通过find里的ID方法去查找
 			context = ( Expr.find["ID"]( token.matches[0].replace(runescape, funescape), context ) || [] )[0];
 			if ( !context ) {
 				return results;
 
 			// Precompiled matchers will still verify ancestry, so step up a level
+			// 将查找到的上下文的父元素作为当前的上下文.
 			} else if ( compiled ) {
 				context = context.parentNode;
 			}
-
+			// 去掉该ID头
 			selector = selector.slice( tokens.shift().value.length );
 		}
 
 		// Fetch a seed set for right-to-left matching
+		// 取出关系选择器和位置选择器
 		i = matchExpr["needsContext"].test( selector ) ? 0 : tokens.length;
+		// 循环被分解后的选择器
 		while ( i-- ) {
 			token = tokens[i];
-
 			// Abort if we hit a combinator
+			// 碰到关系选择器 + >~ 则中止
 			if ( Expr.relative[ (type = token.type) ] ) {
 				break;
 			}
 			if ( (find = Expr.find[ type ]) ) {
 				// Search, expanding context for leading sibling combinators
+				// 通过不同类型, 来使用不同的 find 来查找元素
 				if ( (seed = find(
 					token.matches[0].replace( runescape, funescape ),
 					rsibling.test( tokens[0].type ) && testContext( context.parentNode ) || context
@@ -3029,6 +3038,7 @@ select = Sizzle.select = function( selector, context, results, seed ) {
 
 	// Compile and execute a filtering function if one is not provided
 	// Provide `match` to avoid retokenization if we modified the selector above
+	// 如果以上都找不到内容, 则采用 compiled 的方法解析内容
 	( compiled || compile( selector, match ) )(
 		seed,
 		context,
