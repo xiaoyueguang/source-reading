@@ -2199,7 +2199,6 @@ select = Sizzle.select = function( selector, context, results, seed ) {
 
 // Sort stability
 support.sortStable = expando.split("").sort( sortOrder ).join("") === expando;
-
 // Support: Chrome 14-35+
 // Always assume duplicates if they aren't passed to the comparison function
 support.detectDuplicates = !!hasDuplicate;

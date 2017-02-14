@@ -3053,18 +3053,22 @@ select = Sizzle.select = function( selector, context, results, seed ) {
 // One-time assignments
 // 只执行一次.
 // Sort stability
-// TODO 
+// sizzle1487062868058 => 7szzle148i062868058 不一致.
+// chrome下不一致. 需要判断
 support.sortStable = expando.split("").sort( sortOrder ).join("") === expando;
 
 // Support: Chrome 14-35+
 // Always assume duplicates if they aren't passed to the comparison function
+// hasDuplicate 从上面的 sortOrder 里有进行过赋值
 support.detectDuplicates = !!hasDuplicate;
 
 // Initialize against the default document
+// 初始化 设置该函数
 setDocument();
 
 // Support: Webkit<537.32 - Safari 6.0.3/Chrome 25 (fixed in Chrome 27)
 // Detached nodes confoundingly follow *each other*
+//TODO
 support.sortDetached = assert(function( el ) {
 	// Should return 1, but returns 4 (following)
 	return el.compareDocumentPosition( document.createElement("fieldset") ) & 1;
