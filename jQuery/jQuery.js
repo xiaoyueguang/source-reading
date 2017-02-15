@@ -1050,6 +1050,7 @@ function markFunction( fn ) {
 
 /**
  * Support testing using an element
+ * 断言测试方法
  * 通过创建一个 fieldset, 通过一系列的 方法去判断 浏览器的支持程度, 并添加到 Sizzle.support
  * @param {Function} fn Passed the created element and returns a boolean result
  */
@@ -1057,12 +1058,12 @@ function assert( fn ) {
 	var el = document.createElement("fieldset");
 
 	try {
-		// try 判断方法是否正常执行
+		// fn里可能会出现不同浏览器不同的情况, 有些浏览器因没有对应的方法, 会导致报错, 所以放入try里.
 		return !!fn( el );
 	} catch (e) {
 		return false;
 	} finally {
-		// 创建该dom元素后, 即时释放内存
+		// 创建该dom元素后, 及时释放内存
 		// Remove from its parent by default
 		// 如果该被插入到页面里, 则去父组件里删除该子组件
 		if ( el.parentNode ) {
@@ -3068,15 +3069,18 @@ setDocument();
 
 // Support: Webkit<537.32 - Safari 6.0.3/Chrome 25 (fixed in Chrome 27)
 // Detached nodes confoundingly follow *each other*
-//TODO
+// // 判断是否支持 compareDocumentPosition 方法 (判断dom相对于另一个dom的位置)
 support.sortDetached = assert(function( el ) {
 	// Should return 1, but returns 4 (following)
+	// 判断dom相对于另一个dom的位置
 	return el.compareDocumentPosition( document.createElement("fieldset") ) & 1;
 });
 
 // Support: IE<8
 // Prevent attribute/property "interpolation"
 // https://msdn.microsoft.com/en-us/library/ms536429%28VS.85%29.aspx
+// 调整IE8以下的 attribute 兼容. IE8以下有可能不能通过 getAttribute 获取到href值.
+// 调整 type href height width 的获取方式
 if ( !assert(function( el ) {
 	el.innerHTML = "<a href='#'></a>";
 	return el.firstChild.getAttribute("href") === "#" ;
@@ -3090,6 +3094,8 @@ if ( !assert(function( el ) {
 
 // Support: IE<9
 // Use defaultValue in place of getAttribute("value")
+// IE9以下的兼容. IE9以下 可能 getAttribute(vale)会有问题.
+// 调整value的获取方式
 if ( !support.attributes || !assert(function( el ) {
 	el.innerHTML = "<input/>";
 	el.firstChild.setAttribute( "value", "" );
@@ -3104,6 +3110,7 @@ if ( !support.attributes || !assert(function( el ) {
 
 // Support: IE<9
 // Use getAttributeNode to fetch booleans when getAttribute lies
+// IE9以下, disabled的方式
 if ( !assert(function( el ) {
 	return el.getAttribute("disabled") == null;
 }) ) {
@@ -3117,13 +3124,11 @@ if ( !assert(function( el ) {
 		}
 	});
 }
-
 return Sizzle;
-
 })( window );
 
 // Sizzle 选择器引擎结束
-
+// 将 Sizzle下的一系列方法 复制给 对应的 $
 jQuery.find = Sizzle;
 jQuery.expr = Sizzle.selectors;
 
@@ -3135,9 +3140,8 @@ jQuery.isXMLDoc = Sizzle.isXML;
 jQuery.contains = Sizzle.contains;
 jQuery.escapeSelector = Sizzle.escape;
 
-
-
-
+// 从 elem元素出发, 沿着 dir 方向 一个个查找, 直到 下一个为空或 document 或 目标符合该 until 时
+// 将该元素作为一个数组集合返回
 var dir = function( elem, dir, until ) {
 	var matched = [],
 		truncate = until !== undefined;
@@ -3153,7 +3157,7 @@ var dir = function( elem, dir, until ) {
 	return matched;
 };
 
-
+// 返回 n元素后面的所有兄弟节点, 不包含 elem, 包含 n元素自身
 var siblings = function( n, elem ) {
 	var matched = [];
 
@@ -3166,16 +3170,15 @@ var siblings = function( n, elem ) {
 	return matched;
 };
 
-
 var rneedsContext = jQuery.expr.match.needsContext;
+console.log(rneedsContext)
 
 var rsingleTag = ( /^<([a-z][^\/\0>:\x20\t\r\n\f]*)[\x20\t\r\n\f]*\/?>(?:<\/\1>|)$/i );
-
-
 
 var risSimple = /^.[^:#\[\.,]*$/;
 
 // Implement the identical functionality for filter and not
+// TODO
 function winnow( elements, qualifier, not ) {
 	if ( jQuery.isFunction( qualifier ) ) {
 		return jQuery.grep( elements, function( elem, i ) {
