@@ -46,7 +46,7 @@
 	// arguments.callee.caller (trac-13335). But as of jQuery 3.0 (2016), strict mode should be common
 	// enough that all such attempts are guarded in a try block.
 	"use strict";
-
+	// 先起变量, 从各个原生方法里取值
 	var arr = [];
 
 	var document = window.document;
@@ -68,7 +68,7 @@
 	var hasOwn = class2type.hasOwnProperty;
 
 	var fnToString = hasOwn.toString;
-
+	// function Object() { [native code] }
 	var ObjectFunctionString = fnToString.call(Object);
 
 	var support = {};
@@ -118,12 +118,14 @@
 			return letter.toUpperCase();
 		};
 	// 以下的内容挂载在 jQuery的原型链下
-	// TODO jQuery.fn
+	// 为一个jQuery抓取到的元素集合
+	// $.fn 打印出来是 [], 但实际上经过 toString.call($.fn) 得到的结果为 [object Object].
+	// $.fn 只是看起来像是数组, 本质上还是对象. 下面放了许多属性方法
 	jQuery.fn = jQuery.prototype = {
 
 		// The current version of jQuery being used
 		jquery: version,
-
+		// 将 jquery 赋值给该属性, 如果有执行$.fn.constructor, 实际上就是运行 $()
 		constructor: jQuery,
 
 		// The default length of a jQuery object is 0
@@ -131,7 +133,7 @@
 		// 返回当前实例中元素的数量
 		length: 0,
 
-		// 返回一个数组, 包含当前实例的所有DOM
+		// 返回一个数组, 包含当前实例的所有 elem元素
 		toArray: function () {
 			return slice.call(this);
 		},
@@ -152,15 +154,15 @@
 
 		// Take an array of elements and push it onto the stack
 		// (returning the new matched element set)
-		// 传入一个包含元素的数组, 合并成一个新元素集
+		// 传入一个 $elem对象集合, 合并成一个新元素集
 		// 并返回该元素集
-		//	TODO
 		pushStack: function (elems) {
 
 			// Build a new jQuery matched element set
+			// 创建一个新的元素集合
 			var ret = jQuery.merge(this.constructor(), elems);
-
 			// Add the old object onto the stack (as a reference)
+			// this为 jQuery 原来的数组集合. 
 			ret.prevObject = this;
 
 			// Return the newly-formed element set
@@ -209,6 +211,8 @@
 		splice: arr.splice
 	};
 	// 定义jQuery扩展方法, 方便开发者扩展功能
+	// $.extend({a: 111})  为$ 或 $.fn扩展添加a 属性
+	// $.extend(true, {}, {a: 1})  将第二个参数后所有的属性都添加到 第二个参数里, 并返回扩展后的
 	// TODO
 	jQuery.extend = jQuery.fn.extend = function () {
 		var options, name, src, copy, copyIsArray, clone,
@@ -218,7 +222,7 @@
 			deep = false;
 
 		// Handle a deep copy situation
-		// 当第一个参数类型为 Boolean 时候, 转为深度复制
+		// 当第一个参数类型为 Boolean 时候, 转为另一种方式
 		if (typeof target === "boolean") {
 			deep = target;
 
@@ -234,12 +238,12 @@
 		}
 
 		// Extend jQuery itself if only one argument is passed
-		// 只有一个参数时
+		// 只有一个参数时, 开始下面循环, 并返回该target
+		// i通过判断, 来确定本函数不同的行为作用
 		if (i === length) {
 			target = this;
 			i--;
 		}
-
 		for (; i < length; i++) {
 
 			// Only deal with non-null/undefined values
@@ -247,18 +251,19 @@
 			if ((options = arguments[i]) != null) {
 
 				// Extend the base object
+				// target 为 自身 this
+				// options 为传入的用于扩展的对象
 				for (name in options) {
 					src = target[name];
 					copy = options[name];
-
 					// Prevent never-ending loop
-					// 值相同则进入下一循环
+					// 禁止扩展自身, 阻止无限循环
 					if (target === copy) {
 						continue;
 					}
 
 					// Recurse if we're merging plain objects or arrays
-					// TODO isPlainObject 方法
+					// 判断 copy 是否为纯粹的对象, 或则不为构造函数所构造的方法
 					if (deep && copy && (jQuery.isPlainObject(copy) ||
 							(copyIsArray = jQuery.isArray(copy)))) {
 
@@ -271,9 +276,11 @@
 						}
 
 						// Never move original objects, clone them
+						// 如果 deep 开, 则循环扩展到target里.
 						target[name] = jQuery.extend(deep, clone, copy);
 
 						// Don't bring in undefined values
+						// 为目标添加扩展的值或方法
 					} else if (copy !== undefined) {
 						target[name] = copy;
 					}
@@ -329,7 +336,7 @@
 				// 所以这里通过 减 运算, 根据结果是否为NaN来判断obj里是否含有其它字符
 				!isNaN(obj - parseFloat(obj));
 		},
-		// 判断是否为构造函数创建的对象
+		// 判断是否为纯粹的对象. 返回true 为普通对象. false为 构造函数对象
 		isPlainObject: function (obj) {
 			var proto, Ctor;
 
@@ -343,14 +350,15 @@
 			proto = getProto(obj);
 
 			// Objects with no prototype (e.g., `Object.create( null )`) are plain
-			// 判断是否有原型
+			// 判断是否有原型. 没有原型则表明是个普通的对象
 			if (!proto) {
 				return true;
 			}
 
 			// Objects with prototype are plain iff they were constructed by a global Object function
-			// TODO: 需要了解原型
+			// 判断该原型是否具有 constructor, 有则赋值给Ctor
 			Ctor = hasOwn.call(proto, "constructor") && proto.constructor;
+			// 原型的constructor 转为 string后还为 function Object() { [native code] }. 即对象, 则说明是个纯粹的对象.
 			return typeof Ctor === "function" && fnToString.call(Ctor) === ObjectFunctionString;
 		},
 		// 是否为空对象
@@ -455,7 +463,7 @@
 
 		// Support: Android <=4.0 only, PhantomJS 1 only
 		// push.apply(_, arraylike) throws on ancient WebKit
-		// 合并两个类数组类型, 返回第一个参数
+		// 合并两个类数组类型, 返回第一个参数. 传入的不一定是数组. 具有length的类数组对象也行
 		merge: function (first, second) {
 			var len = +second.length,
 				j = 0,
@@ -3194,7 +3202,7 @@
 	};
 
 	var rneedsContext = jQuery.expr.match.needsContext;
-	console.log(rneedsContext)
+
 
 	var rsingleTag = (/^<([a-z][^\/\0>:\x20\t\r\n\f]*)[\x20\t\r\n\f]*\/?>(?:<\/\1>|)$/i);
 
