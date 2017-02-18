@@ -47,6 +47,7 @@
 	// enough that all such attempts are guarded in a try block.
 	"use strict";
 	// 先起变量, 从各个原生方法里取值
+	// 数组的方法直接从这里取, 而不是 [].slice, [].concat , 避免多次创建数组
 	var arr = [];
 
 	var document = window.document;
@@ -60,21 +61,23 @@
 	var push = arr.push;
 
 	var indexOf = arr.indexOf;
-
+	// 键值对. 属性名为 toString后值, 比如 [object Array]. 值为结果值 比如 array
 	var class2type = {};
 
 	var toString = class2type.toString;
 
 	var hasOwn = class2type.hasOwnProperty;
-
+	// 该方法是为了获取
 	var fnToString = hasOwn.toString;
 	// function Object() { [native code] }
+	// 主要用来判断对象是否为纯对象, 而不是通过构造方法构造出来
 	var ObjectFunctionString = fnToString.call(Object);
 
 	var support = {};
 
 
 	// 在head标签里创建一个script标签, 并将代码放入内执行.执行完毕后再移除
+	// 执行代码
 	function DOMEval(code, doc) {
 		doc = doc || document;
 
@@ -211,9 +214,9 @@
 		splice: arr.splice
 	};
 	// 定义jQuery扩展方法, 方便开发者扩展功能
-	// $.extend({a: 111})  为$ 或 $.fn扩展添加a 属性
-	// $.extend(true, {}, {a: 1})  将第二个参数后所有的属性都添加到 第二个参数里, 并返回扩展后的
-	// TODO
+	// 如果参数只有一个 则将该参数里的属性 扩展到 $或$.fn下.
+	// 两个或两个以上时, 则将后面的对象全部都扩展到第一个对象上
+	// 第一个为 boolean值且为true时, 函数内将进行递归, 将后面的对象深拷贝到第一个对象里
 	jQuery.extend = jQuery.fn.extend = function () {
 		var options, name, src, copy, copyIsArray, clone,
 			target = arguments[0] || {},
@@ -291,7 +294,7 @@
 		// Return the modified object
 		return target;
 	};
-
+	// 默认先扩展必须的功能, 方便以后的调用
 	jQuery.extend({
 
 		// Unique for each copy of jQuery on the page
@@ -305,7 +308,7 @@
 		error: function (msg) {
 			throw new Error(msg);
 		},
-		//	TODO
+		//	空函数. 之后有调用空函数时直接调用该属性. 避免重复创建函数
 		noop: function () {},
 		// 判断是否为函数方法
 		isFunction: function (obj) {
@@ -379,7 +382,6 @@
 				// null 返回 'null', undefined 返回 'undefined'
 				return obj + "";
 			}
-
 			// Support: Android <=2.3 only (functionish RegExp)
 			return typeof obj === "object" || typeof obj === "function" ?
 				// 当typeof 为 object 或 function时, 需要另行区分.
@@ -391,7 +393,7 @@
 		},
 
 		// Evaluates a script in a global context
-		// 全局执行一个方法
+		// 运行代码.
 		globalEval: function (code) {
 			DOMEval(code);
 		},
@@ -415,6 +417,7 @@
 				length = obj.length;
 				for (; i < length; i++) {
 					// 通过回调返回来控制是否跳出循环, 回调里参数为 index, obj[index]
+					// 这里利用call, 来保证方法里的是上下文是预期的上下文
 					if (callback.call(obj[i], i, obj[i]) === false) {
 						break;
 					}
@@ -438,7 +441,6 @@
 				"" :
 				(text + "").replace(rtrim, "");
 		},
-
 		// results is for internal usage only
 		// 传入任何值, 返回一个合并处理后的数组
 		makeArray: function (arr, results) {
@@ -460,7 +462,6 @@
 		inArray: function (elem, arr, i) {
 			return arr == null ? -1 : indexOf.call(arr, elem, i);
 		},
-
 		// Support: Android <=4.0 only, PhantomJS 1 only
 		// push.apply(_, arraylike) throws on ancient WebKit
 		// 合并两个类数组类型, 返回第一个参数. 传入的不一定是数组. 具有length的类数组对象也行
@@ -477,7 +478,9 @@
 
 			return first;
 		},
-		// 判断数组里的元素，返回一个符合条件的元素数组
+		// 过滤数组里的元素
+		// elem 为待过滤的元素集合, callback为 元素的判断方式
+		// invert 为布尔值, 如果为 true 则返回不符合callback的集合, false或没设置 则返回符合callback的集合
 		grep: function (elems, callback, invert) {
 			var callbackInverse,
 				matches = [],
@@ -499,9 +502,8 @@
 			// 返回该数组
 			return matches;
 		},
-
 		// arg is for internal usage only
-		// 对elems数组执行方法, 并返回一个被处理后的数组
+		// 对 elems数组循环处理, 并对每次循环的值用callback处理, 返回一个处理后全新的数组
 		map: function (elems, callback, arg) {
 			var length, value,
 				i = 0,
@@ -535,14 +537,16 @@
 			// Flatten any nested arrays
 			return concat.apply([], ret);
 		},
-
 		// A global GUID counter for objects
 		// 全局ID, 为下面的代理方法提供全局ID
 		guid: 1,
-
 		// Bind a function to a context, optionally partially applying any
 		// arguments.
-		// TODO
+		// 代理, 返回一个被改变了上下问的 fn方法
+		// 比如
+		// function a () {console.log(this.a)}  a(); /=> undefined; 全局下并没有a属性, 因此返回undefined
+		// var b = $.proxy(a, {a: 4})  b(); /=> 4 这里是返回了一个全新的方法, 里面执行 a方法时, 改变了其上下文为第二个参数的对象
+		// 为此能够访问到该对象里的a属性.
 		proxy: function (fn, context) {
 			var tmp, args, proxy;
 
@@ -565,8 +569,8 @@
 			proxy = function () {
 				return fn.apply(context || this, args.concat(slice.call(arguments)));
 			};
-
 			// Set the guid of unique handler to the same of original handler, so it can be removed
+			// 修改guid, 代理后的guid 将于原本的方法不一致, 做区分
 			proxy.guid = fn.guid = fn.guid || jQuery.guid++;
 
 			return proxy;
@@ -581,8 +585,7 @@
 	});
 	// 判断系统是否含有 Symbol
 	if (typeof Symbol === "function") {
-		// 默认的遍历器方法
-		// TODO. 还不明白这里用处
+		// 添加数组的迭代器接口, 使之 "可遍历的"
 		jQuery.fn[Symbol.iterator] = arr[Symbol.iterator];
 	}
 
@@ -3211,6 +3214,7 @@
 	// Implement the identical functionality for filter and not
 	// TODO
 	function winnow(elements, qualifier, not) {
+		debugger
 		if (jQuery.isFunction(qualifier)) {
 			return jQuery.grep(elements, function (elem, i) {
 				return !!qualifier.call(elem, i, elem) !== not;
@@ -3242,23 +3246,24 @@
 			return (indexOf.call(qualifier, elem) > -1) !== not && elem.nodeType === 1;
 		});
 	}
-
+	// 过滤.
+	// 传入 过滤符串, 元素集合, boolean(true时, 表示过滤时不包含 符合 expr的 elem元素)
 	jQuery.filter = function (expr, elems, not) {
 		var elem = elems[0];
 
 		if (not) {
 			expr = ":not(" + expr + ")";
 		}
-
+		// 当 elem 元素只有一个时, 直接通过 matchesSelector 来进行判断
 		if (elems.length === 1 && elem.nodeType === 1) {
 			return jQuery.find.matchesSelector(elem, expr) ? [elem] : [];
 		}
-
+		// 如果元素很多的时, 通过 matches来判断, 且
 		return jQuery.find.matches(expr, jQuery.grep(elems, function (elem) {
 			return elem.nodeType === 1;
 		}));
 	};
-
+	// TODO
 	jQuery.fn.extend({
 		find: function (selector) {
 			var i, ret,
