@@ -3212,9 +3212,9 @@
 	var risSimple = /^.[^:#\[\.,]*$/;
 
 	// Implement the identical functionality for filter and not
-	// TODO
+	// elements 元素集合. qualifier 符合条件的方法. not 是否以相反的方法查找
+	// qualifier 可为字符串, 或方法, 或 elem元素
 	function winnow(elements, qualifier, not) {
-		debugger
 		if (jQuery.isFunction(qualifier)) {
 			return jQuery.grep(elements, function (elem, i) {
 				return !!qualifier.call(elem, i, elem) !== not;
@@ -3236,6 +3236,7 @@
 		}
 
 		// Simple selector that can be filtered directly, removing non-Elements
+		// 当选择器为字符串, 且符合 risSimple时, 执行 jQuery.filter方法去过滤
 		if (risSimple.test(qualifier)) {
 			return jQuery.filter(qualifier, elements, not);
 		}
@@ -3263,13 +3264,16 @@
 			return elem.nodeType === 1;
 		}));
 	};
-	// TODO
+	// 为 jQuery.fn扩展属性方法.
+	// 当每次$()之后都会返回一个 $.fn.init实例, 实例后的对象能访问的就是 $.fn下的方法
+	// 每个经由 jQuery.fn扩展的方法, this 均指的当前 实例, 即 jQuery对象
 	jQuery.fn.extend({
+		// 查找.选择器. 在当前实例下查找元素
 		find: function (selector) {
 			var i, ret,
 				len = this.length,
 				self = this;
-
+			// 选择器非字符串, 为元素或其它时, 判断该元素是否在 实例里(contains)
 			if (typeof selector !== "string") {
 				return this.pushStack(jQuery(selector).filter(function () {
 					for (i = 0; i < len; i++) {
@@ -3283,17 +3287,21 @@
 			ret = this.pushStack([]);
 
 			for (i = 0; i < len; i++) {
+				// 调用 Sizzle 查找
 				jQuery.find(selector, self[i], ret);
 			}
 
 			return len > 1 ? jQuery.uniqueSort(ret) : ret;
 		},
+		// 过滤. 从当前元素集合以 selector选择器去过滤.并返回过滤后的集合
 		filter: function (selector) {
 			return this.pushStack(winnow(this, selector || [], false));
 		},
+		// 过滤. 从当前元素集合以 selector选择器去过滤.并返回过滤后不符合的集合.
 		not: function (selector) {
 			return this.pushStack(winnow(this, selector || [], true));
 		},
+		// 判断当前实例是否符合 该selector选择器. 通过winnow方法返回的数组的长度
 		is: function (selector) {
 			return !!winnow(
 				this,
@@ -3308,53 +3316,55 @@
 		}
 	});
 
-
 	// Initialize a jQuery object
-
-
 	// A central reference to the root jQuery(document)
+	// 初始化一个jQuery对象
 	var rootjQuery,
 
 		// A simple way to check for HTML strings
 		// Prioritize #id over <tag> to avoid XSS via location.hash (#9521)
 		// Strict HTML recognition (#11290: must start with <)
 		// Shortcut simple #id case for speed
+		// 快速查找正则.
 		rquickExpr = /^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]+))$/,
-
+		// jQuery 核心方法.
+		// 因jQuery功能比较强大, $() 参数可以为 selector字符串 html字符串 方法 elem元素 等
+		// 这里将对传入的参数做判断, 然后执行各自的方法
 		init = jQuery.fn.init = function (selector, context, root) {
 			var match, elem;
-
+			// 当 selector 为空时, 直接返回本身
 			// HANDLE: $(""), $(null), $(undefined), $(false)
 			if (!selector) {
 				return this;
 			}
-
 			// Method init() accepts an alternate rootjQuery
 			// so migrate can support jQuery.sub (gh-2101)
 			root = root || rootjQuery;
-
 			// Handle HTML strings
+			// 区分 调用jQuery是查找还是创建一个 dom元素.
+			// $('<div>')与$('div')需要区别处理
 			if (typeof selector === "string") {
 				if (selector[0] === "<" &&
 					selector[selector.length - 1] === ">" &&
 					selector.length >= 3) {
-
+					// 如果是创建一个 dom元素. 则跳过下面的正则表达式.
 					// Assume that strings that start and end with <> are HTML and skip the regex check
 					match = [null, selector, null];
-
 				} else {
+					// 判断选择器是否符合快速查找
 					match = rquickExpr.exec(selector);
 				}
 
 				// Match html or make sure no context is specified for #id
 				if (match && (match[1] || !context)) {
-
+					// 抓取到的是 html标签, 即创建一个 dom
 					// HANDLE: $(html) -> $(array)
 					if (match[1]) {
 						context = context instanceof jQuery ? context[0] : context;
-
 						// Option to run scripts is true for back-compat
 						// Intentionally let the error be thrown if parseHTML is not present
+						// TODO parseHTML 
+						// 创建 dom元素, 并合并到 this
 						jQuery.merge(this, jQuery.parseHTML(
 							match[1],
 							context && context.nodeType ? context.ownerDocument || context : document,
@@ -3380,28 +3390,31 @@
 
 						// HANDLE: $(#id)
 					} else {
+						// 处理 抓取到 id的情况
+						// 直接进行getElementById查找
 						elem = document.getElementById(match[2]);
-
 						if (elem) {
-
 							// Inject the element directly into the jQuery object
 							this[0] = elem;
 							this.length = 1;
 						}
 						return this;
 					}
-
 					// HANDLE: $(expr, $(...))
+					// 调用Sizzle查找并返回结果集
 				} else if (!context || context.jquery) {
 					return (context || root).find(selector);
 
 					// HANDLE: $(expr, context)
 					// (which is just equivalent to: $(context).find(expr)
+					// $('span', '#app')
+					// 等价于 $('#app').find('span')
 				} else {
 					return this.constructor(context).find(selector);
 				}
 
 				// HANDLE: $(DOMElement)
+				// 传入的选择器为 elem元素时, 直接返回一个包含该元素的数组集合
 			} else if (selector.nodeType) {
 				this[0] = selector;
 				this.length = 1;
@@ -3409,6 +3422,7 @@
 
 				// HANDLE: $(function)
 				// Shortcut for document ready
+				// 如果为方法的话, 则为 document ready
 			} else if (jQuery.isFunction(selector)) {
 				return root.ready !== undefined ?
 					root.ready(selector) :
@@ -3416,7 +3430,7 @@
 					// Execute immediately if ready is not present
 					selector(jQuery);
 			}
-
+			// 排除以上情况后 返回一个包含选择器的数组
 			return jQuery.makeArray(selector, this);
 		};
 
@@ -10143,6 +10157,7 @@
 	// context (optional): If specified, the fragment will be created in this context,
 	// defaults to document
 	// keepScripts (optional): If true, will include scripts passed in the html string
+	// 将字符串转为 html标签. 并返回包含该 dom元素的集合
 	jQuery.parseHTML = function (data, context, keepScripts) {
 		if (typeof data !== "string") {
 			return [];
