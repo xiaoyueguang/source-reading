@@ -3363,8 +3363,7 @@
 						context = context instanceof jQuery ? context[0] : context;
 						// Option to run scripts is true for back-compat
 						// Intentionally let the error be thrown if parseHTML is not present
-						// TODO parseHTML 
-						// 创建 dom元素, 并合并到 this
+						// 创建 dom元素, 将 html字符串转为 elem元素. 返回数组
 						jQuery.merge(this, jQuery.parseHTML(
 							match[1],
 							context && context.nodeType ? context.ownerDocument || context : document,
@@ -3372,15 +3371,17 @@
 						));
 
 						// HANDLE: $(html, props)
+						// 可通过props 给当前元素添加属性或方法
+						// $('<div>', {onclick: function () {}})
 						if (rsingleTag.test(match[1]) && jQuery.isPlainObject(context)) {
 							for (match in context) {
-
 								// Properties of context are called as methods if possible
+								// 绑定方法
 								if (jQuery.isFunction(this[match])) {
 									this[match](context[match]);
-
 									// ...and otherwise set as attributes
 								} else {
+									// 绑定属性
 									this.attr(match, context[match]);
 								}
 							}
@@ -3433,14 +3434,14 @@
 			// 排除以上情况后 返回一个包含选择器的数组
 			return jQuery.makeArray(selector, this);
 		};
-
 	// Give the init function the jQuery prototype for later instantiation
+	// jQuery()主方法 采用 new jQuery.fn.init()的方式创建实例
+	// 实例访问的方法全部都在 init.prototype, 即 jQuery.fn
 	init.prototype = jQuery.fn;
-
 	// Initialize central reference
+	// 创建一个 $(document)实例
 	rootjQuery = jQuery(document);
-
-
+	// 父类的正则
 	var rparentsprev = /^(?:parents|prev(?:Until|All))/,
 
 		// Methods guaranteed to produce a unique set when starting from a unique set
@@ -3450,8 +3451,9 @@
 			next: true,
 			prev: true
 		};
-
+	// 扩展$.fn方法
 	jQuery.fn.extend({
+		// 通过$(selector选择器, context上下文)的方法获取内容.并过滤判断是否在当前实例下.
 		has: function (target) {
 			var targets = jQuery(target, this),
 				l = targets.length;
@@ -3465,7 +3467,7 @@
 				}
 			});
 		},
-
+		// 在当前实例上, 往上一层层沿着父元素查找符合该 选择器
 		closest: function (selectors, context) {
 			var cur,
 				i = 0,
@@ -3483,6 +3485,7 @@
 								targets.index(cur) > -1 :
 
 								// Don't pass non-elements to Sizzle
+								// cur元素 存在时, 判断该元素是否符合 选择器
 								cur.nodeType === 1 &&
 								jQuery.find.matchesSelector(cur, selectors))) {
 
@@ -3492,31 +3495,34 @@
 					}
 				}
 			}
-
+			// 将元素放入数组, 且过滤重复元素
 			return this.pushStack(matched.length > 1 ? jQuery.uniqueSort(matched) : matched);
 		},
 
 		// Determine the position of an element within the set
+		// 根据传入的 elem 来返回对应的索引序号
 		index: function (elem) {
-
 			// No argument, return index in parent
 			if (!elem) {
+				// 如果 elem参数 为空, 则返回当前实例所在的索引位置
+				// 获取 当前实例元素之前所有的元素数组, 返回该长度
 				return (this[0] && this[0].parentNode) ? this.first().prevAll().length : -1;
 			}
-
 			// Index in selector
+			// elem参数 为 selector字符串. 将该 selector字符串转为 jQuery数组, 并查找当前实例所在的索引序号
 			if (typeof elem === "string") {
 				return indexOf.call(jQuery(elem), this[0]);
 			}
 
 			// Locate the position of the desired element
+			// elem参数为 elem元素或jQuery对象时, 则从当前实例里查找该对象
 			return indexOf.call(this,
 
 				// If it receives a jQuery object, the first element is used
 				elem.jquery ? elem[0] : elem
 			);
 		},
-
+		// TODO
 		add: function (selector, context) {
 			return this.pushStack(
 				jQuery.uniqueSort(
@@ -10157,7 +10163,7 @@
 	// context (optional): If specified, the fragment will be created in this context,
 	// defaults to document
 	// keepScripts (optional): If true, will include scripts passed in the html string
-	// 将字符串转为 html标签. 并返回包含该 dom元素的集合
+	// 将字符串转为 html元素. 并返回包含该 dom元素的集合
 	jQuery.parseHTML = function (data, context, keepScripts) {
 		if (typeof data !== "string") {
 			return [];
