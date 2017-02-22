@@ -159,13 +159,14 @@
 		// (returning the new matched element set)
 		// 传入一个 $elem对象集合, 合并成一个新元素集
 		// 并返回该元素集
+		// jQuery 内部有个堆栈, 包含了当前调用 pushStack方法后所查找到的 elem元素.
 		pushStack: function (elems) {
 
 			// Build a new jQuery matched element set
 			// 创建一个新的元素集合
 			var ret = jQuery.merge(this.constructor(), elems);
 			// Add the old object onto the stack (as a reference)
-			// this为 jQuery 原来的数组集合. 
+			// this为 jQuery 原来的数组集合.
 			ret.prevObject = this;
 
 			// Return the newly-formed element set
@@ -201,9 +202,9 @@
 				j = +i + (i < 0 ? len : 0);
 			return this.pushStack(j >= 0 && j < len ? [this[j]] : []);
 		},
-		//	TODO
+		// jQuery 内部有个堆栈, 包含了当前调用 pushStack方法后所查找到的 elem元素.
+		// 通过 end方法, 可获取到 pushStack后所查找到的方法
 		end: function () {
-			//	TODO: prevObject是指什么?
 			return this.prevObject || this.constructor();
 		},
 
@@ -3522,7 +3523,8 @@
 				elem.jquery ? elem[0] : elem
 			);
 		},
-		// TODO
+		// 在当前实例下传入 contetxt下符合selector字符串的 jQuery对象
+		// selector参数 可为 selector字符串, elem元素, html字符串, jQuery对象
 		add: function (selector, context) {
 			return this.pushStack(
 				jQuery.uniqueSort(
@@ -3530,61 +3532,77 @@
 				)
 			);
 		},
-
+		// jQuery内部有个堆栈, 在 某些方法内返回的实例中, 并不会包含自身
+		// 可通过addBack 返回到所有查找的 elem元素
 		addBack: function (selector) {
 			return this.add(selector == null ?
 				this.prevObject : this.prevObject.filter(selector)
 			);
 		}
 	});
-
+	//	获取 cur元素(当前元素)的下个方向的第一个元素.
+	// dir 有 nextSibling, previousSibling
 	function sibling(cur, dir) {
 		while ((cur = cur[dir]) && cur.nodeType !== 1) {}
 		return cur;
 	}
-
+	// 通过each, 将第一个参数的对象赋值给 $.fn
+	// 扩展 jQuery实例化后的查找元素功能
 	jQuery.each({
+		// 获取当前实例的父亲元素
 		parent: function (elem) {
 			var parent = elem.parentNode;
 			return parent && parent.nodeType !== 11 ? parent : null;
 		},
+		// 获取当前实例的全部父亲元素
 		parents: function (elem) {
 			return dir(elem, "parentNode");
 		},
+		// 获取当前实例的所有符合 until 的父亲元素
 		parentsUntil: function (elem, i, until) {
 			return dir(elem, "parentNode", until);
 		},
+		// 获取当前实例的下一个 elem元素
 		next: function (elem) {
 			return sibling(elem, "nextSibling");
 		},
+		// 获取当前实例的上一个 elem元素
 		prev: function (elem) {
 			return sibling(elem, "previousSibling");
 		},
+		// 获取当前实例的后面全部 elem元素
 		nextAll: function (elem) {
 			return dir(elem, "nextSibling");
 		},
+		// 获取当前实例的前面全部 elem元素
 		prevAll: function (elem) {
 			return dir(elem, "previousSibling");
 		},
+		// 获取当前实例的后面全部符合 until的 elem元素
 		nextUntil: function (elem, i, until) {
 			return dir(elem, "nextSibling", until);
 		},
+		// 获取当前实例的前面全部符合 until的 elem元素
 		prevUntil: function (elem, i, until) {
 			return dir(elem, "previousSibling", until);
 		},
+		// 获取当前实例的全部兄弟 elem元素. 通过父类的第一个子元素, 然后获取之后的全部元素
 		siblings: function (elem) {
 			return siblings((elem.parentNode || {}).firstChild, elem);
 		},
+		// 获取当前实例的全部子 elem元素. 不包括子元素的以下的后代 elem元素.
+		// 通过当前 elem元素的第一个子 elem元素, 获取其后的全部兄弟 elem元素
 		children: function (elem) {
 			return siblings(elem.firstChild);
 		},
+		// 返回当前元素的子节点
 		contents: function (elem) {
 			return elem.contentDocument || jQuery.merge([], elem.childNodes);
 		}
 	}, function (name, fn) {
 		jQuery.fn[name] = function (until, selector) {
 			var matched = jQuery.map(this, fn, until);
-
+			// 获取方法名后五个字母是否为 Until, 修改方法的参数
 			if (name.slice(-5) !== "Until") {
 				selector = until;
 			}
@@ -3592,7 +3610,7 @@
 			if (selector && typeof selector === "string") {
 				matched = jQuery.filter(selector, matched);
 			}
-
+			// 得保证原先的实例里有元素
 			if (this.length > 1) {
 
 				// Remove duplicates
