@@ -3601,6 +3601,7 @@
 		}
 	}, function (name, fn) {
 		jQuery.fn[name] = function (until, selector) {
+			// 查找元素
 			var matched = jQuery.map(this, fn, until);
 			// 获取方法名后五个字母是否为 Until, 修改方法的参数
 			if (name.slice(-5) !== "Until") {
@@ -3613,12 +3614,13 @@
 			// 得保证原先的实例里有元素
 			if (this.length > 1) {
 
-				// Remove duplicates
+				// 保证 实例里不包含重复选项
 				if (!guaranteedUnique[name]) {
 					jQuery.uniqueSort(matched);
 				}
 
 				// Reverse order for parents* and prev-derivatives
+				// 如果是查找父类的, 则将倒过来查找
 				if (rparentsprev.test(name)) {
 					matched.reverse();
 				}
@@ -3628,10 +3630,8 @@
 		};
 	});
 	var rnothtmlwhite = (/[^\x20\t\r\n\f]+/g);
-
-
-
 	// Convert String-formatted options into Object-formatted ones
+	// 将字符串转为一个对象的属性名
 	function createOptions(options) {
 		var object = {};
 		jQuery.each(options.match(rnothtmlwhite) || [], function (_, flag) {
@@ -3642,7 +3642,7 @@
 
 	/*
 	 * Create a callback list using the following parameters:
-	 *
+	 *	// 创建一个回调方法列表
 	 *	options: an optional list of space-separated options that will change how
 	 *			the callback list behaves or a more traditional option object
 	 *
@@ -3650,15 +3650,15 @@
 	 * "fired" multiple times.
 	 *
 	 * Possible options:
-	 *
+	 *  // 只执行一次
 	 *	once:			will ensure the callback list can only be fired once (like a Deferred)
-	 *
+	 *  // 
 	 *	memory:			will keep track of previous values and will call any callback added
 	 *					after the list has been fired right away with the latest "memorized"
 	 *					values (like a Deferred)
-	 *
+	 *  // 保证一个回调函数只添加一次
 	 *	unique:			will ensure a callback can only be added once (no duplicate in the list)
-	 *
+	 *  // 当返回 false 时, 中断回调方法
 	 *	stopOnFalse:	interrupt callings when a callback returns false
 	 *
 	 */
@@ -3671,27 +3671,28 @@
 			jQuery.extend({}, options);
 
 		var // Flag to know if list is currently firing
+		// 表示正在触发回调
 			firing,
-
 			// Last fire value for non-forgettable lists
+			// 
 			memory,
-
 			// Flag to know if list was already fired
+			// 表示列表里所有的方法都已经触发完毕了
 			fired,
-
 			// Flag to prevent firing
+			// 表示是否中止了继续触发
 			locked,
-
 			// Actual callback list
+			// 回调列表
 			list = [],
-
 			// Queue of execution data for repeatable lists
+			// 可重复的回调队列
 			queue = [],
-
 			// Index of currently firing callback (modified by add/remove as needed)
+			// 触发当前回调的索引
 			firingIndex = -1,
-
 			// Fire callbacks
+			// 触发回调
 			fire = function () {
 
 				// Enforce single-firing
