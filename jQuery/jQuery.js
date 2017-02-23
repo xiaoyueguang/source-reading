@@ -3631,7 +3631,7 @@
 	});
 	var rnothtmlwhite = (/[^\x20\t\r\n\f]+/g);
 	// Convert String-formatted options into Object-formatted ones
-	// 将字符串转为一个对象的属性名
+	// 将字符串转为一个对象的属性名, 且设置为 true. 提供给下面的 Callbacks 使用
 	function createOptions(options) {
 		var object = {};
 		jQuery.each(options.match(rnothtmlwhite) || [], function (_, flag) {
@@ -3652,7 +3652,7 @@
 	 * Possible options:
 	 *  // 只执行一次
 	 *	once:			will ensure the callback list can only be fired once (like a Deferred)
-	 *  // 
+	 *  // 保存回调执行顺序, fire触发后, 再执行 add添加回调, 会从当前回调上继续下去
 	 *	memory:			will keep track of previous values and will call any callback added
 	 *					after the list has been fired right away with the latest "memorized"
 	 *					values (like a Deferred)
@@ -3662,6 +3662,7 @@
 	 *	stopOnFalse:	interrupt callings when a callback returns false
 	 *
 	 */
+	// 传入参数, 判断jQuery 回调系统该如何执行
 	jQuery.Callbacks = function (options) {
 
 		// Convert options from String-formatted to Object-formatted if needed
@@ -3669,7 +3670,7 @@
 		options = typeof options === "string" ?
 			createOptions(options) :
 			jQuery.extend({}, options);
-
+			console.log(options)
 		var // Flag to know if list is currently firing
 		// 表示正在触发回调
 			firing,
@@ -3680,7 +3681,7 @@
 			// 表示列表里所有的方法都已经触发完毕了
 			fired,
 			// Flag to prevent firing
-			// 表示是否中止了继续触发
+			// 表示是否锁定了继续触发
 			locked,
 			// Actual callback list
 			// 回调列表
@@ -3694,22 +3695,22 @@
 			// Fire callbacks
 			// 触发回调
 			fire = function () {
-
 				// Enforce single-firing
+				// 当仅执行一次时, 锁定. 保证不会触发第二次
 				locked = options.once;
-
 				// Execute callbacks for all pending executions,
 				// respecting firingIndex overrides and runtime changes
+				// 修改状态
 				fired = firing = true;
 				for (; queue.length; firingIndex = -1) {
 					memory = queue.shift();
 					while (++firingIndex < list.length) {
-
 						// Run callback and check for early termination
+						// 开启了 stopOnFalse 状态, 则表示 遇到false 自动停止
 						if (list[firingIndex].apply(memory[0], memory[1]) === false &&
 							options.stopOnFalse) {
-
 							// Jump to end and forget the data so .add doesn't re-fire
+							// 跳到中止条件
 							firingIndex = list.length;
 							memory = false;
 						}
@@ -3739,17 +3740,17 @@
 
 			// Actual Callbacks object
 			self = {
-
 				// Add a callback or a collection of callbacks to the list
+				// 添加回调到列表
 				add: function () {
 					if (list) {
-
 						// If we have memory from a past run, we should fire after adding
+						// 在回调时 不允许添加内容
 						if (memory && !firing) {
 							firingIndex = list.length - 1;
 							queue.push(memory);
 						}
-
+						// 判断 参数 是为 Array 或 Fn, 递归添加Array里的fn到 callback的 list里
 						(function add(args) {
 							jQuery.each(args, function (_, arg) {
 								if (jQuery.isFunction(arg)) {
@@ -3763,15 +3764,15 @@
 								}
 							});
 						})(arguments);
-
+						// 开启memory, 并且不处于触发状态, 则立即触发新添加的方法
 						if (memory && !firing) {
 							fire();
 						}
 					}
 					return this;
 				},
-
 				// Remove a callback from the list
+				// 
 				remove: function () {
 					jQuery.each(arguments, function (_, arg) {
 						var index;
@@ -3786,38 +3787,39 @@
 					});
 					return this;
 				},
-
 				// Check if a given callback is in the list.
 				// If no argument is given, return whether or not list has callbacks attached.
+				// 判断该方法是否在回调列表里
 				has: function (fn) {
 					return fn ?
 						jQuery.inArray(fn, list) > -1 :
 						list.length > 0;
 				},
-
 				// Remove all callbacks from the list
+				// 清空回调列表
 				empty: function () {
 					if (list) {
 						list = [];
 					}
 					return this;
 				},
-
 				// Disable .fire and .add
 				// Abort any current/pending executions
 				// Clear all callbacks and values
+				// 禁用回调列表
 				disable: function () {
 					locked = queue = [];
 					list = memory = "";
 					return this;
 				},
+				// 返回是否被禁用
 				disabled: function () {
 					return !list;
 				},
-
 				// Disable .fire
 				// Also disable .add unless we have memory (since it would have no effect)
 				// Abort any pending executions
+				// 锁定
 				lock: function () {
 					locked = queue = [];
 					if (!memory && !firing) {
@@ -3825,11 +3827,12 @@
 					}
 					return this;
 				},
+				// 返回是否锁定
 				locked: function () {
 					return !!locked;
 				},
-
 				// Call all callbacks with the given context and arguments
+				// 回调
 				fireWith: function (context, args) {
 					if (!locked) {
 						args = args || [];
@@ -3841,41 +3844,38 @@
 					}
 					return this;
 				},
-
 				// Call all the callbacks with the given arguments
+				// 触发回调
 				fire: function () {
 					self.fireWith(this, arguments);
 					return this;
 				},
-
 				// To know if the callbacks have already been called at least once
+				// 返回回调是否执行过一次
 				fired: function () {
 					return !!fired;
 				}
 			};
-
 		return self;
 	};
-
-
+	// 返回值
 	function Identity(v) {
 		return v;
 	}
-
+	// 抛出值
 	function Thrower(ex) {
 		throw ex;
 	}
-
+	// 处理值, 判断是否支持 Promise. 不支持则采用响应的错误处理
 	function adoptValue(value, resolve, reject) {
 		var method;
-
 		try {
-
 			// Check for promise aspect first to privilege synchronous behavior
+			// 检查是否支持 Promise. 先检查Promise的行为
 			if (value && jQuery.isFunction((method = value.promise))) {
 				method.call(value).done(resolve).fail(reject);
-
 				// Other thenables
+				// 或检查Promise返回的 then行为
 			} else if (value && jQuery.isFunction((method = value.then))) {
 				method.call(value, resolve, reject);
 
@@ -3891,13 +3891,13 @@
 			// Since jQuery.when doesn't unwrap thenables, we can skip the extra checks appearing in
 			// Deferred#then to conditionally suppress rejection.
 		} catch (value) {
-
 			// Support: Android 4.0 only
 			// Strict mode functions invoked without .call/.apply get global-object context
+			// 报错 则直接通过定义的 reject处理错误
 			reject.call(undefined, value);
 		}
 	}
-
+	// TODO
 	jQuery.extend({
 
 		Deferred: function (func) {

@@ -31,5 +31,20 @@
     var span = document.getElementById('span')
     var span1 = document.getElementById('span1')
     var input = document.getElementById('input')
+    var c = $.Callbacks('memory')
+    c.add(() => {
+      console.log(2)
+      return false
+    })
+    var fn = () => console.log(1)
+    c.add(fn)
+    c.add(fn)
+    c.add(fn)
+    c.add(() => {
+      setTimeout(function () {
+        console.log(3)
+      }, 1000)
+    })
+    c.add(() => console.log(4))
   </script>
 </html>
