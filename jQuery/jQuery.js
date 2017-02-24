@@ -3663,6 +3663,7 @@
 	 *
 	 */
 	// 传入参数, 判断jQuery 回调系统该如何执行
+	// TODO: Callbacks 以及下面的 deferred对象 都很抽象. 以后再仔细阅读
 	jQuery.Callbacks = function (options) {
 
 		// Convert options from String-formatted to Object-formatted if needed
@@ -3670,7 +3671,6 @@
 		options = typeof options === "string" ?
 			createOptions(options) :
 			jQuery.extend({}, options);
-			console.log(options)
 		var // Flag to know if list is currently firing
 		// 表示正在触发回调
 			firing,
@@ -3899,8 +3899,9 @@
 	}
 	// TODO
 	jQuery.extend({
-
+		// jQuery的 Deferred 对象. 类似 Promise
 		Deferred: function (func) {
+			// 元组集合. 每个参数 [动作, 监听, jQuery回调系统实例, 处理回调实例, 序号, 最后状态(可能)]
 			var tuples = [
 
 					// action, add listener, callbacks,
@@ -3908,6 +3909,7 @@
 					["notify", "progress", jQuery.Callbacks("memory"),
 						jQuery.Callbacks("memory"), 2
 					],
+					// 完成
 					["resolve", "done", jQuery.Callbacks("once memory"),
 						jQuery.Callbacks("once memory"), 0, "resolved"
 					],
@@ -3915,23 +3917,28 @@
 						jQuery.Callbacks("once memory"), 1, "rejected"
 					]
 				],
+				// 状态
 				state = "pending",
+				// 内部创建一个私有 promise变量, 保存状态值
 				promise = {
+					// 状态值
 					state: function () {
 						return state;
 					},
+					// TODO
 					always: function () {
 						deferred.done(arguments).fail(arguments);
 						return this;
 					},
+					// TODO
 					"catch": function (fn) {
 						return promise.then(null, fn);
 					},
-
 					// Keep pipe for back-compat
+					// TODO
 					pipe: function ( /* fnDone, fnFail, fnProgress */ ) {
 						var fns = arguments;
-
+						// 返回一个新的 deferred对象
 						return jQuery.Deferred(function (newDefer) {
 							jQuery.each(tuples, function (i, tuple) {
 
@@ -3959,9 +3966,10 @@
 							fns = null;
 						}).promise();
 					},
+					// 类似 Promise 的then. 返回一个新的 defered对象 以实现链式操作
 					then: function (onFulfilled, onRejected, onProgress) {
 						var maxDepth = 0;
-
+						// 返回一个方法. 用以添加 参数里的回调方法
 						function resolve(depth, deferred, handler, special) {
 							return function () {
 								var that = this,
@@ -4088,7 +4096,7 @@
 						}
 
 						return jQuery.Deferred(function (newDefer) {
-
+							// 将 then里的 对应的回调添加到对应的 元组里
 							// progress_handlers.add( ... )
 							tuples[0][3].add(
 								resolve(
@@ -4100,7 +4108,6 @@
 									newDefer.notifyWith
 								)
 							);
-
 							// fulfilled_handlers.add( ... )
 							tuples[1][3].add(
 								resolve(
@@ -4111,8 +4118,8 @@
 									Identity
 								)
 							);
-
 							// rejected_handlers.add( ... )
+							// 如果报错, 则给
 							tuples[2][3].add(
 								resolve(
 									0,
@@ -4124,93 +4131,92 @@
 							);
 						}).promise();
 					},
-
 					// Get a promise for this deferred
 					// If obj is provided, the promise aspect is added to the object
+					// 获得一个 promise, 或合并promise
 					promise: function (obj) {
 						return obj != null ? jQuery.extend(obj, promise) : promise;
 					}
 				},
+				// deferred对象
 				deferred = {};
-
 			// Add list-specific methods
+			// 添加特定的方法. 
 			jQuery.each(tuples, function (i, tuple) {
 				var list = tuple[2],
 					stateString = tuple[5];
-
 				// promise.progress = list.add
 				// promise.done = list.add
 				// promise.fail = list.add
+				// 为 promise添加方法属性. .progress .done .fail
 				promise[tuple[1]] = list.add;
 
 				// Handle state
 				if (stateString) {
 					list.add(
 						function () {
-
 							// state = "resolved" (i.e., fulfilled)
 							// state = "rejected"
+							// 添加状态改变方法
 							state = stateString;
 						},
-
 						// rejected_callbacks.disable
 						// fulfilled_callbacks.disable
+						// 禁用对应状态元组里的 回调系统
 						tuples[3 - i][2].disable,
-
 						// progress_callbacks.lock
+						// 状态被改变时, 锁定 第一个元组
 						tuples[0][2].lock
 					);
 				}
-
 				// progress_handlers.fire
 				// fulfilled_handlers.fire
 				// rejected_handlers.fire
+				// 触发元组里的回调系统
 				list.add(tuple[3].fire);
-
 				// deferred.notify = function() { deferred.notifyWith(...) }
 				// deferred.resolve = function() { deferred.resolveWith(...) }
 				// deferred.reject = function() { deferred.rejectWith(...) }
+				// 添加方法
 				deferred[tuple[0]] = function () {
 					deferred[tuple[0] + "With"](this === deferred ? undefined : this, arguments);
 					return this;
 				};
-
 				// deferred.notifyWith = list.fireWith
 				// deferred.resolveWith = list.fireWith
 				// deferred.rejectWith = list.fireWith
+				// 添加对象方法
 				deferred[tuple[0] + "With"] = list.fireWith;
 			});
-
 			// Make the deferred a promise
+			// 将 deferred对象合并
 			promise.promise(deferred);
 
 			// Call given func if any
+			// 有传入参数, 则执行并返回 deferred对象
 			if (func) {
 				func.call(deferred, deferred);
 			}
-
 			// All done!
+			// 完成后 返回 deferred对象
 			return deferred;
 		},
-
 		// Deferred helper
+		// when 表示两个回调都完成后再执行
 		when: function (singleValue) {
 			var
-
 				// count of uncompleted subordinates
 				remaining = arguments.length,
-
 				// count of unprocessed arguments
 				i = remaining,
-
 				// subordinate fulfillment data
 				resolveContexts = Array(i),
 				resolveValues = slice.call(arguments),
-
 				// the master Deferred
+				// 创建一个主线程
 				master = jQuery.Deferred(),
-
 				// subordinate callback factory
+				// 生成回调方法
 				updateFunc = function (i) {
 					return function (value) {
 						resolveContexts[i] = this;
@@ -4220,8 +4226,8 @@
 						}
 					};
 				};
-
 			// Single- and empty arguments are adopted like Promise.resolve
+			// 执行方法
 			if (remaining <= 1) {
 				adoptValue(singleValue, master.done(updateFunc(i)).resolve, master.reject);
 
@@ -4241,53 +4247,40 @@
 			return master.promise();
 		}
 	});
-
-
 	// These usually indicate a programmer mistake during development,
 	// warn about them ASAP rather than swallowing them by default.
+	// 报错信息正则
 	var rerrorNames = /^(Eval|Internal|Range|Reference|Syntax|Type|URI)Error$/;
-
+	// 错误勾子
 	jQuery.Deferred.exceptionHook = function (error, stack) {
-
 		// Support: IE 8 - 9 only
 		// Console exists when dev tools are open, which can happen at any time
 		if (window.console && window.console.warn && error && rerrorNames.test(error.name)) {
 			window.console.warn("jQuery.Deferred exception: " + error.message, error.stack, stack);
 		}
 	};
-
-
-
-
+	// 报错. 等js代码执行完毕后异步报错
 	jQuery.readyException = function (error) {
 		window.setTimeout(function () {
 			throw error;
 		});
 	};
-
-
-
-
 	// The deferred used on DOM ready
+	// ready 列表. 即 deferred对象
 	var readyList = jQuery.Deferred();
-
 	jQuery.fn.ready = function (fn) {
-
 		readyList
 			.then(fn)
-
 			// Wrap jQuery.readyException in a function so that the lookup
 			// happens at the time of error handling instead of callback
 			// registration.
 			.catch(function (error) {
 				jQuery.readyException(error);
 			});
-
 		return this;
 	};
-
+	// TODO
 	jQuery.extend({
-
 		// Is the DOM ready to be used? Set to true once it occurs.
 		isReady: false,
 
