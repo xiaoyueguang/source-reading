@@ -4279,17 +4279,16 @@
 			});
 		return this;
 	};
-	// TODO
-	
 	jQuery.extend({
 		// Is the DOM ready to be used? Set to true once it occurs.
+		// 确定DOM是否加载完毕
 		isReady: false,
-
 		// A counter to track how many items to wait for before
 		// the ready event fires. See #6781
+		// 
 		readyWait: 1,
-
 		// Hold (or release) the ready event
+		// 添加步数
 		holdReady: function (hold) {
 			if (hold) {
 				jQuery.readyWait++;
@@ -4297,37 +4296,34 @@
 				jQuery.ready(true);
 			}
 		},
-
 		// Handle when the DOM is ready
+		// jQuery的 ready 函数. DOM加载完毕后执行
 		ready: function (wait) {
-
 			// Abort if there are pending holds or we're already ready
 			if (wait === true ? --jQuery.readyWait : jQuery.isReady) {
 				return;
 			}
-
 			// Remember that the DOM is ready
+			// 执行一次后 记录 状态为true
 			jQuery.isReady = true;
-
 			// If a normal DOM Ready event fired, decrement, and wait if need be
 			if (wait !== true && --jQuery.readyWait > 0) {
 				return;
 			}
-
 			// If there are functions bound, to execute
+			// 执行回调里方法
 			readyList.resolveWith(document, [jQuery]);
 		}
 	});
 
 	jQuery.ready.then = readyList.then;
-
 	// The ready event handler and self cleanup method
+	// ready 后 移除加上去的事件
 	function completed() {
 		document.removeEventListener("DOMContentLoaded", completed);
 		window.removeEventListener("load", completed);
 		jQuery.ready();
 	}
-
 	// Catch cases where $(document).ready() is called
 	// after the browser event has already occurred.
 	// Support: IE <=9 - 10 only
@@ -4336,28 +4332,24 @@
 		(document.readyState !== "loading" && !document.documentElement.doScroll)) {
 
 		// Handle it asynchronously to allow scripts the opportunity to delay ready
+		// 异步执行 ready
 		window.setTimeout(jQuery.ready);
-
 	} else {
-
 		// Use the handy event callback
 		document.addEventListener("DOMContentLoaded", completed);
-
 		// A fallback to window.onload, that will always work
 		window.addEventListener("load", completed);
 	}
-
-
-
-
 	// Multifunctional method to get and set values of a collection
 	// The value/s can optionally be executed if it's a function
+	// 元素集合, 回调方法, key值, value值, 读取0/设置1, raw类型, 字符串为真, 方法为假
+	// 该方法用来给元素添加或获取属性值
 	var access = function (elems, fn, key, value, chainable, emptyGet, raw) {
 		var i = 0,
 			len = elems.length,
 			bulk = key == null;
-
 		// Sets many values
+		// 获取key值. 为对象则递归
 		if (jQuery.type(key) === "object") {
 			chainable = true;
 			for (i in key) {
@@ -4371,17 +4363,17 @@
 			if (!jQuery.isFunction(value)) {
 				raw = true;
 			}
-
 			if (bulk) {
-
 				// Bulk operations run against the entire set
+				// 批量执行方法
 				if (raw) {
 					fn.call(elems, value);
+					// 防止运行以下代码
 					fn = null;
-
 					// ...except when executing function values
 				} else {
 					bulk = fn;
+					// 设置一个专用的方法. 方便下面循环使用
 					fn = function (elem, key, value) {
 						return bulk.call(jQuery(elem), value);
 					};
@@ -4410,8 +4402,8 @@
 
 		return len ? fn(elems[0], key) : emptyGet;
 	};
+	// 表示上面的方法只接受 elem元素, document对象, 或 Object对象
 	var acceptData = function (owner) {
-
 		// Accepts only:
 		//  - Node
 		//    - Node.ELEMENT_NODE
@@ -4420,9 +4412,7 @@
 		//    - Any
 		return owner.nodeType === 1 || owner.nodeType === 9 || !(+owner.nodeType);
 	};
-
-
-
+	// Data构造方法.
 
 	function Data() {
 		this.expando = jQuery.expando + Data.uid++;
@@ -4431,16 +4421,15 @@
 	Data.uid = 1;
 
 	Data.prototype = {
-
+		// 缓存
 		cache: function (owner) {
-
 			// Check if the owner object already has a cache
+			// 判断传进来的参数是否具有 expando. 有的话, 则返回. 没有则创建一个缓存
 			var value = owner[this.expando];
-
+			// TODO
 			// If not, create one
 			if (!value) {
 				value = {};
-
 				// We can accept data for non-element nodes in modern browsers,
 				// but we should not, see #8335.
 				// Always return an empty object.
@@ -4576,7 +4565,7 @@
 	var dataPriv = new Data();
 
 	var dataUser = new Data();
-
+	window.a = new Data()
 
 
 	//	Implementation Summary
