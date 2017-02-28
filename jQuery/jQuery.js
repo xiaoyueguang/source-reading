@@ -4413,7 +4413,10 @@
 		return owner.nodeType === 1 || owner.nodeType === 9 || !(+owner.nodeType);
 	};
 	// Data构造方法.
-
+	// 通过new后, 生成一个唯一的expando.
+	// 在对象上添加 该属性, 值为 其数据.
+	// 每当添加一个值时候, 则在 该对象的 expando属性的值上添加属性.
+	// 获取, 删除也是如此;
 	function Data() {
 		this.expando = jQuery.expando + Data.uid++;
 	}
@@ -4426,15 +4429,16 @@
 			// Check if the owner object already has a cache
 			// 判断传进来的参数是否具有 expando. 有的话, 则返回. 没有则创建一个缓存
 			var value = owner[this.expando];
-			// TODO
+			// 确保有个value值
 			// If not, create one
 			if (!value) {
 				value = {};
 				// We can accept data for non-element nodes in modern browsers,
 				// but we should not, see #8335.
 				// Always return an empty object.
+				// 判断是否符合条件
 				if (acceptData(owner)) {
-
+					// 在元素 或对象上 添加值
 					// If it is a node unlikely to be stringify-ed or looped over
 					// use plain assignment
 					if (owner.nodeType) {
@@ -4451,9 +4455,9 @@
 					}
 				}
 			}
-
 			return value;
 		},
+		// 在 owner 上 设置值
 		set: function (owner, data, value) {
 			var prop,
 				cache = this.cache(owner);
@@ -4473,6 +4477,7 @@
 			}
 			return cache;
 		},
+		// 在 owner 上 获取值
 		get: function (owner, key) {
 			return key === undefined ?
 				this.cache(owner) :
@@ -4511,6 +4516,7 @@
 			// return the expected data based on which path was taken[*]
 			return value !== undefined ? value : key;
 		},
+		// 在 owner 上 删除
 		remove: function (owner, key) {
 			var i,
 				cache = owner[this.expando];
@@ -4557,15 +4563,16 @@
 				}
 			}
 		},
+		// 判断是否有该值
 		hasData: function (owner) {
 			var cache = owner[this.expando];
+			console.log(this.expando)
 			return cache !== undefined && !jQuery.isEmptyObject(cache);
 		}
 	};
 	var dataPriv = new Data();
 
 	var dataUser = new Data();
-	window.a = new Data()
 
 
 	//	Implementation Summary
@@ -4605,7 +4612,7 @@
 
 		return data;
 	}
-
+	// 
 	function dataAttr(elem, key, data) {
 		var name;
 
@@ -4614,12 +4621,11 @@
 		if (data === undefined && elem.nodeType === 1) {
 			name = "data-" + key.replace(rmultiDash, "-$&").toLowerCase();
 			data = elem.getAttribute(name);
-
 			if (typeof data === "string") {
 				try {
 					data = getData(data);
+					console.log(2)
 				} catch (e) {}
-
 				// Make sure we set the data so it isn't changed later
 				dataUser.set(elem, key, data);
 			} else {
@@ -4628,7 +4634,7 @@
 		}
 		return data;
 	}
-
+	// 扩展了 jQuery上的方法, hasData, data, removeData. 需要传入 元素.
 	jQuery.extend({
 		hasData: function (elem) {
 			return dataUser.hasData(elem) || dataPriv.hasData(elem);
@@ -4652,7 +4658,7 @@
 			dataPriv.remove(elem, name);
 		}
 	});
-
+	// 扩展了 jQuery上的方法, hasData, data, removeData. 不需要传入 元素, 直接访问自身实例.
 	jQuery.fn.extend({
 		data: function (key, value) {
 			var i, name, data,
@@ -4738,6 +4744,8 @@
 
 
 	jQuery.extend({
+		// 队列执行函数
+		// 在实例上缓存方法
 		queue: function (elem, type, data) {
 			var queue;
 
@@ -4756,7 +4764,7 @@
 				return queue || [];
 			}
 		},
-
+		// 将队列里方法弹出, 并执行该方法
 		dequeue: function (elem, type) {
 			type = type || "fx";
 
@@ -4793,6 +4801,7 @@
 		},
 
 		// Not public - generate a queueHooks object, or return the current one
+		// 私有对象.
 		_queueHooks: function (elem, type) {
 			var key = type + "queueHooks";
 			return dataPriv.get(elem, key) || dataPriv.access(elem, key, {
@@ -4802,7 +4811,7 @@
 			});
 		}
 	});
-
+	// 在 jQuery实例上 队列执行
 	jQuery.fn.extend({
 		queue: function (type, data) {
 			var setter = 2;
@@ -4838,9 +4847,9 @@
 		clearQueue: function (type) {
 			return this.queue(type || "fx", []);
 		},
-
 		// Get a promise resolved when queues of a certain type
 		// are emptied (fx is the type by default)
+		// TODO
 		promise: function (type, obj) {
 			var tmp,
 				count = 1,
@@ -4876,7 +4885,7 @@
 
 
 	var cssExpand = ["Top", "Right", "Bottom", "Left"];
-
+	// 判断 elem元素 是否隐藏, 且在文档上下文中
 	var isHiddenWithinTree = function (elem, el) {
 
 		// isHiddenWithinTree might be called from jQuery#filter function;
@@ -4895,7 +4904,7 @@
 
 			jQuery.css(elem, "display") === "none";
 	};
-
+	// 有些地方为了获取更准确的CSS, 需要重置掉其 css属性才能获取, 在重置之后执行回调后, 再设置原样.
 	var swap = function (elem, options, callback, args) {
 		var ret, name,
 			old = {};
@@ -4905,20 +4914,14 @@
 			old[name] = elem.style[name];
 			elem.style[name] = options[name];
 		}
-
 		ret = callback.apply(elem, args || []);
-
 		// Revert the old values
 		for (name in options) {
 			elem.style[name] = old[name];
 		}
-
 		return ret;
 	};
-
-
-
-
+	// TODO
 	function adjustCSS(elem, prop, valueParts, tween) {
 		var adjusted,
 			scale = 1,
