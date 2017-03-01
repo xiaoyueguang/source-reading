@@ -4921,7 +4921,7 @@
 		}
 		return ret;
 	};
-	// TODO
+	// 调整CSS TODO
 	function adjustCSS(elem, prop, valueParts, tween) {
 		var adjusted,
 			scale = 1,
@@ -4983,62 +4983,56 @@
 		}
 		return adjusted;
 	}
-
-
 	var defaultDisplayMap = {};
-
+	// 获取 该元素默认的 display类型.
+	// 通过创建一个 elem元素, 来获取其CSS值
 	function getDefaultDisplay(elem) {
 		var temp,
 			doc = elem.ownerDocument,
 			nodeName = elem.nodeName,
 			display = defaultDisplayMap[nodeName];
-
 		if (display) {
 			return display;
 		}
-
 		temp = doc.body.appendChild(doc.createElement(nodeName));
 		display = jQuery.css(temp, "display");
-
 		temp.parentNode.removeChild(temp);
-
 		if (display === "none") {
 			display = "block";
 		}
 		defaultDisplayMap[nodeName] = display;
-
 		return display;
 	}
-
+	// 设置元素显示隐藏. 每次操作都会对原先的 display 进行缓存
 	function showHide(elements, show) {
 		var display, elem,
 			values = [],
 			index = 0,
 			length = elements.length;
-
 		// Determine new display value for elements that need to change
 		for (; index < length; index++) {
 			elem = elements[index];
 			if (!elem.style) {
 				continue;
 			}
-
 			display = elem.style.display;
 			if (show) {
-
 				// Since we force visibility upon cascade-hidden elements, an immediate (and slow)
 				// check is required in this first loop unless we have a nonempty display value (either
 				// inline or about-to-be-restored)
+				// 先获取是否有缓存起其原先的 display类型. 有 则切换
 				if (display === "none") {
 					values[index] = dataPriv.get(elem, "display") || null;
 					if (!values[index]) {
 						elem.style.display = "";
 					}
 				}
+				// display 为空, 并且元素在 document中, 添加其默认的 display类型
 				if (elem.style.display === "" && isHiddenWithinTree(elem)) {
 					values[index] = getDefaultDisplay(elem);
 				}
 			} else {
+				// 直接设置隐藏, 并且将 原先的display类型缓存到 elem上
 				if (display !== "none") {
 					values[index] = "none";
 
@@ -5057,7 +5051,7 @@
 
 		return elements;
 	}
-
+	// 扩展 jQuery实例. 显示隐藏, 以及切换
 	jQuery.fn.extend({
 		show: function () {
 			return showHide(this, true);
@@ -5079,20 +5073,15 @@
 			});
 		}
 	});
+	// checkbox radio 标签
 	var rcheckableType = (/^(?:checkbox|radio)$/i);
-
 	var rtagName = (/<([a-z][^\/\0>\x20\t\r\n\f]+)/i);
-
 	var rscriptType = (/^$|\/(?:java|ecma)script/i);
-
-
-
+	// 包围的标签
 	// We have to close these tags to support XHTML (#13200)
 	var wrapMap = {
-
 		// Support: IE <=9 only
 		option: [1, "<select multiple='multiple'>", "</select>"],
-
 		// XHTML parsers do not magically insert elements in the
 		// same way that tag soup parsers do. So we cannot shorten
 		// this by omitting <tbody> or other required elements.
@@ -5100,42 +5089,32 @@
 		col: [2, "<table><colgroup>", "</colgroup></table>"],
 		tr: [2, "<table><tbody>", "</tbody></table>"],
 		td: [3, "<table><tbody><tr>", "</tr></tbody></table>"],
-
 		_default: [0, "", ""]
 	};
 
 	// Support: IE <=9 only
 	wrapMap.optgroup = wrapMap.option;
-
 	wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
 	wrapMap.th = wrapMap.td;
-
-
+	// 获取该 context上下文下的 全部 tag标签. 通过 getElementsByTagName 和 querySelectorAll 来查找
 	function getAll(context, tag) {
-
 		// Support: IE <=9 - 11 only
 		// Use typeof to avoid zero-argument method invocation on host objects (#15151)
 		var ret;
-
 		if (typeof context.getElementsByTagName !== "undefined") {
 			ret = context.getElementsByTagName(tag || "*");
-
 		} else if (typeof context.querySelectorAll !== "undefined") {
 			ret = context.querySelectorAll(tag || "*");
-
 		} else {
 			ret = [];
 		}
-
 		if (tag === undefined || tag && jQuery.nodeName(context, tag)) {
 			return jQuery.merge([context], ret);
 		}
-
 		return ret;
 	}
-
-
 	// Mark scripts as having already been evaluated
+	// 标记? TODO
 	function setGlobalEval(elems, refElements) {
 		var i = 0,
 			l = elems.length;
@@ -5147,7 +5126,6 @@
 			);
 		}
 	}
-
 
 	var rhtml = /<|&#?\w+;/;
 
@@ -5240,12 +5218,11 @@
 		return fragment;
 	}
 
-
+	// 检查 浏览器对 clone的支持程度
 	(function () {
 		var fragment = document.createDocumentFragment(),
 			div = fragment.appendChild(document.createElement("div")),
 			input = document.createElement("input");
-
 		// Support: Android 4.0 - 4.3 only
 		// Check state lost if the name is set (#11217)
 		// Support: Windows Web Apps (WWA)
@@ -5253,35 +5230,31 @@
 		input.setAttribute("type", "radio");
 		input.setAttribute("checked", "checked");
 		input.setAttribute("name", "t");
-
 		div.appendChild(input);
-
 		// Support: Android <=4.1 only
 		// Older WebKit doesn't clone checked state correctly in fragments
 		support.checkClone = div.cloneNode(true).cloneNode(true).lastChild.checked;
-
 		// Support: IE <=11 only
 		// Make sure textarea (and checkbox) defaultValue is properly cloned
 		div.innerHTML = "<textarea>x</textarea>";
 		support.noCloneChecked = !!div.cloneNode(true).lastChild.defaultValue;
 	})();
+
 	var documentElement = document.documentElement;
 
-
-
 	var
+		// 键盘正则
 		rkeyEvent = /^key/,
+		// 鼠标操作正则
 		rmouseEvent = /^(?:mouse|pointer|contextmenu|drag|drop)|click/,
 		rtypenamespace = /^([^.]*)(?:\.(.+)|)/;
-
+	// 以下三个方法, 在有些地方需要参数为方法, 且需要返回某些值
 	function returnTrue() {
 		return true;
 	}
-
 	function returnFalse() {
 		return false;
 	}
-
 	// Support: IE <=9 only
 	// See #13393 for more info
 	function safeActiveElement() {
@@ -5289,14 +5262,17 @@
 			return document.activeElement;
 		} catch (err) {}
 	}
-
+	// 绑定. 元素, 类型, 选择器, 数据, 回调, 是否绑定一次
 	function on(elem, types, selector, data, fn, one) {
 		var origFn, type;
-
 		// Types can be a map of types/handlers
+		// types 为对象时, 即 {类型, 回调}
+		// 循环绑定
 		if (typeof types === "object") {
 
 			// ( types-Object, selector, data )
+			// 根据参数数量判断执行方式
+			// selector选择器不为字符串时, 则为undefined.
 			if (typeof selector !== "string") {
 
 				// ( types-Object, data )
@@ -5308,7 +5284,7 @@
 			}
 			return elem;
 		}
-
+		// 以下条件都是 根据参数数量判断执行方式
 		if (data == null && fn == null) {
 
 			// ( types, fn )
@@ -5336,8 +5312,8 @@
 
 		if (one === 1) {
 			origFn = fn;
+			// 如果仅执行一次. 则将fn改造成 执行一次后, 马上取消事件, 并执行方法.
 			fn = function (event) {
-
 				// Can use an empty set, since event contains the info
 				jQuery().off(event);
 				return origFn.apply(this, arguments);
@@ -5347,37 +5323,33 @@
 			fn.guid = origFn.guid || (origFn.guid = jQuery.guid++);
 		}
 		return elem.each(function () {
+			// 为实例添加方法
 			jQuery.event.add(this, types, fn, data, selector);
 		});
 	}
-
 	/*
 	 * Helper functions for managing events -- not part of the public interface.
 	 * Props to Dean Edwards' addEvent library for many of the ideas.
 	 */
+	// 事件处理对象
 	jQuery.event = {
-
 		global: {},
-
+		// 添加方法
 		add: function (elem, types, handler, data, selector) {
-
 			var handleObjIn, eventHandle, tmp,
 				events, t, handleObj,
 				special, handlers, type, namespaces, origType,
 				elemData = dataPriv.get(elem);
-
 			// Don't attach events to noData or text/comment nodes (but allow plain objects)
 			if (!elemData) {
 				return;
 			}
-
 			// Caller can pass in an object of custom data in lieu of the handler
 			if (handler.handler) {
 				handleObjIn = handler;
 				handler = handleObjIn.handler;
 				selector = handleObjIn.selector;
 			}
-
 			// Ensure that invalid selectors throw exceptions at attach time
 			// Evaluate against documentElement in case elem is a non-element node (e.g., document)
 			if (selector) {
@@ -5426,6 +5398,7 @@
 				special = jQuery.event.special[type] || {};
 
 				// handleObj is passed to all event handlers
+				// 生成一个jQuery 的 event
 				handleObj = jQuery.extend({
 					type: type,
 					origType: origType,
