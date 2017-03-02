@@ -5334,7 +5334,7 @@
 	// 事件处理对象
 	jQuery.event = {
 		global: {},
-		// 添加方法
+		// 添加方法. 将绑定的方法全部缓存到 Data里. 执行的时候按照顺序执行
 		add: function (elem, types, handler, data, selector) {
 			var handleObjIn, eventHandle, tmp,
 				events, t, handleObj,
@@ -5418,13 +5418,12 @@
 					// Only use addEventListener if the special events handler returns false
 					if (!special.setup ||
 						special.setup.call(elem, data, namespaces, eventHandle) === false) {
-
+					// 绑定事件
 						if (elem.addEventListener) {
 							elem.addEventListener(type, eventHandle);
 						}
 					}
 				}
-
 				if (special.add) {
 					special.add.call(elem, handleObj);
 
@@ -5443,10 +5442,10 @@
 				// Keep track of which events have ever been used, for event optimization
 				jQuery.event.global[type] = true;
 			}
-
 		},
 
 		// Detach an event or set of events from an element
+		// 移除方法, 将Data里的方法移除掉. 
 		remove: function (elem, types, handler, selector, mappedTypes) {
 
 			var j, origCount, tmp,
@@ -5519,7 +5518,8 @@
 				dataPriv.remove(elem, "handle events");
 			}
 		},
-
+		// 调度方法. jQuery 绑定的方法 都是绑定该方法.
+		// 该方法执行元素上缓存的events, 并按顺序调用
 		dispatch: function (nativeEvent) {
 
 			// Make a writable jQuery.Event from the native event object
@@ -5583,7 +5583,7 @@
 
 			return event.result;
 		},
-
+		// 执行方法. 上面为队列执行该方法.
 		handlers: function (event, handlers) {
 			var i, handleObj, sel, matchedHandlers, matchedSelectors,
 				handlerQueue = [],
@@ -5647,7 +5647,7 @@
 
 			return handlerQueue;
 		},
-
+		// 传入属性或方法
 		addProp: function (name, hook) {
 			Object.defineProperty(jQuery.Event.prototype, name, {
 				enumerable: true,
@@ -5674,22 +5674,22 @@
 				}
 			});
 		},
-
+		// 将原生的 events参数 转为 jQuery的事件参数
 		fix: function (originalEvent) {
 			return originalEvent[jQuery.expando] ?
 				originalEvent :
 				new jQuery.Event(originalEvent);
 		},
-
+		// 一些特殊的方法. 需要特殊处理. 在不同元素上会有不同行为
 		special: {
 			load: {
-
+				// 图片的onLoad 不应该执行 window.onload
 				// Prevent triggered image.load events from bubbling to window.load
 				noBubble: true
 			},
 			focus: {
-
 				// Fire native event if possible so blur/focus sequence is correct
+				// 重写 focus 事件 的 trigger
 				trigger: function () {
 					if (this !== safeActiveElement() && this.focus) {
 						this.focus();
@@ -5699,6 +5699,7 @@
 				delegateType: "focusin"
 			},
 			blur: {
+				// 重写 blur 的trigger
 				trigger: function () {
 					if (this === safeActiveElement() && this.blur) {
 						this.blur();
@@ -5708,8 +5709,8 @@
 				delegateType: "focusout"
 			},
 			click: {
-
 				// For checkbox, fire native event so checked state will be right
+				// 重写 checkbox input 的 click trigger事件
 				trigger: function () {
 					if (this.type === "checkbox" && this.click && jQuery.nodeName(this, "input")) {
 						this.click();
@@ -5722,10 +5723,9 @@
 					return jQuery.nodeName(event.target, "a");
 				}
 			},
-
+			// 关闭窗口前事件绑定重写
 			beforeunload: {
 				postDispatch: function (event) {
-
 					// Support: Firefox 20+
 					// Firefox doesn't alert if the returnValue field is not set.
 					if (event.result !== undefined && event.originalEvent) {
@@ -5735,15 +5735,14 @@
 			}
 		}
 	};
-
+	// 移除绑定事件
 	jQuery.removeEvent = function (elem, type, handle) {
-
 		// This "if" is needed for plain objects
 		if (elem.removeEventListener) {
 			elem.removeEventListener(type, handle);
 		}
 	};
-
+	// jQuery 的 Event对象 构造函数
 	jQuery.Event = function (src, props) {
 
 		// Allow instantiation without the 'new' keyword
@@ -5792,7 +5791,6 @@
 		// Mark it as fixed
 		this[jQuery.expando] = true;
 	};
-
 	// jQuery.Event is based on DOM3 Events as specified by the ECMAScript Language Binding
 	// https://www.w3.org/TR/2003/WD-DOM-Level-3-Events-20030331/ecma-script-binding.html
 	jQuery.Event.prototype = {
@@ -5801,7 +5799,7 @@
 		isPropagationStopped: returnFalse,
 		isImmediatePropagationStopped: returnFalse,
 		isSimulated: false,
-
+		// 保证某些行为跟原生的 events一致
 		preventDefault: function () {
 			var e = this.originalEvent;
 
@@ -5832,8 +5830,8 @@
 			this.stopPropagation();
 		}
 	};
-
 	// Includes all common event props including KeyEvent and MouseEvent specific props
+	// 将 原生 events上的属性 传入 jQuery.Event的原型上
 	jQuery.each({
 		altKey: true,
 		bubbles: true,
@@ -5893,7 +5891,6 @@
 			return event.which;
 		}
 	}, jQuery.event.addProp);
-
 	// Create mouseenter/leave events using mouseover/out and event-time checks
 	// so that event delegation works in jQuery.
 	// Do the same for pointerenter/pointerleave and pointerover/pointerout
@@ -5902,6 +5899,7 @@
 	// Safari sends mouseenter too often; see:
 	// https://bugs.chromium.org/p/chromium/issues/detail?id=470258
 	// for the description of the bug (it existed in older Chrome versions as well).
+	// 某些浏览器的 事件方法 有问题
 	jQuery.each({
 		mouseenter: "mouseover",
 		mouseleave: "mouseout",
@@ -5929,15 +5927,17 @@
 			}
 		};
 	});
-
+	// 给实例绑定事件
 	jQuery.fn.extend({
-
+		// 绑定
 		on: function (types, selector, data, fn) {
 			return on(this, types, selector, data, fn);
 		},
+		// 绑定一次
 		one: function (types, selector, data, fn) {
 			return on(this, types, selector, data, fn, 1);
 		},
+		// 取消
 		off: function (types, selector, fn) {
 			var handleObj, type;
 			if (types && types.preventDefault && types.handleObj) {
@@ -5976,7 +5976,6 @@
 		}
 	});
 
-
 	var
 
 		/* eslint-disable max-len */
@@ -5996,6 +5995,7 @@
 		rscriptTypeMasked = /^true\/(.*)/,
 		rcleanScript = /^\s*<!(?:\[CDATA\[|--)|(?:\]\]|--)>\s*$/g;
 
+	// table的环境下, 在插入或移除元素, 与正常方式不一致, 需要更改 元素
 	function manipulationTarget(elem, content) {
 		if (jQuery.nodeName(elem, "table") &&
 			jQuery.nodeName(content.nodeType !== 11 ? content : content.firstChild, "tr")) {
@@ -6007,11 +6007,12 @@
 	}
 
 	// Replace/restore the type attribute of script elements for safe DOM manipulation
+	// 禁用script 标签. 更改标签的 type属性
 	function disableScript(elem) {
 		elem.type = (elem.getAttribute("type") !== null) + "/" + elem.type;
 		return elem;
 	}
-
+	// 恢复
 	function restoreScript(elem) {
 		var match = rscriptTypeMasked.exec(elem.type);
 
@@ -6023,7 +6024,8 @@
 
 		return elem;
 	}
-
+	// 复制事件. 判断是否有 jQuery缓存, 则取出来复制一份 events
+	// src 原elem  dest 目标elem
 	function cloneCopyEvent(src, dest) {
 		var i, l, type, pdataOld, pdataCur, udataOld, udataCur, events;
 
@@ -6057,8 +6059,8 @@
 			dataUser.set(dest, udataCur);
 		}
 	}
-
 	// Fix IE bugs, see support tests
+	// IE下 input的 checked属性以及 以及复制 input 的值
 	function fixInput(src, dest) {
 		var nodeName = dest.nodeName.toLowerCase();
 
@@ -6071,7 +6073,7 @@
 			dest.defaultValue = src.defaultValue;
 		}
 	}
-
+	// TODO
 	function domManip(collection, args, callback, ignored) {
 
 		// Flatten any nested arrays
