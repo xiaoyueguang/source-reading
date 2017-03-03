@@ -5128,7 +5128,7 @@
 	}
 
 	var rhtml = /<|&#?\w+;/;
-
+	// 创建元素
 	function buildFragment(elems, context, scripts, selection, ignored) {
 		var elem, tmp, tag, wrap, contains, j,
 			fragment = context.createDocumentFragment(),
@@ -5214,7 +5214,6 @@
 				}
 			}
 		}
-
 		return fragment;
 	}
 
@@ -6073,9 +6072,9 @@
 			dest.defaultValue = src.defaultValue;
 		}
 	}
-	// TODO
+	// collection elem元素集合
+	// 添加元素
 	function domManip(collection, args, callback, ignored) {
-
 		// Flatten any nested arrays
 		args = concat.apply([], args);
 
@@ -6085,12 +6084,12 @@
 			iNoClone = l - 1,
 			value = args[0],
 			isFunction = jQuery.isFunction(value);
-
 		// We can't cloneNode fragments that contain checked, in WebKit
 		if (isFunction ||
 			(l > 1 && typeof value === "string" &&
 				!support.checkClone && rchecked.test(value))) {
 			return collection.each(function (index) {
+				// elem元素集合 循环添加
 				var self = collection.eq(index);
 				if (isFunction) {
 					args[0] = value.call(this, index, self.html());
@@ -6100,14 +6099,14 @@
 		}
 
 		if (l) {
+			// 创建元素
 			fragment = buildFragment(args, collection[0].ownerDocument, false, collection, ignored);
 			first = fragment.firstChild;
-
 			if (fragment.childNodes.length === 1) {
 				fragment = first;
 			}
-
 			// Require either new content or an interest in ignored elements to invoke the callback
+			// 第一次添加的时候 判断是否有 script, 防止 script标签里执行多次
 			if (first || ignored) {
 				scripts = jQuery.map(getAll(fragment, "script"), disableScript);
 				hasScripts = scripts.length;
@@ -6160,10 +6159,9 @@
 				}
 			}
 		}
-
 		return collection;
 	}
-
+	// 移除元素. keepData 保留数据
 	function remove(elem, selector, keepData) {
 		var node,
 			nodes = selector ? jQuery.filter(selector, elem) : elem,
@@ -6187,10 +6185,12 @@
 	}
 
 	jQuery.extend({
+		// html预处理. 将标签处理成标准的HTML语法.
+		// $.htmlPrefilter('<div/>') => <div></div>
 		htmlPrefilter: function (html) {
 			return html.replace(rxhtmlTag, "<$1></$2>");
 		},
-
+		// 克隆元素
 		clone: function (elem, dataAndEvents, deepDataAndEvents) {
 			var i, l, srcElements, destElements,
 				clone = elem.cloneNode(true),
@@ -6232,7 +6232,7 @@
 			// Return the cloned set
 			return clone;
 		},
-
+		// 清空 DOM上 被 jQuery 添加上的数据
 		cleanData: function (elems) {
 			var data, elem, type,
 				special = jQuery.event.special,
@@ -6268,16 +6268,17 @@
 			}
 		}
 	});
-
+	// elem元素 操作
 	jQuery.fn.extend({
+		// 删除元素, 但是保留数据
 		detach: function (selector) {
 			return remove(this, selector, true);
 		},
-
+		// 删除元素. 不保留
 		remove: function (selector) {
 			return remove(this, selector);
 		},
-
+		// 修改文字
 		text: function (value) {
 			return access(this, function (value) {
 				return value === undefined ?
@@ -6289,7 +6290,7 @@
 					});
 			}, null, value, arguments.length);
 		},
-
+		// 内部后面插入元素
 		append: function () {
 			return domManip(this, arguments, function (elem) {
 				if (this.nodeType === 1 || this.nodeType === 11 || this.nodeType === 9) {
@@ -6298,7 +6299,7 @@
 				}
 			});
 		},
-
+		// 内部前面插入元素
 		prepend: function () {
 			return domManip(this, arguments, function (elem) {
 				if (this.nodeType === 1 || this.nodeType === 11 || this.nodeType === 9) {
@@ -6307,7 +6308,7 @@
 				}
 			});
 		},
-
+		// 外部前面插入
 		before: function () {
 			return domManip(this, arguments, function (elem) {
 				if (this.parentNode) {
@@ -6315,7 +6316,7 @@
 				}
 			});
 		},
-
+		// 外部后面插入
 		after: function () {
 			return domManip(this, arguments, function (elem) {
 				if (this.parentNode) {
@@ -6323,7 +6324,7 @@
 				}
 			});
 		},
-
+		// 清空全部子节点
 		empty: function () {
 			var elem,
 				i = 0;
@@ -6342,7 +6343,7 @@
 
 			return this;
 		},
-
+		// 克隆 elem元素
 		clone: function (dataAndEvents, deepDataAndEvents) {
 			dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
 			deepDataAndEvents = deepDataAndEvents == null ? dataAndEvents : deepDataAndEvents;
@@ -6351,7 +6352,7 @@
 				return jQuery.clone(this, dataAndEvents, deepDataAndEvents);
 			});
 		},
-
+		// 元素里插入html标签
 		html: function (value) {
 			return access(this, function (value) {
 				var elem = this[0] || {},
@@ -6390,7 +6391,7 @@
 				}
 			}, null, value, arguments.length);
 		},
-
+		// 传入html字符串 替换 elem元素.
 		replaceWith: function () {
 			var ignored = [];
 
@@ -6409,7 +6410,7 @@
 			}, ignored);
 		}
 	});
-
+	// 添加方法. 将本身插入到目标
 	jQuery.each({
 		appendTo: "append",
 		prependTo: "prepend",
@@ -6436,10 +6437,12 @@
 			return this.pushStack(ret);
 		};
 	});
+
+	// CSS相关
 	var rmargin = (/^margin/);
 
 	var rnumnonpx = new RegExp("^(" + pnum + ")(?!px)[a-z%]+$", "i");
-
+	// 获取元素的样式. 默认调用 getComputedStyle方法
 	var getStyles = function (elem) {
 
 		// Support: IE <=11 only, Firefox <=30 (#15098, #14150)
@@ -6450,18 +6453,14 @@
 		if (!view || !view.opener) {
 			view = window;
 		}
-
 		return view.getComputedStyle(elem);
 	};
 
-
-
+	// getComputedStyle 兼容性检查
 	(function () {
-
 		// Executing both pixelPosition & boxSizingReliable tests require only one layout
 		// so they're executed at the same time to save the second computation.
 		function computeStyleTests() {
-
 			// This is a singleton, we need to execute it only once
 			if (!div) {
 				return;
@@ -6533,7 +6532,7 @@
 		});
 	})();
 
-
+	// TODO
 	function curCSS(elem, name, computed) {
 		var width, minWidth, maxWidth, ret,
 			style = elem.style;
@@ -9703,7 +9702,7 @@
 		};
 	});
 
-
+	// 请求代码执行
 	jQuery._evalUrl = function (url) {
 		return jQuery.ajax({
 			url: url,
