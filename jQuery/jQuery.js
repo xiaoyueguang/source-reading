@@ -6532,11 +6532,10 @@
 		});
 	})();
 
-	// TODO
+	// 返回该 elem元素的 css值为 name 的值
 	function curCSS(elem, name, computed) {
 		var width, minWidth, maxWidth, ret,
 			style = elem.style;
-
 		computed = computed || getStyles(elem);
 
 		// Support: IE <=9 only
@@ -6553,6 +6552,7 @@
 			// but width seems to be reliably pixels.
 			// This is against the CSSOM draft spec:
 			// https://drafts.csswg.org/cssom/#resolved-values
+			// 兼容性检查
 			if (!support.pixelMarginRight() && rnumnonpx.test(ret) && rmargin.test(name)) {
 
 				// Remember the original values
@@ -6578,10 +6578,8 @@
 			ret + "" :
 			ret;
 	}
-
-
+	// 定义钩子. 如果 conditionFn 为true, 则使用狗子里的方法. conditionFn为兼容性判断方法
 	function addGetHookIf(conditionFn, hookFn) {
-
 		// Define the hook, we'll check on the first run if it's really needed.
 		return {
 			get: function () {
@@ -6598,10 +6596,7 @@
 			}
 		};
 	}
-
-
 	var
-
 		// Swappable if display is none or starts with table
 		// except "table", "table-cell", or "table-caption"
 		// See here for display values: https://developer.mozilla.org/en-US/docs/CSS/display
@@ -6618,15 +6613,13 @@
 
 		cssPrefixes = ["Webkit", "Moz", "ms"],
 		emptyStyle = document.createElement("div").style;
-
 	// Return a css property mapped to a potentially vendor prefixed property
+	// 返回一个带有前缀的属性名.
 	function vendorPropName(name) {
-
 		// Shortcut for names that are not vendor prefixed
 		if (name in emptyStyle) {
 			return name;
 		}
-
 		// Check for vendor prefixed names
 		var capName = name[0].toUpperCase() + name.slice(1),
 			i = cssPrefixes.length;
@@ -6638,9 +6631,8 @@
 			}
 		}
 	}
-
+	// 设置个正整数
 	function setPositiveNumber(elem, value, subtract) {
-
 		// Any relative (+/-) values have already been
 		// normalized at this point
 		var matches = rcssNum.exec(value);
@@ -6650,11 +6642,10 @@
 			Math.max(0, matches[2] - (subtract || 0)) + (matches[3] || "px") :
 			value;
 	}
-
+	// 获取元素的 增加的宽和高. 比如 padding border margin
 	function augmentWidthOrHeight(elem, name, extra, isBorderBox, styles) {
 		var i,
 			val = 0;
-
 		// If we already have the right measurement, avoid augmentation
 		if (extra === (isBorderBox ? "border" : "content")) {
 			i = 4;
@@ -6663,40 +6654,32 @@
 		} else {
 			i = name === "width" ? 1 : 0;
 		}
-
 		for (; i < 4; i += 2) {
-
 			// Both box models exclude margin, so add it if we want it
 			if (extra === "margin") {
 				val += jQuery.css(elem, extra + cssExpand[i], true, styles);
 			}
-
 			if (isBorderBox) {
-
 				// border-box includes padding, so remove it if we want content
 				if (extra === "content") {
 					val -= jQuery.css(elem, "padding" + cssExpand[i], true, styles);
 				}
-
 				// At this point, extra isn't border nor margin, so remove border
 				if (extra !== "margin") {
 					val -= jQuery.css(elem, "border" + cssExpand[i] + "Width", true, styles);
 				}
 			} else {
-
 				// At this point, extra isn't content, so add padding
 				val += jQuery.css(elem, "padding" + cssExpand[i], true, styles);
-
 				// At this point, extra isn't content nor padding, so add border
 				if (extra !== "padding") {
 					val += jQuery.css(elem, "border" + cssExpand[i] + "Width", true, styles);
 				}
 			}
 		}
-
 		return val;
 	}
-
+	// 获取元素本身内容的的宽或高
 	function getWidthOrHeight(elem, name, extra) {
 
 		// Start with offset property, which is equivalent to the border-box value
@@ -6750,7 +6733,7 @@
 	}
 
 	jQuery.extend({
-
+		// 设置勾子. 分别调整 hook 里的值的设置 和获取
 		// Add in style property hooks for overriding the default
 		// behavior of getting and setting a style property
 		cssHooks: {
@@ -6890,7 +6873,7 @@
 			return val;
 		}
 	});
-
+	// 添加 height, width 钩子 cssHooks
 	jQuery.each(["height", "width"], function (i, name) {
 		jQuery.cssHooks[name] = {
 			get: function (elem, computed, extra) {
@@ -6937,7 +6920,7 @@
 			}
 		};
 	});
-
+	// 添加 marginLeft 勾子 cssHooks
 	jQuery.cssHooks.marginLeft = addGetHookIf(support.reliableMarginLeft,
 		function (elem, computed) {
 			if (computed) {
@@ -6952,8 +6935,8 @@
 			}
 		}
 	);
-
 	// These hooks are used by animate to expand properties
+	// 添加 margin padding border 钩子
 	jQuery.each({
 		margin: "",
 		padding: "",
@@ -6980,7 +6963,7 @@
 			jQuery.cssHooks[prefix + suffix].set = setPositiveNumber;
 		}
 	});
-
+	// 给 jQuery 实例添加 css 相关的方法
 	jQuery.fn.extend({
 		css: function (name, value) {
 			return access(this, function (elem, name, value) {
@@ -7005,8 +6988,7 @@
 			}, name, value, arguments.length > 1);
 		}
 	});
-
-
+	// jQuery CSS补间动画相关
 	function Tween(elem, options, prop, end, easing) {
 		return new Tween.prototype.init(elem, options, prop, end, easing);
 	}
@@ -7014,6 +6996,7 @@
 
 	Tween.prototype = {
 		constructor: Tween,
+		// 初始化参数
 		init: function (elem, options, prop, end, easing, unit) {
 			this.elem = elem;
 			this.prop = prop;
@@ -7023,13 +7006,14 @@
 			this.end = end;
 			this.unit = unit || (jQuery.cssNumber[prop] ? "" : "px");
 		},
+		// 获取当前值
 		cur: function () {
 			var hooks = Tween.propHooks[this.prop];
-
 			return hooks && hooks.get ?
 				hooks.get(this) :
 				Tween.propHooks._default.get(this);
 		},
+		// 计算当前百分比下 所该有的值. 执行动画
 		run: function (percent) {
 			var eased,
 				hooks = Tween.propHooks[this.prop];
@@ -7106,7 +7090,7 @@
 			}
 		}
 	};
-
+	// 动画曲线
 	jQuery.easing = {
 		linear: function (p) {
 			return p;
@@ -7122,14 +7106,11 @@
 	// Back compat <1.8 extension point
 	jQuery.fx.step = {};
 
-
-
-
 	var
 		fxNow, timerId,
 		rfxtypes = /^(?:toggle|show|hide)$/,
 		rrun = /queueHooks$/;
-
+	// 定时器. 默认采用 requestAnimationFrame
 	function raf() {
 		if (timerId) {
 			window.requestAnimationFrame(raf);
