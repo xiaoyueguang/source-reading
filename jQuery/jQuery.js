@@ -7808,18 +7808,15 @@
 			};
 		});
 	};
-	// TODO
+	// 兼容性检查
 	(function () {
 		var input = document.createElement("input"),
 			select = document.createElement("select"),
 			opt = select.appendChild(document.createElement("option"));
-
 		input.type = "checkbox";
-
 		// Support: Android <=4.3 only
 		// Default value for a checkbox should be "on"
 		support.checkOn = input.value !== "";
-
 		// Support: IE <=11 only
 		// Must access selectedIndex to make default options select
 		support.optSelected = opt.selected;
@@ -7831,23 +7828,21 @@
 		input.type = "radio";
 		support.radioValue = input.value === "t";
 	})();
-
-
 	var boolHook,
 		attrHandle = jQuery.expr.attrHandle;
-
 	jQuery.fn.extend({
+		// 设置属性
 		attr: function (name, value) {
 			return access(this, jQuery.attr, name, value, arguments.length > 1);
 		},
-
+		// 删除属性
 		removeAttr: function (name) {
 			return this.each(function () {
 				jQuery.removeAttr(this, name);
 			});
 		}
 	});
-
+	// 设置属性
 	jQuery.extend({
 		attr: function (elem, name, value) {
 			var ret, hooks,
@@ -7894,7 +7889,7 @@
 			// Non-existent attributes return null, we normalize to undefined
 			return ret == null ? undefined : ret;
 		},
-
+		// 根据兼容性, 修正个别元素设置属性方式
 		attrHooks: {
 			type: {
 				set: function (elem, value) {
@@ -7910,7 +7905,7 @@
 				}
 			}
 		},
-
+		// 移除属性
 		removeAttr: function (elem, value) {
 			var name,
 				i = 0,
@@ -7926,8 +7921,8 @@
 			}
 		}
 	});
-
 	// Hooks for boolean attributes
+	// 关于 值 仅有 true 以及 false 的元素的 钩子
 	boolHook = {
 		set: function (elem, value, name) {
 			if (value === false) {
@@ -7940,7 +7935,7 @@
 			return name;
 		}
 	};
-
+	// 将 所有 仅拥有 true false 的属性绑上钩子
 	jQuery.each(jQuery.expr.match.bool.source.match(/\w+/g), function (i, name) {
 		var getter = attrHandle[name] || jQuery.find.attr;
 
@@ -7962,9 +7957,7 @@
 		};
 	});
 
-
-
-
+	// TODO
 	var rfocusable = /^(?:input|select|textarea|button)$/i,
 		rclickable = /^(?:a|area)$/i;
 
