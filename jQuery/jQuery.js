@@ -6993,7 +6993,7 @@
 		return new Tween.prototype.init(elem, options, prop, end, easing);
 	}
 	jQuery.Tween = Tween;
-
+	// init cur run
 	Tween.prototype = {
 		constructor: Tween,
 		// 初始化参数
@@ -7080,7 +7080,6 @@
 			}
 		}
 	};
-
 	// Support: IE <=9 only
 	// Panic based approach to setting things on disconnected nodes
 	Tween.propHooks.scrollTop = Tween.propHooks.scrollLeft = {
@@ -7125,8 +7124,8 @@
 		});
 		return (fxNow = jQuery.now());
 	}
-
 	// Generate parameters to create a standard animation
+	// 生成 fx 方法
 	function genFx(type, includeWidth) {
 		var which,
 			i = 0,
@@ -7148,7 +7147,7 @@
 
 		return attrs;
 	}
-
+	// 创建补间动画
 	function createTween(value, prop, animation) {
 		var tween,
 			collection = (Animation.tweeners[prop] || []).concat(Animation.tweeners["*"]),
@@ -7162,7 +7161,7 @@
 			}
 		}
 	}
-
+	// 动画 预处理
 	function defaultPrefilter(elem, props, opts) {
 		var prop, value, toggle, hooks, oldfire, propTween, restoreDisplay, display,
 			isBox = "width" in props || "height" in props,
@@ -7173,6 +7172,7 @@
 			dataShow = dataPriv.get(elem, "fxshow");
 
 		// Queue-skipping animations hijack the fx hooks
+		// 检查是否有 钩子函数
 		if (!opts.queue) {
 			hooks = jQuery._queueHooks(elem, "fx");
 			if (hooks.unqueued == null) {
@@ -7187,7 +7187,6 @@
 			hooks.unqueued++;
 
 			anim.always(function () {
-
 				// Ensure the complete handler is called before this completes
 				anim.always(function () {
 					hooks.unqueued--;
@@ -7197,8 +7196,8 @@
 				});
 			});
 		}
-
 		// Detect show/hide animations
+		// 显示 隐藏 动画
 		for (prop in props) {
 			value = props[prop];
 			if (rfxtypes.test(value)) {
@@ -7219,14 +7218,14 @@
 				orig[prop] = dataShow && dataShow[prop] || jQuery.style(elem, prop);
 			}
 		}
-
 		// Bail out if this is a no-op like .hide().hide()
+		// 防止出现 连续隐藏
 		propTween = !jQuery.isEmptyObject(props);
 		if (!propTween && jQuery.isEmptyObject(orig)) {
 			return;
 		}
-
 		// Restrict "overflow" and "display" styles during box animations
+		// 自动切换 overflow 以及 display 属性
 		if (isBox && elem.nodeType === 1) {
 
 			// Support: IE <=9 - 11, Edge 12 - 13
@@ -7282,6 +7281,7 @@
 		}
 
 		// Implement show/hide animations
+		// $.fn.show() $.fn.hide() 动画. 是通过减少宽高来实现隐藏显示 体验很差 不如 fadeIn fadeOut
 		propTween = false;
 		for (prop in orig) {
 
@@ -7335,11 +7335,11 @@
 			}
 		}
 	}
-
+	// 属性过滤
 	function propFilter(props, specialEasing) {
 		var index, name, easing, value, hooks;
-
 		// camelCase, specialEasing and expand cssHook pass
+		// 处理前缀
 		for (index in props) {
 			name = jQuery.camelCase(index);
 			easing = specialEasing[name];
@@ -7348,12 +7348,12 @@
 				easing = value[1];
 				value = props[index] = value[0];
 			}
-
+			// 过滤相同属性 不同前缀
 			if (index !== name) {
 				props[name] = value;
 				delete props[index];
 			}
-
+			// 查找钩子
 			hooks = jQuery.cssHooks[name];
 			if (hooks && "expand" in hooks) {
 				value = hooks.expand(value);
@@ -7372,17 +7372,20 @@
 			}
 		}
 	}
-
+	// 创建动画
+	// elem元素 动画完成后的 css值, 以及动画选项
 	function Animation(elem, properties, options) {
 		var result,
 			stopped,
 			index = 0,
 			length = Animation.prefilters.length,
+			// 通过jQuery的 deferred对象
 			deferred = jQuery.Deferred().always(function () {
-
 				// Don't match elem in the :animated selector
+				// 不抓取 动画中的
 				delete tick.elem;
 			}),
+			// 动画瞬间. 定时器直接执行 tick里的即可
 			tick = function () {
 				if (stopped) {
 					return false;
@@ -7410,6 +7413,7 @@
 					return false;
 				}
 			},
+			// 动画的属性设置
 			animation = deferred.promise({
 				elem: elem,
 				props: jQuery.extend({}, properties),
@@ -7422,12 +7426,14 @@
 				startTime: fxNow || createFxNow(),
 				duration: options.duration,
 				tweens: [],
+				// 创建补间
 				createTween: function (prop, end) {
 					var tween = jQuery.Tween(elem, animation.opts, prop, end,
 						animation.opts.specialEasing[prop] || animation.opts.easing);
 					animation.tweens.push(tween);
 					return tween;
 				},
+				// 停止动画
 				stop: function (gotoEnd) {
 					var index = 0,
 
@@ -7453,9 +7459,9 @@
 				}
 			}),
 			props = animation.props;
-
+		// 处理部分属性
 		propFilter(props, animation.opts.specialEasing);
-
+		// 动画里的钩子 处理
 		for (; index < length; index++) {
 			result = Animation.prefilters[index].call(animation, elem, props, animation.opts);
 			if (result) {
@@ -7466,13 +7472,13 @@
 				return result;
 			}
 		}
-
+		// 创建补间动画
 		jQuery.map(props, createTween, animation);
 
 		if (jQuery.isFunction(animation.opts.start)) {
 			animation.opts.start.call(elem, animation);
 		}
-
+		// 添加时间
 		jQuery.fx.timer(
 			jQuery.extend(tick, {
 				elem: elem,
@@ -7480,14 +7486,14 @@
 				queue: animation.opts.queue
 			})
 		);
-
 		// attach callbacks from options
+		// 执行 defered对象
 		return animation.progress(animation.opts.progress)
 			.done(animation.opts.done, animation.opts.complete)
 			.fail(animation.opts.fail)
 			.always(animation.opts.always);
 	}
-
+	// 扩展Animation属性
 	jQuery.Animation = jQuery.extend(Animation, {
 
 		tweeners: {
@@ -7527,7 +7533,7 @@
 			}
 		}
 	});
-
+	// 速度计算
 	jQuery.speed = function (speed, easing, fn) {
 		var opt = speed && typeof speed === "object" ? jQuery.extend({}, speed) : {
 			complete: fn || !fn && easing ||
@@ -7571,7 +7577,7 @@
 
 		return opt;
 	};
-
+	// 扩展 jQuery实例  fadeTo, animate, stop, finish
 	jQuery.fn.extend({
 		fadeTo: function (speed, to, easing, callback) {
 
@@ -7602,6 +7608,7 @@
 				this.each(doAnimation) :
 				this.queue(optall.queue, doAnimation);
 		},
+		// 停止动画
 		stop: function (type, clearQueue, gotoEnd) {
 			var stopQueue = function (hooks) {
 				var stop = hooks.stop;
@@ -7654,6 +7661,7 @@
 				}
 			});
 		},
+		// 直接跳到最后
 		finish: function (type) {
 			if (type !== false) {
 				type = type || "fx";
@@ -7696,7 +7704,7 @@
 			});
 		}
 	});
-
+	// 扩展 toggle show hide 方法
 	jQuery.each(["toggle", "show", "hide"], function (i, name) {
 		var cssFn = jQuery.fn[name];
 		jQuery.fn[name] = function (speed, easing, callback) {
@@ -7705,8 +7713,8 @@
 				this.animate(genFx(name, true), speed, easing, callback);
 		};
 	});
-
 	// Generate shortcuts for custom animations
+	// 扩展方法
 	jQuery.each({
 		slideDown: genFx("show"),
 		slideUp: genFx("hide"),
@@ -7727,6 +7735,7 @@
 	});
 
 	jQuery.timers = [];
+	// 获取瞬间时间, 并根据时间来判断动画下一部怎么执行
 	jQuery.fx.tick = function () {
 		var timer,
 			i = 0,
@@ -7748,7 +7757,7 @@
 		}
 		fxNow = undefined;
 	};
-
+	// 添加计时器
 	jQuery.fx.timer = function (timer) {
 		jQuery.timers.push(timer);
 		if (timer()) {
@@ -7757,8 +7766,9 @@
 			jQuery.timers.pop();
 		}
 	};
-
+	// 默认定时器长度
 	jQuery.fx.interval = 13;
+	// 开始动画
 	jQuery.fx.start = function () {
 		if (!timerId) {
 			timerId = window.requestAnimationFrame ?
@@ -7766,7 +7776,7 @@
 				window.setInterval(jQuery.fx.tick, jQuery.fx.interval);
 		}
 	};
-
+	// 清除动画计时器
 	jQuery.fx.stop = function () {
 		if (window.cancelAnimationFrame) {
 			window.cancelAnimationFrame(timerId);
@@ -7776,7 +7786,7 @@
 
 		timerId = null;
 	};
-
+	// 默认动画速度
 	jQuery.fx.speeds = {
 		slow: 600,
 		fast: 200,
@@ -7784,10 +7794,9 @@
 		// Default speed
 		_default: 400
 	};
-
-
 	// Based off of the plugin by Clint Helfers, with permission.
 	// https://web.archive.org/web/20100324014747/http://blindsignals.com/index.php/2009/07/jquery-delay/
+	// 延迟执行
 	jQuery.fn.delay = function (time, type) {
 		time = jQuery.fx ? jQuery.fx.speeds[time] || time : time;
 		type = type || "fx";
@@ -7799,8 +7808,7 @@
 			};
 		});
 	};
-
-
+	// TODO
 	(function () {
 		var input = document.createElement("input"),
 			select = document.createElement("select"),
