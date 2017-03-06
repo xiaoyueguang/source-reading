@@ -4566,7 +4566,6 @@
 		// 判断是否有该值
 		hasData: function (owner) {
 			var cache = owner[this.expando];
-			console.log(this.expando)
 			return cache !== undefined && !jQuery.isEmptyObject(cache);
 		}
 	};
@@ -7956,24 +7955,24 @@
 			return ret;
 		};
 	});
-
-	// TODO
+	// 负责兼容性
 	var rfocusable = /^(?:input|select|textarea|button)$/i,
 		rclickable = /^(?:a|area)$/i;
-
+	// jQuery 将数据缓存到对象上
 	jQuery.fn.extend({
+		// 读取数据值
 		prop: function (name, value) {
 			return access(this, jQuery.prop, name, value, arguments.length > 1);
 		},
-
+		// 移除数据值
 		removeProp: function (name) {
 			return this.each(function () {
 				delete this[jQuery.propFix[name] || name];
 			});
 		}
 	});
-
 	jQuery.extend({
+		// 往对象上存储值. 需要判断elem
 		prop: function (elem, name, value) {
 			var ret, hooks,
 				nType = elem.nodeType;
@@ -8007,9 +8006,9 @@
 		},
 
 		propHooks: {
+			// 兼容 tabIndex
 			tabIndex: {
 				get: function (elem) {
-
 					// Support: IE <=9 - 11 only
 					// elem.tabIndex doesn't always return the
 					// correct value when it hasn't been explicitly set
@@ -8033,13 +8032,12 @@
 				}
 			}
 		},
-
+		// 修正属性值
 		propFix: {
 			"for": "htmlFor",
 			"class": "className"
 		}
 	});
-
 	// Support: IE <=11 only
 	// Accessing the selectedIndex property
 	// forces the browser to respect setting selected
@@ -8048,6 +8046,7 @@
 	// when in an optgroup
 	// eslint rule "no-unused-expressions" is disabled for this code
 	// since it considers such accessions noop
+	// 修正 IE11以下的 select 行为
 	if (!support.optSelected) {
 		jQuery.propHooks.selected = {
 			get: function (elem) {
@@ -8075,7 +8074,7 @@
 			}
 		};
 	}
-
+	// 将以下属性添加值
 	jQuery.each([
 		"tabIndex",
 		"readOnly",
@@ -8091,22 +8090,19 @@
 		jQuery.propFix[this.toLowerCase()] = this;
 	});
 
-
-
-
 	// Strip and collapse whitespace according to HTML spec
 	// https://html.spec.whatwg.org/multipage/infrastructure.html#strip-and-collapse-whitespace
+	// 去除空格
 	function stripAndCollapse(value) {
 		var tokens = value.match(rnothtmlwhite) || [];
 		return tokens.join(" ");
 	}
-
-
+	// 获取类名
 	function getClass(elem) {
 		return elem.getAttribute && elem.getAttribute("class") || "";
 	}
-
 	jQuery.fn.extend({
+		// 添加类名 
 		addClass: function (value) {
 			var classes, elem, cur, curValue, clazz, j, finalValue,
 				i = 0;
@@ -8143,7 +8139,7 @@
 
 			return this;
 		},
-
+		// 删除类名
 		removeClass: function (value) {
 			var classes, elem, cur, curValue, clazz, j, finalValue,
 				i = 0;
@@ -8188,7 +8184,7 @@
 
 			return this;
 		},
-
+		// 切换类名
 		toggleClass: function (value, stateVal) {
 			var type = typeof value;
 
@@ -8248,7 +8244,7 @@
 				}
 			});
 		},
-
+		// 判断是否有类名
 		hasClass: function (selector) {
 			var className, elem,
 				i = 0;
@@ -8265,12 +8261,9 @@
 		}
 	});
 
-
-
-
 	var rreturn = /\r/g;
-
 	jQuery.fn.extend({
+		// 读取值或设置值
 		val: function (value) {
 			var hooks, ret, isFunction,
 				elem = this[0];
@@ -8340,6 +8333,7 @@
 	});
 
 	jQuery.extend({
+		// 钩子. 兼容某些版本的 option select
 		valHooks: {
 			option: {
 				get: function (elem) {
@@ -8429,8 +8423,8 @@
 			}
 		}
 	});
-
 	// Radios and checkboxes getter/setter
+	// 添加钩子 radio checkbox
 	jQuery.each(["radio", "checkbox"], function () {
 		jQuery.valHooks[this] = {
 			set: function (elem, value) {
@@ -8446,16 +8440,10 @@
 		}
 	});
 
-
-
-
 	// Return jQuery for attributes-only inclusion
-
-
 	var rfocusMorph = /^(?:focusinfocus|focusoutblur)$/;
-
 	jQuery.extend(jQuery.event, {
-
+		// 添加模拟事件. 执行缓存到 DOM上的方法
 		trigger: function (event, data, elem, onlyHandlers) {
 
 			var i, cur, tmp, bubbleType, ontype, handle, special,
@@ -8589,9 +8577,9 @@
 
 			return event.result;
 		},
-
 		// Piggyback on a donor event to simulate a different one
 		// Used only for `focus(in | out)` events
+		// 模拟 focusin focusout 冒泡事件
 		simulate: function (type, elem, event) {
 			var e = jQuery.extend(
 				new jQuery.Event(),
@@ -8607,12 +8595,13 @@
 	});
 
 	jQuery.fn.extend({
-
+		// 添加模拟事件. 执行缓存到 DOM上的方法以及 原生方法
 		trigger: function (type, data) {
 			return this.each(function () {
 				jQuery.event.trigger(type, data, this);
 			});
 		},
+		// 添加模拟事件. 执行缓存到 DOM上的方法 不执行原生方法
 		triggerHandler: function (type, data) {
 			var elem = this[0];
 			if (elem) {
@@ -8620,8 +8609,7 @@
 			}
 		}
 	});
-
-
+	// 给jQuery实例 添加事件方法
 	jQuery.each(("blur focus focusin focusout resize scroll click dblclick " +
 			"mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave " +
 			"change select submit keydown keypress keyup contextmenu").split(" "),
@@ -8634,18 +8622,14 @@
 					this.trigger(name);
 			};
 		});
-
+	// 添加hover 方法
 	jQuery.fn.extend({
 		hover: function (fnOver, fnOut) {
 			return this.mouseenter(fnOver).mouseleave(fnOut || fnOver);
 		}
 	});
-
-
-
-
+	// 判断是否拥有 focusin 事件
 	support.focusin = "onfocusin" in window;
-
 
 	// Support: Firefox <=44
 	// Firefox doesn't have focus(in | out) events
@@ -8655,6 +8639,7 @@
 	// focus(in | out) events fire after focus & blur events,
 	// which is spec violation - http://www.w3.org/TR/DOM-Level-3-Events/#events-focusevent-event-order
 	// Related ticket - https://bugs.chromium.org/p/chromium/issues/detail?id=449857
+	// 兼容 onfocusin
 	if (!support.focusin) {
 		jQuery.each({
 			focus: "focusin",
@@ -8697,15 +8682,13 @@
 
 	var rquery = (/\?/);
 
-
-
 	// Cross-browser xml parsing
+	// 解析为 xml
 	jQuery.parseXML = function (data) {
 		var xml;
 		if (!data || typeof data !== "string") {
 			return null;
 		}
-
 		// Support: IE 9 - 11 only
 		// IE throws on parseFromString with invalid input.
 		try {
@@ -8720,16 +8703,14 @@
 		return xml;
 	};
 
-
 	var
 		rbracket = /\[\]$/,
 		rCRLF = /\r?\n/g,
 		rsubmitterTypes = /^(?:submit|button|image|reset|file)$/i,
 		rsubmittable = /^(?:input|select|textarea|keygen)/i;
-
+	// 创建参数
 	function buildParams(prefix, obj, traditional, add) {
 		var name;
-
 		if (jQuery.isArray(obj)) {
 
 			// Serialize array item.
@@ -8767,6 +8748,7 @@
 
 	// Serialize an array of form elements or a set of
 	// key/values into a query string
+	// 将键值对 转为字符串
 	jQuery.param = function (a, traditional) {
 		var prefix,
 			s = [],
@@ -8802,6 +8784,7 @@
 		return s.join("&");
 	};
 
+	// 序列化
 	jQuery.fn.extend({
 		serialize: function () {
 			return jQuery.param(this.serializeArray());
@@ -8845,7 +8828,8 @@
 		}
 	});
 
-
+	// AJAX
+	// TODO
 	var
 		r20 = /%20/g,
 		rhash = /#.*$/,
@@ -9699,8 +9683,8 @@
 		});
 	};
 
-
 	jQuery.fn.extend({
+		// 将所有匹配的元素 包起来
 		wrapAll: function (html) {
 			var wrap;
 
@@ -9729,7 +9713,7 @@
 
 			return this;
 		},
-
+		// 将匹配的元素 从内部包起来
 		wrapInner: function (html) {
 			if (jQuery.isFunction(html)) {
 				return this.each(function (i) {
@@ -9749,7 +9733,7 @@
 				}
 			});
 		},
-
+		// 
 		wrap: function (html) {
 			var isFunction = jQuery.isFunction(html);
 
