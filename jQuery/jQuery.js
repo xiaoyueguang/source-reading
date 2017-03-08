@@ -11,7 +11,7 @@
  *
  * Date: 2016-09-22T22:30Z
  */
-// 立即执行函数, 将 jQuery 挂载到window下
+// 立即执行函数
 (function (global, factory) {
 
 	"use strict";
@@ -178,13 +178,13 @@
 		each: function (callback) {
 			return jQuery.each(this, callback);
 		},
-		// TODO
+		// 
 		map: function (callback) {
 			return this.pushStack(jQuery.map(this, function (elem, i) {
 				return callback.call(elem, i, elem);
 			}));
 		},
-		// TODO
+		// 
 		slice: function () {
 			return this.pushStack(slice.apply(this, arguments));
 		},
@@ -388,7 +388,6 @@
 				// 当typeof 为 object 或 function时, 需要另行区分.
 				// typeof [], typeof /ff/, typeof {} 均返回object
 				// toString.call 将内容转为 [object XXXXX]的格式
-				// TODO: toString.call
 				class2type[toString.call(obj)] || "object" :
 				typeof obj;
 		},
@@ -827,7 +826,7 @@
 					}
 				);
 			// Optimize for push.apply( _, NodeList )
-			// 将document根节点的子节点推入arr, TODO: 意义不明
+			// 将document根节点的子节点推入arr
 			try {
 				push.apply(
 					(arr = slice.call(preferredDoc.childNodes)),
@@ -3897,7 +3896,6 @@
 			reject.call(undefined, value);
 		}
 	}
-	// TODO
 	jQuery.extend({
 		// jQuery的 Deferred 对象. 类似 Promise
 		Deferred: function (func) {
@@ -4920,7 +4918,7 @@
 		}
 		return ret;
 	};
-	// 调整CSS TODO
+	// 调整CSS
 	function adjustCSS(elem, prop, valueParts, tween) {
 		var adjusted,
 			scale = 1,
