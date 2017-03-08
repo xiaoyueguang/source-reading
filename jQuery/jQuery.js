@@ -8828,8 +8828,7 @@
 		}
 	});
 
-	// AJAX
-	// TODO
+	// AJAX请求 一堆配置.
 	var
 		r20 = /%20/g,
 		rhash = /#.*$/,
@@ -9733,7 +9732,7 @@
 				}
 			});
 		},
-		// 
+		// 包起来
 		wrap: function (html) {
 			var isFunction = jQuery.isFunction(html);
 
@@ -9741,7 +9740,7 @@
 				jQuery(this).wrapAll(isFunction ? html.call(this, i) : html);
 			});
 		},
-
+		// 与上面相反
 		unwrap: function (selector) {
 			this.parent(selector).not("body").each(function () {
 				jQuery(this).replaceWith(this.childNodes);
@@ -9750,17 +9749,15 @@
 		}
 	});
 
-
+	// 是否隐藏
 	jQuery.expr.pseudos.hidden = function (elem) {
 		return !jQuery.expr.pseudos.visible(elem);
 	};
+	// 是否可见. 判断宽高
 	jQuery.expr.pseudos.visible = function (elem) {
 		return !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
 	};
-
-
-
-
+	// 默认xhr
 	jQuery.ajaxSettings.xhr = function () {
 		try {
 			return new window.XMLHttpRequest();
@@ -9994,9 +9991,6 @@
 		}
 	});
 
-
-
-
 	var oldCallbacks = [],
 		rjsonp = /(=)\?(?=&|$)|\?\?/;
 
@@ -10089,14 +10083,12 @@
 		}
 	});
 
-
-
-
 	// Support: Safari 8 only
 	// In Safari 8 documents created via document.implementation.createHTMLDocument
 	// collapse sibling forms: the second one becomes a child of the first one.
 	// Because of that, this security measure has to be disabled in Safari 8.
 	// https://bugs.webkit.org/show_bug.cgi?id=137337
+	// safari 的创建dom兼容
 	support.createHTMLDocument = (function () {
 		var body = document.implementation.createHTMLDocument("").body;
 		body.innerHTML = "<form></form><form></form>";
@@ -10154,11 +10146,10 @@
 
 		return jQuery.merge([], parsed.childNodes);
 	};
-
-
 	/**
 	 * Load a url into a page
 	 */
+	// ajax load方法
 	jQuery.fn.load = function (url, params, callback) {
 		var selector, type, response,
 			self = this,
@@ -10219,9 +10210,6 @@
 		return this;
 	};
 
-
-
-
 	// Attach a bunch of functions for handling common AJAX events
 	jQuery.each([
 		"ajaxStart",
@@ -10235,26 +10223,20 @@
 			return this.on(type, fn);
 		};
 	});
-
-
-
-
+	// 判断是否在动画
 	jQuery.expr.pseudos.animated = function (elem) {
 		return jQuery.grep(jQuery.timers, function (fn) {
 			return elem === fn.elem;
 		}).length;
 	};
 
-
-
-
 	/**
 	 * Gets a window from an element
 	 */
+	// 获取window
 	function getWindow(elem) {
 		return jQuery.isWindow(elem) ? elem : elem.nodeType === 9 && elem.defaultView;
 	}
-
 	jQuery.offset = {
 		setOffset: function (elem, options, i) {
 			var curPosition, curLeft, curCSSTop, curTop, curOffset, curCSSLeft, calculatePosition,
@@ -10308,6 +10290,7 @@
 	};
 
 	jQuery.fn.extend({
+		// 元素的 相对视口 左边边距 以及 顶部边距
 		offset: function (options) {
 
 			// Preserve chaining for setter
@@ -10353,7 +10336,7 @@
 			// Return zeros for disconnected and hidden elements (gh-2310)
 			return rect;
 		},
-
+		// 元素的 左边边距 以及 顶部边距
 		position: function () {
 			if (!this[0]) {
 				return;
@@ -10454,6 +10437,7 @@
 	// Blink bug: https://bugs.chromium.org/p/chromium/issues/detail?id=589347
 	// getComputedStyle returns percent when specified for top/left/bottom/right;
 	// rather than make the css module depend on the offset module, just check for it here
+	// top left CSS钩子
 	jQuery.each(["top", "left"], function (i, prop) {
 		jQuery.cssHooks[prop] = addGetHookIf(support.pixelPosition,
 			function (elem, computed) {
@@ -10469,8 +10453,8 @@
 		);
 	});
 
-
 	// Create innerHeight, innerWidth, height, width, outerHeight and outerWidth methods
+	// 获取宽高. 会获取元素内的 margin border
 	jQuery.each({
 		Height: "height",
 		Width: "width"
@@ -10522,10 +10506,8 @@
 				};
 			});
 	});
-
-
+	// 事件方法绑定
 	jQuery.fn.extend({
-
 		bind: function (types, data, fn) {
 			return this.on(types, null, data, fn);
 		},
@@ -10547,9 +10529,6 @@
 
 	jQuery.parseJSON = JSON.parse;
 
-
-
-
 	// Register as a named AMD module, since jQuery can be concatenated with other
 	// files that may use define, but not via a proper concatenation script that
 	// understands anonymous AMD modules. A named AMD is safest and most robust
@@ -10562,24 +10541,19 @@
 	// declare themselves as anonymous modules, and avoid setting a global if an
 	// AMD loader is present. jQuery is a special case. For more information, see
 	// https://github.com/jrburke/requirejs/wiki/Updating-existing-libraries#wiki-anon
-
+	// 模块加载器
 	if (typeof define === "function" && define.amd) {
 		define("jquery", [], function () {
 			return jQuery;
 		});
 	}
-
-
-
-
 	var
-
 		// Map over jQuery in case of overwrite
 		_jQuery = window.jQuery,
 
 		// Map over the $ in case of overwrite
 		_$ = window.$;
-
+	// 解决jQuery的 $变量 冲突
 	jQuery.noConflict = function (deep) {
 		if (window.$ === jQuery) {
 			window.$ = _$;
@@ -10598,10 +10572,5 @@
 	if (!noGlobal) {
 		window.jQuery = window.$ = jQuery;
 	}
-
-
-
-
-
 	return jQuery;
 });
