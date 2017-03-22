@@ -1,7 +1,13 @@
 /* @flow */
 
+/** 内含助手函数 */
+
 /**
  * Convert a value to a string that is actually rendered.
+ * 将值转换为 字符串.
+ * undefined null 均转为 ''
+ * Array 以及 Object 转为 JSON
+ * String Number Boolean 转为字符串
  */
 export function _toString (val: any): string {
   return val == null
@@ -14,6 +20,7 @@ export function _toString (val: any): string {
 /**
  * Convert a input value to a number for persistence.
  * If the conversion fails, return original string.
+ * 将字符串转为数字, 若字符串里数字为错误格式的数字, 则直接返回字符串
  */
 export function toNumber (val: string): number | string {
   const n = parseFloat(val)
@@ -23,6 +30,9 @@ export function toNumber (val: string): number | string {
 /**
  * Make a map and return a function for checking if a key
  * is in that map.
+ * 将传入的字符通过 ',' 切割成数组, 返回一个匿名箭头函数, 形成一个闭包
+ * 传入该匿名箭头函数来判断该值是否在 最初的字符串里
+ * expectsLowerCase 是否将值转为小写
  */
 export function makeMap (
   str: string,
@@ -40,11 +50,14 @@ export function makeMap (
 
 /**
  * Check if a tag is a built-in tag.
+ * 检查标签是否为 VUE 内置的标签.
+ * 通过 makeMap 方法生成一个检查 内置标签的方法.
  */
 export const isBuiltInTag = makeMap('slot,component', true)
 
 /**
  * Remove an item from an array
+ * 利用 splice 移除数组里的某个值
  */
 export function remove (arr: Array<any>, item: any): Array<any> | void {
   if (arr.length) {
@@ -57,6 +70,7 @@ export function remove (arr: Array<any>, item: any): Array<any> | void {
 
 /**
  * Check whether the object has the property.
+ * 检查目标对象是否有该属性
  */
 const hasOwnProperty = Object.prototype.hasOwnProperty
 export function hasOwn (obj: Object, key: string): boolean {
@@ -65,6 +79,7 @@ export function hasOwn (obj: Object, key: string): boolean {
 
 /**
  * Check if value is primitive
+ * 判断该值为基本类型, 即 字符串或数字
  */
 export function isPrimitive (value: any): boolean {
   return typeof value === 'string' || typeof value === 'number'
@@ -72,6 +87,8 @@ export function isPrimitive (value: any): boolean {
 
 /**
  * Create a cached version of a pure function.
+ * TODO
+ * 创建一个缓存?
  */
 export function cached<F: Function> (fn: F): F {
   const cache = Object.create(null)
@@ -83,6 +100,7 @@ export function cached<F: Function> (fn: F): F {
 
 /**
  * Camelize a hyphen-delimited string.
+ * 
  */
 const camelizeRE = /-(\w)/g
 export const camelize = cached((str: string): string => {

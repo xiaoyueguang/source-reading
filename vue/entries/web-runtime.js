@@ -1,6 +1,9 @@
 /* @flow */
-
+/**
+ * build 文件的入口文件. 因此从这开始读
+ */
 import Vue from 'core/index'
+// 包含各种配置项.
 import config from 'core/config'
 import { patch } from 'web/runtime/patch'
 import { extend, noop } from 'shared/util'

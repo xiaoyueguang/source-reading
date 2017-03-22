@@ -1,7 +1,9 @@
 /* @flow */
 
 import { no, noop, identity } from 'shared/util'
-
+/**
+ * 定义数值静态类型 Config
+ */
 export type Config = {
   // user
   optionMergeStrategies: { [key: string]: Function };
