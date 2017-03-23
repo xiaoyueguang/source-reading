@@ -100,7 +100,7 @@ export function cached<F: Function> (fn: F): F {
 
 /**
  * Camelize a hyphen-delimited string.
- * 
+ * 将字符串 驼峰化
  */
 const camelizeRE = /-(\w)/g
 export const camelize = cached((str: string): string => {
@@ -109,6 +109,7 @@ export const camelize = cached((str: string): string => {
 
 /**
  * Capitalize a string.
+ * 将字符串首个单词转为大写
  */
 export const capitalize = cached((str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1)
@@ -127,6 +128,7 @@ export const hyphenate = cached((str: string): string => {
 
 /**
  * Simple bind, faster than native
+ * 绑定上下文. 比原生快.
  */
 export function bind (fn: Function, ctx: Object): Function {
   function boundFn (a) {
@@ -144,6 +146,7 @@ export function bind (fn: Function, ctx: Object): Function {
 
 /**
  * Convert an Array-like object to a real Array.
+ * 将类数组 转为数组
  */
 export function toArray (list: any, start?: number): Array<any> {
   start = start || 0
@@ -157,6 +160,7 @@ export function toArray (list: any, start?: number): Array<any> {
 
 /**
  * Mix properties into target object.
+ * 将原对象的属性扩展到目标对象上
  */
 export function extend (to: Object, _from: ?Object): Object {
   for (const key in _from) {
@@ -169,6 +173,7 @@ export function extend (to: Object, _from: ?Object): Object {
  * Quick object check - this is primarily used to tell
  * Objects from primitive values when we know the value
  * is a JSON-compliant type.
+ * 判断是否为对象. 符合 JSON
  */
 export function isObject (obj: mixed): boolean {
   return obj !== null && typeof obj === 'object'
@@ -177,6 +182,8 @@ export function isObject (obj: mixed): boolean {
 /**
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
+ * 判断是否为 JavaScript 真实的对象.
+ * 因为 Javascript的任何类型 均为对象. 该方法则判断是否为 纯对象
  */
 const toString = Object.prototype.toString
 const OBJECT_STRING = '[object Object]'
@@ -186,6 +193,7 @@ export function isPlainObject (obj: any): boolean {
 
 /**
  * Merge an Array of Objects into a single Object.
+ * 将一个包含多个对象的数组, 扩展到一个单一的对象
  */
 export function toObject (arr: Array<any>): Object {
   const res = {}
@@ -199,21 +207,26 @@ export function toObject (arr: Array<any>): Object {
 
 /**
  * Perform no operation.
+ * 空
  */
 export function noop () {}
 
 /**
  * Always return false.
+ * 定义一个返回false 的方法
  */
 export const no = () => false
 
 /**
  * Return same value
+ * 返回自身
  */
 export const identity = (_: any) => _
 
 /**
  * Generate a static keys string from compiler modules.
+ * 将值 合并生成一个 静态key
+ * TODO
  */
 export function genStaticKeys (modules: Array<ModuleOptions>): string {
   return modules.reduce((keys, m) => {
@@ -224,6 +237,8 @@ export function genStaticKeys (modules: Array<ModuleOptions>): string {
 /**
  * Check if two values are loosely equal - that is,
  * if they are plain objects, do they have the same shape?
+ * JS里 两个对象总是不相等.
+ * 此方法则判断对象的 属性与值 是否完全相等. 若相等, 则两个对象相同
  */
 export function looseEqual (a: mixed, b: mixed): boolean {
   const isObjectA = isObject(a)
@@ -236,7 +251,9 @@ export function looseEqual (a: mixed, b: mixed): boolean {
     return false
   }
 }
-
+/**
+ * 从数组里 查找 相同的对象
+ */
 export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
   for (let i = 0; i < arr.length; i++) {
     if (looseEqual(arr[i], val)) return i
@@ -246,6 +263,7 @@ export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
 
 /**
  * Ensure a function is called only once.
+ * 包装一个方法. 确定该方法只执行一次
  */
 export function once (fn: Function): Function {
   let called = false
