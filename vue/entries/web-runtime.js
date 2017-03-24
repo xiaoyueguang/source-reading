@@ -1,6 +1,7 @@
 /* @flow */
 /**
  * build 文件的入口文件. 因此从这开始读
+ * 这里设置 web环境下 的配置.
  */
 import Vue from 'core/index'
 // 包含各种配置项.
@@ -21,19 +22,26 @@ import {
 } from 'web/util/index'
 
 // install platform specific utils
+// 安装特定平台的工具.
+// TODO
 Vue.config.mustUseProp = mustUseProp
 Vue.config.isReservedTag = isReservedTag
 Vue.config.getTagNamespace = getTagNamespace
 Vue.config.isUnknownElement = isUnknownElement
 
 // install platform runtime directives & components
+// 扩展 vue默认的指令和组件
+// 默认指令有 v-model 以及 v-show.
+// 默认组件有 <transition> <transition-group>
 extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function
+// TODO
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
+// 将 组件 挂载到某个 dom元素下.
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
@@ -44,6 +52,7 @@ Vue.prototype.$mount = function (
 
 // devtools global hook
 /* istanbul ignore next */
+// 检测开发者工具. setTimeout 运行, 保证不影响主要任务执行.
 setTimeout(() => {
   if (config.devtools) {
     if (devtools) {
