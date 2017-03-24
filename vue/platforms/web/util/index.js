@@ -8,6 +8,7 @@ export * from './element'
 
 /**
  * Query an element selector if it's not an element already.
+ * 查找元素. 不存在时 则放到一个新建的 DIV里
  */
 export function query (el: string | Element): Element {
   if (typeof el === 'string') {

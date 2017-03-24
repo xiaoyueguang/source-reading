@@ -1,9 +1,10 @@
 /* @flow */
-
+// 导出一个空的对象. 无法添加属性
 export const emptyObject = Object.freeze({})
 
 /**
  * Check if a string starts with $ or _
+ * 判断字符时候以 $ 或 _ 开头
  */
 export function isReserved (str: string): boolean {
   const c = (str + '').charCodeAt(0)
@@ -12,6 +13,7 @@ export function isReserved (str: string): boolean {
 
 /**
  * Define a property.
+ * 定义属性
  */
 export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
   Object.defineProperty(obj, key, {
@@ -24,6 +26,9 @@ export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
 
 /**
  * Parse simple path.
+ * 解析路径. 从对象里读取相应的值
+ * let a = parsePath('a.b.c')
+ * a({a: {b: c: 2}}) //=> 2
  */
 const bailRE = /[^\w.$]/
 export function parsePath (path: string): any {
