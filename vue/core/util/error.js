@@ -1,7 +1,9 @@
 import config from '../config'
 import { warn } from './debug'
 import { inBrowser } from './env'
-
+/**
+ * 错误处理程序
+ */
 export function handleError (err, vm, type) {
   if (config.errorHandler) {
     config.errorHandler.call(null, err, vm, type)

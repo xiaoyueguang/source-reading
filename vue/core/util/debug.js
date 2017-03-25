@@ -1,3 +1,7 @@
+/**
+ * 该文件定义了两种打印方式: 警告与提示.
+ * 同时提供了 组件 name值的格式化方法. 方便获取以及打印错误
+ */
 import config from '../config'
 import { noop } from 'shared/util'
 
@@ -11,7 +15,9 @@ if (process.env.NODE_ENV !== 'production') {
   const classify = str => str
     .replace(classifyRE, c => c.toUpperCase())
     .replace(/[-_]/g, '')
-
+  /**
+   * 定义了两种打印方式. 警告 以及 提示.
+   */
   warn = (msg, vm) => {
     if (hasConsole && (!config.silent)) {
       console.error(`[Vue warn]: ${msg} ` + (
@@ -27,7 +33,9 @@ if (process.env.NODE_ENV !== 'production') {
       ))
     }
   }
-
+  /**
+   * 获取组件名称. 格式化消息信息
+   */
   formatComponentName = (vm, includeFile) => {
     if (vm.$root === vm) {
       return '<Root>'
@@ -47,7 +55,9 @@ if (process.env.NODE_ENV !== 'production') {
       (file && includeFile !== false ? ` at ${file}` : '')
     )
   }
-
+  /**
+   * 消息信息格式化
+   */
   const formatLocation = str => {
     if (str === `<Anonymous>`) {
       str += ` - use the "name" option for better debugging messages.`
