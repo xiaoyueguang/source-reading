@@ -11,8 +11,11 @@
  * Not type-checking this because this file is perf-critical and the cost
  * of making flow understand it is not worth it.
  */
-
+/**
+ * 虚拟DOM的实现. 基于 Snabbdom
+ */
 import config from '../config'
+// vnode的声明文件
 import VNode from './vnode'
 import { makeMap, isPrimitive, warn } from '../util/index'
 import { activeInstance } from '../instance/lifecycle'

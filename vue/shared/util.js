@@ -117,6 +117,7 @@ export const capitalize = cached((str: string): string => {
 
 /**
  * Hyphenate a camelCase string.
+ * 将驼峰转为 - 连接的字符
  */
 const hyphenateRE = /([^-])([A-Z])/g
 export const hyphenate = cached((str: string): string => {
@@ -173,7 +174,8 @@ export function extend (to: Object, _from: ?Object): Object {
  * Quick object check - this is primarily used to tell
  * Objects from primitive values when we know the value
  * is a JSON-compliant type.
- * 判断是否为对象. 符合 JSON
+ * 判断是否为对象.或数组.
+ * 当传入的值为 对象或者数组的时候, 返回true
  */
 export function isObject (obj: mixed): boolean {
   return obj !== null && typeof obj === 'object'
