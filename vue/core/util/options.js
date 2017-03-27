@@ -1,5 +1,7 @@
 /* @flow */
-
+/**
+ * TODO. 还不太明确这里的方法是做什么用的
+ */
 import Vue from '../instance/index'
 import config from '../config'
 import { warn } from './debug'
@@ -17,11 +19,13 @@ import {
  * Option overwriting strategies are functions that handle
  * how to merge a parent option value and a child option
  * value into the final value.
+ * 合并策略
  */
 const strats = config.optionMergeStrategies
 
 /**
  * Options with restrictions
+ * 判断 propsdata
  */
 if (process.env.NODE_ENV !== 'production') {
   strats.el = strats.propsData = function (parent, child, vm, key) {
@@ -37,6 +41,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 /**
  * Helper that recursively merges two data objects together.
+ * 合并 两者的 data数据
  */
 function mergeData (to: Object, from: ?Object): Object {
   if (!from) return to
@@ -57,6 +62,7 @@ function mergeData (to: Object, from: ?Object): Object {
 
 /**
  * Data
+ * 生成data数据. 子组件的 data则执行方法
  */
 strats.data = function (
   parentVal: any,
@@ -111,6 +117,8 @@ strats.data = function (
 
 /**
  * Hooks and props are merged as arrays.
+ * 合并方法.
+ * 将两个参数里的方法 合并到一个数组里
  */
 function mergeHook (
   parentVal: ?Array<Function>,
@@ -124,7 +132,7 @@ function mergeHook (
         : [childVal]
     : parentVal
 }
-
+// 生命周期 合并钩子.
 config._lifecycleHooks.forEach(hook => {
   strats[hook] = mergeHook
 })
@@ -135,6 +143,7 @@ config._lifecycleHooks.forEach(hook => {
  * When a vm is present (instance creation), we need to do
  * a three-way merge between constructor options, instance
  * options and parent options.
+ * vm创建时, 需要将 构建选项, 实例选项以及父选项合并
  */
 function mergeAssets (parentVal: ?Object, childVal: ?Object): Object {
   const res = Object.create(parentVal || null)
@@ -142,7 +151,7 @@ function mergeAssets (parentVal: ?Object, childVal: ?Object): Object {
     ? extend(res, childVal)
     : res
 }
-
+// ["component", "directive", "filter"]
 config._assetTypes.forEach(function (type) {
   strats[type + 's'] = mergeAssets
 })
@@ -152,6 +161,7 @@ config._assetTypes.forEach(function (type) {
  *
  * Watchers hashes should not overwrite one
  * another, so we merge them as arrays.
+ * 合并 Watchers
  */
 strats.watch = function (parentVal: ?Object, childVal: ?Object): ?Object {
   /* istanbul ignore if */
@@ -174,6 +184,7 @@ strats.watch = function (parentVal: ?Object, childVal: ?Object): ?Object {
 
 /**
  * Other object hashes.
+ * 合并 props methods computed
  */
 strats.props =
 strats.methods =
@@ -188,6 +199,7 @@ strats.computed = function (parentVal: ?Object, childVal: ?Object): ?Object {
 
 /**
  * Default strategy.
+ * 返回默认的值
  */
 const defaultStrat = function (parentVal: any, childVal: any): any {
   return childVal === undefined
@@ -197,10 +209,12 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
 
 /**
  * Validate component names
+ * 通过标签名来验证组件名字.
  */
 function checkComponents (options: Object) {
   for (const key in options.components) {
     const lower = key.toLowerCase()
+    // 判断标签名
     if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
       warn(
         'Do not use built-in or reserved HTML elements as component ' +
@@ -213,6 +227,7 @@ function checkComponents (options: Object) {
 /**
  * Ensure all props option syntax are normalized into the
  * Object-based format.
+ * 格式化 props. 保证props 配置正确
  */
 function normalizeProps (options: Object) {
   const props = options.props
@@ -244,6 +259,7 @@ function normalizeProps (options: Object) {
 
 /**
  * Normalize raw function directives into object format.
+ * 格式化 指令, 保证为所需要的格式
  */
 function normalizeDirectives (options: Object) {
   const dirs = options.directives
@@ -260,6 +276,7 @@ function normalizeDirectives (options: Object) {
 /**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
+ * 合并选项.
  */
 export function mergeOptions (
   parent: Object,
@@ -307,6 +324,7 @@ export function mergeOptions (
  * Resolve an asset.
  * This function is used because child instances need access
  * to assets defined in its ancestor chain.
+ * 移除
  */
 export function resolveAsset (
   options: Object,

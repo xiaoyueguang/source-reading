@@ -1,5 +1,7 @@
 /* @flow */
-
+/**
+ * 断言
+ */
 import config from '../config'
 import { warn, isPlainObject } from '../util/index'
 
