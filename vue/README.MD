@@ -5,10 +5,11 @@
 
 接下来需要按照以下顺序读源码
 1. `core/index`
-2. `core/observer` 监听
-3. `core/global-api` 全局API
-4. `core/vdom` VDOM 实现
-5. `core/components` 默认组件
-6. `compiler/index` 待定
-7. `platforms/` 待定
-8. `sfc/` 待定
+2. `core/instance`
+3. `core/observer` 监听
+4. `core/global-api` 全局API
+5. `core/vdom` VDOM 实现
+6. `core/components` 默认组件
+7. `compiler/index` 待定
+8. `platforms/` 待定
+9. `sfc/` 待定

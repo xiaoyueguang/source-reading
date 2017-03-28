@@ -40,6 +40,7 @@ if (process.env.NODE_ENV !== 'production') {
     if (vm.$root === vm) {
       return '<Root>'
     }
+    // _isVue 标志: 避免该实例被观察
     let name = vm._isVue
       ? vm.$options.name || vm.$options._componentTag
       : vm.name

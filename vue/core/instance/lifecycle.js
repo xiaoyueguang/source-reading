@@ -1,5 +1,7 @@
 /* @flow */
-
+/**
+ * 生命周期
+ */
 import config from '../config'
 import { perf } from '../util/perf'
 import Watcher from '../observer/watcher'

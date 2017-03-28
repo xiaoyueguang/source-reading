@@ -1,5 +1,7 @@
 /* @flow */
-
+/**
+ * 初始化. 安装
+ */
 import config from '../config'
 import { perf } from '../util/perf'
 import { initProxy } from './proxy'
@@ -13,18 +15,24 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
+  // 初始化方法. Vue实例化后调用该方法
   Vue.prototype._init = function (options?: Object) {
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
+      // TODO
       perf.mark('init')
     }
 
     const vm: Component = this
     // a uid
+    // 每个 Vue 实例 uid 都是第一无二
     vm._uid = uid++
     // a flag to avoid this being observed
+    // TODO
+    // 标志. 避免被观察
     vm._isVue = true
     // merge options
+    // 组件则执行合并
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
@@ -39,18 +47,26 @@ export function initMixin (Vue: Class<Component>) {
     }
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
+      // 代理
       initProxy(vm)
     } else {
       vm._renderProxy = vm
     }
     // expose real self
     vm._self = vm
+    // 生命周期
     initLifecycle(vm)
+    // 事件
     initEvents(vm)
+    // 渲染
     initRender(vm)
+    // 调用生命钩子 beforeCreate
     callHook(vm, 'beforeCreate')
+    // 初始化 state
     initState(vm)
+    // 注入
     initInjections(vm)
+    // 调用生命钩子 created
     callHook(vm, 'created')
 
     /* istanbul ignore if */
@@ -59,7 +75,7 @@ export function initMixin (Vue: Class<Component>) {
       perf.mark('init end')
       perf.measure(`${vm._name} init`, 'init', 'init end')
     }
-
+    // 存在 el 则挂载到该元素上
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }
