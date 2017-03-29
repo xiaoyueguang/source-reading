@@ -13,7 +13,9 @@ import { initLifecycle, callHook } from './lifecycle'
 import { extend, mergeOptions, formatComponentName } from '../util/index'
 
 let uid = 0
-
+/**
+ * 添加 _init 实例化方法. 根节点以及 组件的实例化方法
+ */
 export function initMixin (Vue: Class<Component>) {
   // 初始化方法. Vue实例化后调用该方法
   Vue.prototype._init = function (options?: Object) {
@@ -37,6 +39,7 @@ export function initMixin (Vue: Class<Component>) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
+      // 优化组件实例化
       initInternalComponent(vm, options)
     } else {
       vm.$options = mergeOptions(
@@ -72,6 +75,7 @@ export function initMixin (Vue: Class<Component>) {
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
       vm._name = formatComponentName(vm, false)
+      // TODO
       perf.mark('init end')
       perf.measure(`${vm._name} init`, 'init', 'init end')
     }
@@ -81,10 +85,13 @@ export function initMixin (Vue: Class<Component>) {
     }
   }
 }
-
+/**
+ * 优化组件内部组件实例化
+ */
 function initInternalComponent (vm: Component, options: InternalComponentOptions) {
   const opts = vm.$options = Object.create(vm.constructor.options)
   // doing this because it's faster than dynamic enumeration.
+  // 通过 for 动态枚举速度太慢, 直接自己取值赋值, 这样更快
   opts.parent = options.parent
   opts.propsData = options.propsData
   opts._parentVnode = options._parentVnode
@@ -98,7 +105,9 @@ function initInternalComponent (vm: Component, options: InternalComponentOptions
     opts.staticRenderFns = options.staticRenderFns
   }
 }
-
+/**
+ * 合并构造函数选项
+ */
 export function resolveConstructorOptions (Ctor: Class<Component>) {
   let options = Ctor.options
   if (Ctor.super) {
@@ -107,6 +116,7 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
     if (superOptions !== cachedSuperOptions) {
       // super option changed,
       // need to resolve new options.
+      // 如果 新的选项 与原先的不一致, 需要做合并处理
       Ctor.superOptions = superOptions
       // check if there are any late-modified/attached options (#4976)
       const modifiedOptions = resolveModifiedOptions(Ctor)
@@ -122,7 +132,9 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
   }
   return options
 }
-
+/**
+ * 合并选项. 修改后的则合并上去
+ */
 function resolveModifiedOptions (Ctor: Class<Component>): ?Object {
   let modified
   const latest = Ctor.options
@@ -135,7 +147,9 @@ function resolveModifiedOptions (Ctor: Class<Component>): ?Object {
   }
   return modified
 }
-
+/**
+ * 合并数组, 去除重复项
+ */
 function dedupe (latest, sealed) {
   // compare latest and sealed to ensure lifecycle hooks won't be duplicated
   // between merges
