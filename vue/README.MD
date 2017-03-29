@@ -13,3 +13,9 @@
 7. `compiler/index` 待定
 8. `platforms/` 待定
 9. `sfc/` 待定
+
+2017/3/29
+> 果然项目有点复杂. 读起来比较吃力.  
+> 决定先 fork `vue`项目, 从最开始的 `tag`处开始读.  
+> 慢慢往后面读. 相信理解速度会快.  
+[VUE-链接](https://github.com/xiaoyueguang/vue/tree/v0.9.1)
