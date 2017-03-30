@@ -1,0 +1,54 @@
+# VUE
+
+首先先整理目录结构. 了解每个文件的作用以及入口文件.
+
+```
+  Vue
+  │  batcher.js       // 
+  │  binding.js       // 绑定.
+  │  compiler.js      // 编译
+  │  config.js        // vue 相关设置
+  │  deps-parser.js   // 消息 解析
+  │  directive.js     // 指令
+  │  emitter.js       // 消息订阅器(观察者)
+  │  exp-parser.js    // 事件 解析
+  │  filters.js       // 过滤器
+  │  main.js          // 为 ViewModel 添加原型方法
+  │  observer.js      // 将对象转为观察对象
+  │  text-parser.js   // 文字解析
+  │  transition.js    // 过渡
+  │  utils.js         // 助手函数
+  │  viewmodel.js     // 定义一个 ViewModel 构造函数, 并绑定各种方法.
+  │                   // ViewModel即 vue的前身
+  └─directives      // 指令文件夹
+          html.js   // v-html
+          if.js     // v-if
+          index.js  
+          model.js  // v-model
+          on.js     // 绑定事件
+          partial.js // 
+          repeat.js // v-repeat
+          style.js  // v-style
+          view.js   // 
+          with.js   // 
+```
+
+## 顺序
+
+- utils
+- config
+- observer
+- viewmodel
+- main
+- filters
+- transition
+- emitter
+- text-parser
+- exp-parser
+- deps-parser
+- batcher
+- binding
+- directive
+- directives文件夹
+- compiler
+
