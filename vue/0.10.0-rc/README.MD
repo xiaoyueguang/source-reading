@@ -7,7 +7,7 @@
   │  batcher.js       // 
   │  binding.js       // 绑定.
   │  compiler.js      // 编译
-  │  config.js        // vue 相关设置
+  │  config.js        // vue 全局配置
   │  deps-parser.js   // 消息 解析
   │  directive.js     // 指令
   │  emitter.js       // 消息订阅器(观察者)

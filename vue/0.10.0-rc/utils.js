@@ -1,3 +1,6 @@
+/**
+ * 助手方法
+ */
 var config    = require('./config'),
     toString  = ({}).toString,
     win       = window,
@@ -11,6 +14,8 @@ var utils = module.exports = {
 
     /**
      *  get a value from an object keypath
+     * 从对象中根据路径获取值.
+     * get({a: {b: 1}}, 'a.b') // => 1
      */
     get: function (obj, key) {
         /* jshint eqeqeq: false */
@@ -27,6 +32,10 @@ var utils = module.exports = {
 
     /**
      *  set a value to an object keypath
+     * 根据路径, 给对象设置一个值
+     * let a = {}
+     * set(a, 'a.b.c', 1)
+     * a => {a: {b: {c: 1}}}
      */
     set: function (obj, key, val) {
         /* jshint eqeqeq: false */
@@ -47,6 +56,8 @@ var utils = module.exports = {
 
     /**
      *  return the base segment of a keypath
+     * 返回键值路径的根路径
+     * baseKey('a.b.c') //=> 返回 a . 为根路径
      */
     baseKey: function (key) {
         return key.indexOf('.') > 0
@@ -57,6 +68,7 @@ var utils = module.exports = {
     /**
      *  Create a prototype-less object
      *  which is a better hash/map
+     * 创建一个空对象
      */
     hash: function () {
         return Object.create(null)
@@ -64,6 +76,9 @@ var utils = module.exports = {
 
     /**
      *  get an attribute and remove it.
+     * 获取一个属性. 并移除该值
+     * config.prefix 为前缀.
+     * 这是为了获取并移除 dom 上的一些 v-on, v-text 等类似的属性.
      */
     attr: function (el, type) {
         var attr = config.prefix + '-' + type,
