@@ -42,7 +42,7 @@
 - main
 - filters
 - transition
-- emitter
+8. emitter
 - text-parser
 - exp-parser
 - deps-parser
