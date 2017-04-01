@@ -93,6 +93,7 @@ var utils = module.exports = {
      *  Define an ienumerable property
      *  This avoids it being included in JSON.stringify
      *  or for...in loops.
+     * 属性保护. 给对象传入一个属性. 保证不会被 for in 枚举或者 JSON转字符串
      */
     defProtected: function (obj, key, val, enumerable, writable) {
         if (obj.hasOwnProperty(key)) return
@@ -107,6 +108,7 @@ var utils = module.exports = {
     /**
      *  Accurate type check
      *  internal use only, so no need to check for NaN
+     * 获取对象类型
      */
     typeOf: function (obj) {
         return toString.call(obj).slice(8, -1)
@@ -115,6 +117,7 @@ var utils = module.exports = {
     /**
      *  Most simple bind
      *  enough for the usecase and fast than native bind()
+     * 绑定上下文. 比原生的绑定更快?
      */
     bind: function (fn, ctx) {
         return function (arg) {
@@ -124,6 +127,7 @@ var utils = module.exports = {
 
     /**
      *  Make sure null and undefined output empty string
+     * 确保 null 以及 undefined 输出空字符串
      */
     guard: function (value) {
         /* jshint eqeqeq: false, eqnull: true */
@@ -136,6 +140,7 @@ var utils = module.exports = {
 
     /**
      *  When setting value on the VM, parse possible numbers
+     * vm上设置的值, 尽可能的把 number 值给取出来.
      */
     checkNumber: function (value) {
         return (isNaN(value) || value === null || typeof value === 'boolean')
@@ -145,6 +150,7 @@ var utils = module.exports = {
 
     /**
      *  simple extend
+     * 扩展属性
      */
     extend: function (obj, ext, protective) {
         for (var key in ext) {
@@ -156,6 +162,8 @@ var utils = module.exports = {
 
     /**
      *  filter an array with duplicates into uniques
+     * 过滤数组的重复项
+     * 通过给对象属性传值, 查看属性是否存在来判断是否重复
      */
     unique: function (arr) {
         var hash = utils.hash(),
@@ -172,6 +180,7 @@ var utils = module.exports = {
 
     /**
      *  Convert a string template to a dom fragment
+     * 将字符串 转为 dom片段
      */
     toFragment: function (template) {
         if (typeof template !== 'string') {
@@ -198,6 +207,7 @@ var utils = module.exports = {
     /**
      *  Convert the object to a ViewModel constructor
      *  if it is not already one
+     * 将 对象转为 vue组件
      */
     toConstructor: function (obj) {
         ViewModel = ViewModel || require('./viewmodel')
@@ -211,6 +221,8 @@ var utils = module.exports = {
     /**
      *  Check if a filter function contains references to `this`
      *  If yes, mark it as a computed filter.
+     * 判断一个过滤函数 是否引用 this.
+     * 如果引用了, 则将其标记 为 可自动计算的 过滤器
      */
     checkFilter: function (filter) {
         if (THIS_RE.test(filter.toString())) {
@@ -220,6 +232,11 @@ var utils = module.exports = {
 
     /**
      *  convert certain option values to the desired format.
+     * 将值 转为需要的值
+     * 1. 对象转组件
+     * 2. partials 字符串转为 dom片段(TODO)
+     * 3. 标记过滤器
+     * 4. 模板转为 dom片段
      */
     processOptions: function (options) {
         var components = options.components,
@@ -249,6 +266,7 @@ var utils = module.exports = {
 
     /**
      *  used to defer batch updates
+     * 延迟执行. 等DOM更新完毕后, 执行方法
      */
     nextTick: function (cb) {
         timeout(cb, 0)
@@ -257,6 +275,7 @@ var utils = module.exports = {
     /**
      *  add class for IE9
      *  uses classList if available
+     * 兼容IE9. 添加类
      */
     addClass: function (el, cls) {
         if (hasClassList) {
@@ -271,6 +290,7 @@ var utils = module.exports = {
 
     /**
      *  remove class for IE9
+     * 移除类
      */
     removeClass: function (el, cls) {
         if (hasClassList) {
@@ -288,6 +308,8 @@ var utils = module.exports = {
     /**
      *  Convert an object to Array
      *  used in v-repeat and array filters
+     * 对象转数组.
+     * 一个包含对象的数组.
      */
     objectToArray: function (obj) {
         var res = [], val, data
@@ -304,9 +326,13 @@ var utils = module.exports = {
 }
 
 enableDebug()
+/**
+ * 开启调试模式
+ */
 function enableDebug () {
     /**
      *  log for debugging
+     * 打印内容
      */
     utils.log = function (msg) {
         if (config.debug && console) {
@@ -317,6 +343,7 @@ function enableDebug () {
     /**
      *  warnings, traces by default
      *  can be suppressed by `silent` option.
+     * 根据设置的 silent 来判断是否报错
      */
     utils.warn = function (msg) {
         if (!config.silent && console) {

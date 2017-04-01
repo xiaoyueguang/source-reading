@@ -35,8 +35,8 @@
 
 ## 顺序
 
-- utils
-- config
+1. utils
+2. config
 - observer
 - viewmodel
 - main
