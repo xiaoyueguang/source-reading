@@ -37,7 +37,7 @@
 
 1. utils
 2. config
-- observer
+3. observer
 - viewmodel
 - main
 - filters

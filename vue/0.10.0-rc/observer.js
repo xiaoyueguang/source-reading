@@ -1,6 +1,6 @@
 /* jshint proto:true */
 /**
- * 将一个对象转为一个 可观察的 对象
+ * 将一个对象或数组转为一个 可观察的.
  */
 
 var Emitter  = require('./emitter'),
@@ -132,7 +132,6 @@ function linkArrayElements (arr, items) {
                     convert(item)
                     watch(item)
                 }
-                // TODO.
                 owners = item.__emitter__.owners
                 if (owners.indexOf(arr) < 0) {
                     owners.push(arr)
@@ -152,7 +151,6 @@ function unlinkArrayElements (arr, items) {
         while (i--) {
             item = items[i]
             if (item && item.__emitter__) {
-                // TODO
                 var owners = item.__emitter__.owners
                 if (owners) owners.splice(owners.indexOf(arr))
             }
@@ -198,7 +196,12 @@ function isWatchable (obj) {
  * 利用def. 保证打印属性时 不会出现观察者.
  * 通过给他添加 __emitter__ 属性, 赋值 一个全新的观察者对象
  * 监听 set事件.以及 变更页面事件.
- * 并且定义了owners 以及 values属性(TODO)
+ * 并且定义了owners 以及 values
+ * owners 为一个被观察的数组
+ * values 为缓存的值. 通过 Object.defineProperty 来访问或修改 values对应的值
+ * 返回一个 boolean.
+ * true值表示已经被转化.
+ * false值表示刚刚被转化
  */
 function convert (obj) {
     if (obj.__emitter__) return true
@@ -244,6 +247,7 @@ function watch (obj) {
 /**
  *  Augment target objects with modified
  *  methods
+ * 将src的属性扩展到 target下. 且不可枚举
  */
 function augment (target, src) {
     if (hasProto) {
@@ -257,6 +261,7 @@ function augment (target, src) {
 
 /**
  *  Watch an Object, recursive.
+ * 监视一个对象.
  */
 function watchObject (obj) {
     augment(obj, ObjProxy)
@@ -268,6 +273,7 @@ function watchObject (obj) {
 /**
  *  Watch an Array, overload mutation methods
  *  and add augmentations by intercepting the prototype chain
+ * 监视 数组. 将数组里的一些方法拦截住
  */
 function watchArray (arr) {
     augment(arr, ArrayProxy)
@@ -278,16 +284,21 @@ function watchArray (arr) {
  *  Define accessors for a property on an Object
  *  so it emits get/set events.
  *  Then watch the value itself.
+ * 定义对象上的 get/set 属性.
+ * 保证能够在set时候能触发 页面更新
  */
 function convertKey (obj, key) {
     var keyPrefix = key.charAt(0)
+    // 不监听私有属性. 比如 $ _ 开头的属性值
     if (keyPrefix === '$' || keyPrefix === '_') {
         return
     }
     // emit set on bind
     // this means when an object is observed it will emit
     // a first batch of set events.
+    // 获取对象下的 观察者. 通过该观察者来进行观察以及触发
     var emitter = obj.__emitter__,
+        // values 是 对象监听的 值. 对对象设置的值 全部都传入该属性中
         values  = emitter.values
 
     init(obj[key])
@@ -296,6 +307,7 @@ function convertKey (obj, key) {
         get: function () {
             var value = values[key]
             // only emit get on tip values
+            // 当 shouldGet开启时  获取对象值将触发 观察者的 监听的get 事件
             if (pub.shouldGet) {
                 emitter.emit('get', key)
             }
@@ -303,14 +315,16 @@ function convertKey (obj, key) {
         },
         set: function (newVal) {
             var oldVal = values[key]
+            // 取消监听
             unobserve(oldVal, key, emitter)
             copyPaths(newVal, oldVal)
             // an immediate property should notify its parent
             // to emit set for itself too
+            // 触发监听事件 且重新监听
             init(newVal, true)
         }
     })
-
+    // 触发事件 重新监听
     function init (val, propagate) {
         values[key] = val
         emitter.emit('set', key, val, propagate)
@@ -326,6 +340,8 @@ function convertKey (obj, key) {
  *  observed again by another observer, we can skip
  *  the watch conversion and simply emit set event for
  *  all of its properties.
+ * 当一个值已经经过监听.
+ * 而其它观察者想监听该值时, 直接触发方法.
  */
 function emitSet (obj) {
     var type = typeOf(obj),
@@ -347,6 +363,8 @@ function emitSet (obj) {
  *  in a new object.
  *  So when an object changes, all missing keys will
  *  emit a set event with undefined value.
+ * 复制路径. 从源对象上复制路径到新对象上
+ * 保证对象改变后, 不会触发额外的事件.
  */
 function copyPaths (newObj, oldObj) {
     if (typeOf(oldObj) !== OBJECT || typeOf(newObj) !== OBJECT) {
@@ -372,6 +390,7 @@ function copyPaths (newObj, oldObj) {
 /**
  *  walk along a path and make sure it can be accessed
  *  and enumerated in that object
+ * 沿着 key 的路径走. 确保对象或数组里的值都经过转变
  */
 function ensurePath (obj, key) {
     var path = key.split('.'), sec
@@ -397,18 +416,26 @@ function ensurePath (obj, key) {
 /**
  *  Observe an object with a given path,
  *  and proxy get/set/mutate events to the provided observer.
+ * 观察给定的路径, 给观察者代理 get set mutate事件
+ * TODO:
+ * 给对象或数组的每个属性监听.
+ * 代理事件则绑定到父级上. 以便观察者引用触发.
  */
 function observe (obj, rawPath, observer) {
 
     if (!isWatchable(obj)) return
 
     var path = rawPath ? rawPath + '.' : '',
+        // 是否转化.
         alreadyConverted = convert(obj),
         emitter = obj.__emitter__
 
     // setup proxy listeners on the parent observer.
     // we need to keep reference to them so that they
     // can be removed when the object is un-observed.
+    /**
+     * 在父级上设置代理监听. 保留该引用, 以便以后被移除时取消观察
+     */
     observer.proxies = observer.proxies || {}
     var proxies = observer.proxies[path] = {
         get: function (key) {
@@ -438,6 +465,7 @@ function observe (obj, rawPath, observer) {
 
     // attach the listeners to the child observer.
     // now all the events will propagate upwards.
+    // 给事件监听 父级上的代理
     emitter
         .on('get', proxies.get)
         .on('set', proxies.set)
@@ -446,6 +474,7 @@ function observe (obj, rawPath, observer) {
     if (alreadyConverted) {
         // for objects that have already been converted,
         // emit set events for everything inside
+        // 若已经监听了. 则直接触发方法
         emitSet(obj)
     } else {
         watch(obj)
@@ -454,6 +483,7 @@ function observe (obj, rawPath, observer) {
 
 /**
  *  Cancel observation, turn off the listeners.
+ * 取消监听代理上的方法
  */
 function unobserve (obj, path, observer) {
 
