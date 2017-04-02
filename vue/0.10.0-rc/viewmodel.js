@@ -1,3 +1,7 @@
+/**
+ * 定义viewmodel 主要方法.
+ * 编译, 并添加若干方法.
+ */
 var Compiler   = require('./compiler'),
     utils      = require('./utils'),
     transition = require('./transition'),
