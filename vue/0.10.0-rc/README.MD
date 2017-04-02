@@ -46,7 +46,7 @@
 - text-parser
 - exp-parser
 - deps-parser
-- batcher
+12. batcher
 - binding
 - directive
 - directives文件夹
