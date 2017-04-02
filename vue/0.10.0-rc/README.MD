@@ -38,7 +38,7 @@
 1. utils
 2. config
 3. observer
-- viewmodel
+4. viewmodel
 - main
 - filters
 - transition
