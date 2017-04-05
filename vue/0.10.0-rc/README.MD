@@ -4,7 +4,7 @@
 
 ```
   Vue
-  │  batcher.js       // 
+  │  batcher.js       // 批处理
   │  binding.js       // 绑定.
   │  compiler.js      // 编译
   │  config.js        // vue 全局配置
@@ -39,8 +39,8 @@
 2. config
 3. observer
 4. viewmodel
-- main
-- filters
+5. main
+6. filters
 - transition
 8. emitter
 - text-parser
@@ -52,3 +52,5 @@
 - directives文件夹
 - compiler
 
+> 从 `filters`, `transition`开始感觉有点抽象了.  
+> 需要写类似的代码, 利用调试来明白各个参数的意义了
