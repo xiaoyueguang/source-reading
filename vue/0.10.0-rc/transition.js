@@ -1,3 +1,6 @@
+/**
+ * Vue 过渡
+ */
 var endEvents  = sniffEndEvents(),
     config     = require('./config'),
     // batch enter animations so we only force the layout once
@@ -30,6 +33,7 @@ batcher._preFlush = function () {
  *  stage:
  *    1 = enter
  *    2 = leave
+ * 状态分两种. enter 以及 leave
  */
 var transition = module.exports = function (el, stage, cb, compiler) {
 

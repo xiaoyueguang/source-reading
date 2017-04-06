@@ -713,11 +713,13 @@ CompilerProto.getOption = function (type, id) {
     var opts = this.options,
         parent = this.parent,
         globalAssets = config.globalAssets
-    return (opts[type] && opts[type][id]) || (
-        parent
-            ? parent.getOption(type, id)
-            : globalAssets[type] && globalAssets[type][id]
-    )
+    // FIX
+    // var result = (opts[type] && opts[type][id]) || (
+    //     parent
+    //         ? parent.getOption(type, id)
+    //         : globalAssets[type] && globalAssets[type][id]
+    // )
+    return
 }
 
 /**

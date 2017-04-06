@@ -1,35 +1,66 @@
+/**
+ * Vue 指令系统
+ * Vue 的指令 是指 带有 v- 前缀的语法.
+ * 比如 v-if v-show 等
+ */
 var utils      = require('./utils'),
     directives = require('./directives'),
+    // 指令ID. 每绑定一次则执行 ++. 确保每个指令ID都是独一无二.
     dirId      = 1,
 
     // Regexes!
 
+    // 以下正则. 用来区分指令里多个参数.
     // regex to split multiple directive expressions
     // split by commas, but ignore commas within quotes, parens and escapes.
+    // 逗号分隔. 引号里的 逗号不能进行分隔
     SPLIT_RE        = /(?:['"](?:\\.|[^'"])*['"]|\((?:\\.|[^\)])*\)|\\.|[^,])+/g,
 
     // match up to the first single pipe, ignore those within quotes.
+    // 抓取管道里的第一个内容
     KEY_RE          = /^(?:['"](?:\\.|[^'"])*['"]|\\.|[^\|]|\|\|)+/,
-
+    // 抓取带有 : 的键值对
     ARG_RE          = /^([\w-$ ]+):(.+)$/,
+    // 抓取过滤器的名称. 即 开头为 | 的内容
     FILTERS_RE      = /\|[^\|]+/g,
+    // 抓取 过滤器的 参数
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'|[^\s"]+|"[^"]+"/g,
+    // 抓取 $parent. 和 $root.
     NESTING_RE      = /^\$(parent|root)\./,
+    // 抓取单个变量
     SINGLE_VAR_RE   = /^[\w\.$]+$/
 
 /**
  *  Directive class
  *  represents a single directive instance in the DOM
+ * 指令 构造方法.
+ * 代表 DOM里的一个 指令实例
+ */
+/**
+ * 
+ * @param {string} dirname 指令名称
+ * @param {object} definition 指令的定义. 可查看 directives里的内容
+ * @param {string} expression 指令的表达式.
+ *                              即 v-text = 'aaa + 1'
+ *                              aaa + 1 即表达式
+ * @param {string} rawKey TODO:总是与上面的一致. 还不知道叫什么好
+ * @param {object|compiler} compiler 编译器
+ * @param {node} node 节点的引用.
  */
 function Directive (dirname, definition, expression, rawKey, compiler, node) {
-
+    // 指令ID. 每绑定一次则执行 ++. 确保每个指令ID都是独一无二.
     this.id             = dirId++
+    // 指令名称
     this.name           = dirname
+    // 自身编译器
     this.compiler       = compiler
+    // 指令所指的 vm
     this.vm             = compiler.vm
+    // 指令要改的元素
     this.el             = node
+    // 
     this.computeFilters = false
-
+    // 表达式是否为空
     var isEmpty   = expression === ''
 
     // mix in properties from the directive definition

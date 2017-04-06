@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <span v-text="msg + '!'"></span>
+      <span>{{test}}!</span>
+      <p v-repeat="items">{{$value}}1</p>
+    </div>
+  </body>
+  <script src="./dist/vue.js"></script>
+  <script>
+    window.$vm = new Vue({
+      el: '#app',
+      data: {
+        msg: 'hehe',
+        test: 'hello',
+        items: ['aa', 'bb']
+      }
+    })
+  </script>
+</html>

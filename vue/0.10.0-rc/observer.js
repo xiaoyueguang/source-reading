@@ -422,6 +422,7 @@ function ensurePath (obj, key) {
  * 代理事件则绑定到父级上. 以便观察者引用触发.
  */
 function observe (obj, rawPath, observer) {
+    if (observer.proxies) {window.ob = observer}
 
     if (!isWatchable(obj)) return
 

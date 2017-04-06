@@ -214,4 +214,4 @@ function query (el) {
 /**
  * 导出ViewModel. 即 Vue
  */
-module.exports = ViewModel
+window.Vue = module.exports = ViewModel
