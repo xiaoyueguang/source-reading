@@ -11,8 +11,10 @@
   <body>
     <div id="app">
       <div v-text="msg + '!'"></div>
+      <div v-text="msg + '!'"></div>
+      <div v-text="msg + '!'"></div>
       <span>{{test}}!</span>
-      <p v-repeat="items">{{$value}}1</p>
+      <p v-repeat="items" v-on="click: test">{{$value}}1</p>
     </div>
   </body>
   <script src="./dist/vue.js"></script>
@@ -23,6 +25,11 @@
         msg: 'hehe',
         test: 'hello',
         items: ['aa', 'bb']
+      },
+      methods: {
+        test () {
+          console.log(1)
+        }
       }
     })
   </script>

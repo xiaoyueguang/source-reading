@@ -40,7 +40,7 @@ BatcherProto.push = function (job) {
     }
 }
 /**
- * 执行任务
+ * 冲洗任务
  */
 BatcherProto.flush = function () {
     // before flush hook

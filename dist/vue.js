@@ -731,7 +731,7 @@ BatcherProto.push = function (job) {
     }
 }
 /**
- * 执行任务
+ * 冲洗任务
  */
 BatcherProto.flush = function () {
     // before flush hook
@@ -2443,13 +2443,17 @@ CompilerProto.getOption = function (type, id) {
     var opts = this.options,
         parent = this.parent,
         globalAssets = config.globalAssets
-    // FIX
-    // var result = (opts[type] && opts[type][id]) || (
-    //     parent
-    //         ? parent.getOption(type, id)
-    //         : globalAssets[type] && globalAssets[type][id]
-    // )
-    return
+    // TODO: 报错 注释
+    try {
+        var result = (opts[type] && opts[type][id]) || (
+            parent
+                ? parent.getOption(type, id)
+                : globalAssets[type] && globalAssets[type][id]
+        )
+    } catch (e) {
+        
+    }
+    return result
 }
 
 /**
@@ -2632,25 +2636,45 @@ module.exports = Compiler
 var Batcher        = __webpack_require__(3),
     bindingBatcher = new Batcher(),
     bindingId      = 1
-
+    
 /**
  *  Binding class.
  *
  *  each property on the viewmodel has one corresponding Binding object
  *  which has multiple directive instances on the DOM
  *  and multiple computed property dependents
+ * 捆绑类.
+ * 将指令, 以及 监听全部都连接起来.
+ * 因此, 在值更新之后, 可通知到 vue 更新调用指令的update方法.
+ * @param {object|compiler} compiler 
+ * @param {string} key 表达式. 或 变量字符串
+ *                  | 当以下的 isExp为false. 即非表达式.
+ *                  | 则该字段表示为变量path.
+ * @param {boolean} isExp 是否为表达式
+ * @param {boolean} isFn 是否为方法
  */
 function Binding (compiler, key, isExp, isFn) {
+    // binding的uuid
     this.id = bindingId++
+    // 默认值为空
     this.value = undefined
+    // 是否表达式
     this.isExp = !!isExp
+    // 是否为方法
     this.isFn = isFn
+    // 当为非表达式, 且变量path里没有 . 时候. 表明该变量所指的值在根上
     this.root = !this.isExp && key.indexOf('.') === -1
+    // 编译器
     this.compiler = compiler
+    // key值
     this.key = key
+    // 依赖
     this.dirs = []
+    // 对应的值的监听数组
     this.subs = []
+    // TODO: 啥东西
     this.deps = []
+    // 绑定状态值. 一开始设置为绑定.
     this.unbound = false
 }
 
@@ -2658,16 +2682,21 @@ var BindingProto = Binding.prototype
 
 /**
  *  Update value and queue instance updates.
+ * 绑定更新.
  */
 BindingProto.update = function (value) {
+    // 判断是否为可计算.或者方法
     if (!this.isComputed || this.isFn) {
         this.value = value
     }
+    // 如果存在收集到的指令 或 监听...
+    // 则将任务推送进 批处理的队列里.
     if (this.dirs.length || this.subs.length) {
         var self = this
         bindingBatcher.push({
             id: this.id,
             execute: function () {
+                // 推入批处理
                 if (!self.unbound) {
                     self._update()
                 }
@@ -2678,6 +2707,7 @@ BindingProto.update = function (value) {
 
 /**
  *  Actually update the directives.
+ * 对指令执行更新操作.
  */
 BindingProto._update = function () {
     var i = this.dirs.length,
@@ -2691,6 +2721,7 @@ BindingProto._update = function () {
 /**
  *  Return the valuated value regardless
  *  of whether it is computed or not
+ * 返回值.
  */
 BindingProto.val = function () {
     return this.isComputed && !this.isFn
@@ -2701,6 +2732,8 @@ BindingProto.val = function () {
 /**
  *  Notify computed properties that depend on this binding
  *  to update themselves
+ * 通知依赖. 调用该方法可通知 vue 将 subs数组里的监听的指令方法, 全部更新
+ * 然后当值变化后, 批量更新 subs 数组里的指令, 进行批量更新
  */
 BindingProto.pub = function () {
     var i = this.subs.length
@@ -2711,6 +2744,7 @@ BindingProto.pub = function () {
 
 /**
  *  Unbind the binding, remove itself from all of its dependencies
+ * 解除绑定. 将所有的依赖关系 进行解除绑定
  */
 BindingProto.unbind = function () {
     // Indicate this has been unbound.

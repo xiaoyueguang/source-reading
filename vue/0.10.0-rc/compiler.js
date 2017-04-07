@@ -713,13 +713,17 @@ CompilerProto.getOption = function (type, id) {
     var opts = this.options,
         parent = this.parent,
         globalAssets = config.globalAssets
-    // FIX
-    // var result = (opts[type] && opts[type][id]) || (
-    //     parent
-    //         ? parent.getOption(type, id)
-    //         : globalAssets[type] && globalAssets[type][id]
-    // )
-    return
+    // TODO: 报错 注释
+    try {
+        var result = (opts[type] && opts[type][id]) || (
+            parent
+                ? parent.getOption(type, id)
+                : globalAssets[type] && globalAssets[type][id]
+        )
+    } catch (e) {
+        
+    }
+    return result
 }
 
 /**
