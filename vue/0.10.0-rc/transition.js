@@ -103,7 +103,7 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
     // 设置类的列表. 以及进入出去的类名.
     var onEnd,
         classList        = el.classList,
-        // TODO:
+        // 结束后的回调
         existingCallback = el.vue_trans_cb,
         enterClass       = config.enterClass,
         leaveClass       = config.leaveClass,
@@ -121,10 +121,12 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
     if (stage > 0) { // enter
 
         // set to enter state before appending
+        // 在 append 之前, 先添加初始 类名
         classList.add(enterClass)
         // append
         changeState()
         // trigger transition
+        // 批处理类过渡.
         if (!hasAnimation) {
             batcher.push({
                 execute: function () {
@@ -134,6 +136,7 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
         } else {
             onEnd = function (e) {
                 if (e.target === el) {
+                    // 保证过渡完成后即时移除
                     el.removeEventListener(endEvent, onEnd)
                     el.vue_trans_cb = null
                     classList.remove(enterClass)
@@ -142,15 +145,18 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
             el.addEventListener(endEvent, onEnd)
             el.vue_trans_cb = onEnd
         }
+        // 标记 过渡进入完成
         return codes.CSS_E
 
     } else { // leave
-
+        // 判断当前 元素是否 具有长宽
         if (el.offsetWidth || el.offsetHeight) {
             // trigger hide transition
+            // 添加离开过渡类
             classList.add(leaveClass)
             onEnd = function (e) {
                 if (e.target === el) {
+                    // 保证过渡完成后即时移除
                     el.removeEventListener(endEvent, onEnd)
                     el.vue_trans_cb = null
                     // actually remove node here
@@ -163,14 +169,23 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
             el.vue_trans_cb = onEnd
         } else {
             // directly remove invisible elements
+            // 如果该元素并不具有长宽. 直接触发结果
             changeState()
         }
+        // 标记 过渡离开完成
         return codes.CSS_L
         
     }
 
 }
-
+/**
+ * 
+ * @param {*} el 
+ * @param {*} stage 
+ * @param {*} changeState 
+ * @param {*} effectId 
+ * @param {*} compiler 
+ */
 function applyTransitionFunctions (el, stage, changeState, effectId, compiler) {
 
     var funcs = compiler.getOption('effects', effectId)
