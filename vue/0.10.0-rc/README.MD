@@ -48,7 +48,7 @@
 - deps-parser
 12. batcher
 - binding
-- directive
+14. directive
 - directives文件夹
 - compiler
 
