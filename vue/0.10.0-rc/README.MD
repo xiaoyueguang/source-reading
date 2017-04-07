@@ -47,7 +47,7 @@
 - exp-parser
 - deps-parser
 12. batcher
-- binding
+13. binding
 14. directive
 - directives文件夹
 - compiler

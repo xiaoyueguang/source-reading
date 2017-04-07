@@ -10,6 +10,7 @@ var endEvents  = sniffEndEvents(),
     setTO      = window.setTimeout,
     clearTO    = window.clearTimeout,
     // exit codes for testing
+    // 状态值.
     codes = {
         CSS_E     : 1,
         CSS_L     : 2,
@@ -24,6 +25,7 @@ var endEvents  = sniffEndEvents(),
     }
 
 // force layout before triggering transitions/animations
+// TODO: 不知道有啥用
 batcher._preFlush = function () {
     /* jshint unused: false */
     var f = document.body.offsetHeight
@@ -33,12 +35,17 @@ batcher._preFlush = function () {
  *  stage:
  *    1 = enter
  *    2 = leave
- * 状态分两种. enter 以及 leave
+ * 执行动画
+ * @param {node} el node节点
+ * @param {number} stage 状态. 1 为进入. 2 为出去
+ * @param {function} cb 回调方法.
+ * @param {object|compiler} compiler 编译器
  */
 var transition = module.exports = function (el, stage, cb, compiler) {
 
     var changeState = function () {
         cb()
+        // TODO:编译器的钩子
         compiler.execHook(stage > 0 ? 'attached' : 'detached')
     }
 
@@ -46,7 +53,7 @@ var transition = module.exports = function (el, stage, cb, compiler) {
         changeState()
         return codes.INIT
     }
-
+    // 是否有 过渡 或者 动画属性
     var hasTransition = el.vue_trans === '',
         hasAnimation  = el.vue_anim === '',
         effectId      = el.vue_effect
@@ -67,6 +74,7 @@ var transition = module.exports = function (el, stage, cb, compiler) {
             hasAnimation
         )
     } else {
+        // 当没有 effect 或 动画 过渡效果时, 直接执行
         changeState()
         return codes.SKIP
     }
@@ -77,9 +85,14 @@ transition.codes = codes
 
 /**
  *  Togggle a CSS class to trigger transition
+ * 执行过渡时, 仅需要切换类即可触发动画
+ * @param {node} el 元素节点
+ * @param {number} stage 状态 1:进入 2:离开
+ * @param {function} changeState 改变状态的回调方法
+ * @param {boolean} hasAnimation 是否为动画
  */
 function applyTransitionClass (el, stage, changeState, hasAnimation) {
-
+    // 浏览器不支持动画时, 标记为 因css而跳过
     if (!endEvents.trans) {
         changeState()
         return codes.CSS_SKIP
@@ -87,14 +100,17 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
 
     // if the browser supports transition,
     // it must have classList...
+    // 设置类的列表. 以及进入出去的类名.
     var onEnd,
         classList        = el.classList,
+        // TODO:
         existingCallback = el.vue_trans_cb,
         enterClass       = config.enterClass,
         leaveClass       = config.leaveClass,
         endEvent         = hasAnimation ? endEvents.anim : endEvents.trans
 
     // cancel unfinished callbacks and jobs
+    // 动画或者过渡被中止.
     if (existingCallback) {
         el.removeEventListener(endEvent, existingCallback)
         classList.remove(enterClass)
@@ -207,6 +223,10 @@ function applyTransitionFunctions (el, stage, changeState, effectId, compiler) {
 
 /**
  *  Sniff proper transition end event name
+ * 嗅探过渡结束事件.
+ * 创建一个dom元素. 检查 transition, mozTransition, webkitTransition
+ * 来确定过渡结束事件.
+ * 以及 嗅探 animationend事件
  */
 function sniffEndEvents () {
     var el = document.createElement('vue'),

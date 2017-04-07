@@ -398,6 +398,7 @@ CompilerProto.compileElement = function (node, root) {
         }
 
         // check transition & animation properties
+        // 检查动画或过渡属性
         node.vue_trans  = utils.attr(node, 'transition')
         node.vue_anim   = utils.attr(node, 'animation')
         node.vue_effect = this.eval(utils.attr(node, 'effect'))
