@@ -43,7 +43,7 @@
 6. filters
 7. transition
 8. emitter
-- text-parser
+9. text-parser
 - exp-parser
 - deps-parser
 12. batcher
