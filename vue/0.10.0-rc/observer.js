@@ -309,6 +309,7 @@ function convertKey (obj, key) {
             // only emit get on tip values
             // 当 shouldGet开启时  获取对象值将触发 观察者的 监听的get 事件
             if (pub.shouldGet) {
+                // 触发 get事件. 收集依赖.
                 emitter.emit('get', key)
             }
             return value

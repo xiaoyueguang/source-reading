@@ -16,28 +16,36 @@
   </head>
   <body>
     <div id="app">
-      <div v-text="msg + '!'"></div>
-      <div v-text="msg + '!'"></div>
-      <div v-text="msg + '!'"></div>
-      <div v-show = "show" v-transition="v">{{test}}!</div>
-      <p v-repeat="items" v-on="click: test">{{$value}}1</p>
+      <div  v-on="click: test1">{{msg + '11'}}</div>
+      <p v-repeat="items">{{$value}}1</p>
     </div>
+    <div id="app2"></div>
+      <!--<div v-text="msg + '!'"></div>
+      <div v-text="msg + '!'"></div>
+      <div v-show = "show" v-transition="v">{{test}}!</div>-->
   </body>
   <script src="./dist/vue.js"></script>
   <script>
     window.$vm = new Vue({
       el: '#app',
       data: {
-        msg: 'hehe',
         test: 'hello',
         items: ['aa', 'bb'],
-        show: true
+        show: true,
+        // msg: 'hehe'
+      },
+      computed: {
+        // hehe () {return this.test + 'tete'},
+        msg () {return this.test + 'test'}
       },
       methods: {
-        test () {
+        test1 () {
           console.log(1)
         }
       }
+    })
+    new Vue({
+      el: '#app2'
     })
   </script>
 </html>
