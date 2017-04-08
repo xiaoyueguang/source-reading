@@ -888,7 +888,17 @@ module.exports = Emitter
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
- * Vue 过渡
+ * Vue 过渡, 是利用了 CSS3的动画.
+ * 该版本的 过渡略微简陋了些.
+ * 过渡分两种, CSS过渡以及 JS过渡
+ * 
+ * CSS过渡, 使用 v-enter v-leave.
+ * 本质上是 在DOM插入到页面之前, 给其一个初始状态 v-enter.
+ * 而后在插入到DOM后移除该类. 从而触发过渡.
+ * 离开过渡则反过来, 先添加 离开过渡类. 然后过渡完成后移除.
+ * 
+ * JS过渡. 使用JS一开始定义好的 enter 以及 leave 方法
+ * 过渡以及离开则直接调用该两个方法即可
  */
 var endEvents  = sniffEndEvents(),
     config     = __webpack_require__(1),
@@ -924,6 +934,7 @@ batcher._preFlush = function () {
  *  stage:
  *    1 = enter
  *    2 = leave
+ * CSS过渡
  * 执行动画
  * @param {node} el node节点
  * @param {number} stage 状态. 1 为进入. 2 为出去
@@ -940,13 +951,14 @@ var transition = module.exports = function (el, stage, cb, compiler) {
 
     if (compiler.init) {
         changeState()
+        // 标记 初始化
         return codes.INIT
     }
     // 是否有 过渡 或者 动画属性
     var hasTransition = el.vue_trans === '',
         hasAnimation  = el.vue_anim === '',
         effectId      = el.vue_effect
-
+        // effectId 为 JS 过渡的标记
     if (effectId) {
         return applyTransitionFunctions(
             el,
@@ -1063,34 +1075,37 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
         }
         // 标记 过渡离开完成
         return codes.CSS_L
-        
+
     }
 
 }
 /**
- * 
- * @param {*} el 
- * @param {*} stage 
- * @param {*} changeState 
+ * JS过渡
+ * @param {node} el node节点
+ * @param {number} stage 状态. 1 为进入. 2 为出去
+ * @param {function} changeState 改变dom状态
  * @param {*} effectId 
- * @param {*} compiler 
+ * @param {object|compiler} compiler 编译器
  */
 function applyTransitionFunctions (el, stage, changeState, effectId, compiler) {
 
     var funcs = compiler.getOption('effects', effectId)
     if (!funcs) {
         changeState()
+        // 标记为 JS跳过
         return codes.JS_SKIP
     }
-
+    // 分别取出 进入 离开 方法.
     var enter = funcs.enter,
         leave = funcs.leave,
         timeouts = el.vue_timeouts
 
     // clear previous timeouts
+    // 取消之前的 setTimeout
     if (timeouts) {
         var i = timeouts.length
         while (i--) {
+            // 取消
             clearTO(timeouts[i])
         }
     }
@@ -1099,6 +1114,7 @@ function applyTransitionFunctions (el, stage, changeState, effectId, compiler) {
     function timeout (cb, delay) {
         var id = setTO(function () {
             cb()
+            // 完成一个timeout则移除
             timeouts.splice(timeouts.indexOf(id), 1)
             if (!timeouts.length) {
                 el.vue_timeouts = null
@@ -1110,16 +1126,20 @@ function applyTransitionFunctions (el, stage, changeState, effectId, compiler) {
     if (stage > 0) { // enter
         if (typeof enter !== 'function') {
             changeState()
+            // 标记为 js 跳过进入
             return codes.JS_SKIP_E
         }
         enter(el, changeState, timeout)
+        // 标记为 js 进入
         return codes.JS_E
     } else { // leave
         if (typeof leave !== 'function') {
             changeState()
+            // 标记为 js 跳过离开
             return codes.JS_SKIP_L
         }
         leave(el, changeState, timeout)
+        // 标记为 js 离开
         return codes.JS_L
     }
 

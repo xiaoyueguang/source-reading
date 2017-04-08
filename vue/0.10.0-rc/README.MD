@@ -41,7 +41,7 @@
 4. viewmodel
 5. main
 6. filters
-- transition
+7. transition
 8. emitter
 - text-parser
 - exp-parser

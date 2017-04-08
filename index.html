@@ -5,7 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-      
+      .v-transition {
+        transition: all .6s ease;
+        opacity: 1;
+      }
+      .v-enter, .v-leave {
+        opacity: 0;
+      }
     </style>
   </head>
   <body>
@@ -13,7 +19,7 @@
       <div v-text="msg + '!'"></div>
       <div v-text="msg + '!'"></div>
       <div v-text="msg + '!'"></div>
-      <span>{{test}}!</span>
+      <div v-show = "show" v-transition="v">{{test}}!</div>
       <p v-repeat="items" v-on="click: test">{{$value}}1</p>
     </div>
   </body>
@@ -24,7 +30,8 @@
       data: {
         msg: 'hehe',
         test: 'hello',
-        items: ['aa', 'bb']
+        items: ['aa', 'bb'],
+        show: true
       },
       methods: {
         test () {
