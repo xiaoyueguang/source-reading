@@ -44,8 +44,8 @@
 7. transition
 8. emitter
 9. text-parser
-- exp-parser
-- deps-parser
+10. exp-parser
+11. deps-parser
 12. batcher
 13. binding
 14. directive

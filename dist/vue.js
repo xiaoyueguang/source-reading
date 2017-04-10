@@ -4143,6 +4143,17 @@ module.exports = {
 /* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 解析表达式
+ * 该文件暴露出两个方法.
+ * parse, 以及 eval
+ * parse 将一个表达式字符串转为一个匿名方法.
+ * 提取出字符串中的变量名(getVariables)
+ * 解析出一串字符串. 而后转为匿名方法(makeGetter).
+ * 该匿名方法 可通过改变上下文执行, 返回 赋值后的表达式
+ * 
+ * eval 则是将表达式转为 字符串
+ */
 var utils           = __webpack_require__(0),
     STR_SAVE_RE     = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
     STR_RESTORE_RE  = /"(\d+)"/g,
@@ -4176,6 +4187,7 @@ var KEYWORDS =
 
 /**
  *  Strip top level variable names from a snippet of JS expression
+ * 从JS中剥离 变量名.
  */
 function getVariables (code) {
     code = code
@@ -4199,6 +4211,8 @@ function getVariables (code) {
  *  It stops at top parent if no vm in the chain has the
  *  key. It then creates any missing bindings on the
  *  final resolved vm.
+ * 当给定的路径在当前编译器上不存在, 且 父类上存在时,
+ * 生成一个关键字符串. 来获取该值
  */
 function traceScope (path, compiler, data) {
     var rel  = '',
@@ -4235,6 +4249,8 @@ function traceScope (path, compiler, data) {
  *  Create a function from a string...
  *  this looks like evil magic but since all variables are limited
  *  to the VM's data it's actually properly sandboxed
+ * 从一个字符串创建一个方法.
+ * 返回一个方法. 执行该方法则可以获得值
  */
 function makeGetter (exp, raw) {
     var fn
@@ -4248,6 +4264,7 @@ function makeGetter (exp, raw) {
 
 /**
  *  Escape a leading dollar sign for regex construction
+ * 将 $ 转码
  */
 function escapeDollar (v) {
     return v.charAt(0) === '$'
@@ -4258,6 +4275,7 @@ function escapeDollar (v) {
 /**
  *  Convert double quotes to single quotes
  *  so they don't mess up the generated function body
+ * 将顺引号转为单引号
  */
 function escapeQuote (v) {
     return v.indexOf('"') > -1
@@ -4269,6 +4287,12 @@ function escapeQuote (v) {
  *  Parse and return an anonymous computed property getter function
  *  from an arbitrary expression, together with a list of paths to be
  *  created as bindings.
+ * 解析 且返回一个匿名方法.
+ * 
+ * @param {string} exp 表达式
+ * @param {Compiler} compiler 编译器
+ * @param {object} data 数值
+ * @param {filters} filters 过滤器
  */
 exports.parse = function (exp, compiler, data, filters) {
     // unicode and 'constructor' are not allowed for XSS security.
@@ -4300,6 +4324,7 @@ exports.parse = function (exp, compiler, data, filters) {
             .replace(STR_RESTORE_RE, restoreStrings)
 
     // wrap expression with computed filters
+    // 有过滤器的话则需要包装下过滤器
     if (filters) {
         filters.forEach(function (filter) {
             var args = filter.args
@@ -4315,7 +4340,10 @@ exports.parse = function (exp, compiler, data, filters) {
     }
 
     body = accessors + 'return ' + body
-
+    /**
+     * 将表达式的字符串和变量先保存到数组里.
+     * @param {*} str 
+     */
     function saveStrings (str) {
         var i = strings.length
         // escape newlines in strings so the expression
@@ -4323,7 +4351,10 @@ exports.parse = function (exp, compiler, data, filters) {
         strings[i] = str.replace(NEWLINE_RE, '\\n')
         return '"' + i + '"'
     }
-
+    /**
+     * 替换变量路径.
+     * @param {string} path 变量路径
+     */
     function replacePath (path) {
         // keep track of the first char
         var c = path.charAt(0)
@@ -4336,7 +4367,11 @@ exports.parse = function (exp, compiler, data, filters) {
         // don't forget to put that first char back
         return c + val
     }
-
+    /**
+     * 将表达式的 字符串里的占位符 转为 正常的变量值.
+     * @param {*} str 
+     * @param {*} i 
+     */
     function restoreStrings (str, i) {
         return strings[i]
     }
@@ -4347,12 +4382,15 @@ exports.parse = function (exp, compiler, data, filters) {
 /**
  *  Evaluate an expression in the context of a compiler.
  *  Accepts additional data.
+ * 将 匿名方法执行后, 返回一个字符串.
  */
 exports.eval = function (exp, compiler, data) {
+    // 先得到一个 匿名方法
     var getter = exports.parse(exp, compiler, data), res
     if (getter) {
         // hack: temporarily attach the additional data so
         // it can be accessed in the getter
+        // 利用call 改变上下文. 保证该匿名方法能获取到表达式的值.
         compiler.vm.$temp = data
         res = getter.call(compiler.vm)
         delete compiler.vm.$temp
