@@ -17,7 +17,7 @@
   <body>
     <div id="app">
       <div  v-on="click: test1">{{ $msg + msg + 'fff' + test2.msg + '11'}}</div>
-      <p v-repeat="items">{{$value}}1</p>
+      <p v-repeat="items">{{$value}} <span>12</span></p>
     </div>
     <div id="app2"></div>
       <!--<div v-text="msg + '!'"></div>
@@ -40,7 +40,8 @@
       },
       computed: {
         // hehe () {return this.test + 'tete'},
-        msg () {return this.test + 'test'}
+        msg () {return this.test + 'test'},
+        fff () {return this.msg}
       },
       methods: {
         test1 () {

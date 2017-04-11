@@ -1,3 +1,6 @@
+/**
+ * 编译器
+ */
 var Emitter     = require('./emitter'),
     Observer    = require('./observer'),
     config      = require('./config'),
@@ -18,6 +21,7 @@ var Emitter     = require('./emitter'),
     hasOwn      = ({}).hasOwnProperty,
 
     // hooks to register
+    // 生命周期
     hooks = [
         'created', 'ready',
         'beforeDestroy', 'afterDestroy',
@@ -26,7 +30,10 @@ var Emitter     = require('./emitter'),
 
     // list of priority directives
     // that needs to be checked in specific order
+    // 优先指令.
+    // 当一个dom上存在多个指令时, 会优先从以下列表中读取. 以节省性能
     priorityDirectives = [
+        // TODO:if 为什么分开?
         'i' + 'f',
         'repeat',
         'view',
@@ -36,46 +43,69 @@ var Emitter     = require('./emitter'),
 /**
  *  The DOM compiler
  *  scans a DOM node and compile bindings for a ViewModel
+ * DOM编译器. 扫描DOM节点, 将指令绑定到一个 Vue 实例上
  */
 function Compiler (vm, options) {
 
     var compiler = this
 
     // default state
+    // 编译器的状态. 初始化, 重复, 摧毁
     compiler.init       = true
     compiler.repeat     = false
     compiler.destroyed  = false
 
     // process and extend options
+    // 处理扩展属性
     options = compiler.options = options || makeHash()
+    // 处理 组件, dom片段, 过滤器, 模版
     utils.processOptions(options)
 
     // copy data, methods & compiler options
+    // 扩展属性. 将data, 方法 扩展到 实例下
+    // 使得实例可通过this访问数据或方法
     var data = compiler.data = options.data || {}
     extend(vm, data, true)
     extend(vm, options.methods, true)
+    // TODO: compilerOptions
     extend(compiler, options.compilerOptions)
 
     // initialize element
+    // 初始化元素
     var el = compiler.el = compiler.setupElement(options)
+    // 打印挂载的元素标签名
     utils.log('\nnew VM instance: ' + el.tagName + '\n')
 
     // set compiler properties
+    // 设置编译器的默认值
+    // 当前本身实例
     compiler.vm = el.vue_vm = vm
+    // 捆绑类. 
     compiler.bindings = makeHash()
+    // 指令
     compiler.dirs = []
+    // TODO:
     compiler.deferred = []
+    // 计算属性.
+    // 不仅包含 computed属性里的方法
+    // 模版里的表达式如果有对某个属性引用, 也会被封装成一个作为计算属性的匿名方法
     compiler.computed = []
+    // 子组件 子编译器
     compiler.children = []
+    // 观察者
     compiler.emitter = new Emitter()
+    // 观察者的上下文
     compiler.emitter._ctx = vm
+    // 代理
     compiler.delegators = makeHash()
 
     // set inenumerable VM properties
+    // 设置一些保护属性.
     def(vm, '$', makeHash())
     def(vm, '$el', el)
     def(vm, '$options', options)
     def(vm, '$compiler', compiler)
+    // 不可枚举. 可重写
     def(vm, '$event', null, false, true)
 
     // set parent
@@ -86,9 +116,11 @@ function Compiler (vm, options) {
         def(vm, '$parent', parentVM)
     }
     // set root
+    // 设置 根编译器
     def(vm, '$root', getRoot(compiler).vm)
 
     // setup observer
+    // 执行 安装观察者
     compiler.setupObserver()
 
     // create bindings for computed properties
@@ -151,9 +183,12 @@ var CompilerProto = Compiler.prototype
 /**
  *  Initialize the VM/Compiler's element.
  *  Fill it in with the template if necessary.
+ * 初始化 VM/compiler元素.
+ * 返回一个经过模版以及属性处理后的模版
  */
 CompilerProto.setupElement = function (options) {
     // create the node first
+    // 读取 挂在的DOM节点. 没有则直接创建一个
     var el = typeof options.el === 'string'
         ? document.querySelector(options.el)
         : options.el || document.createElement(options.tagName || 'div')
@@ -164,11 +199,17 @@ CompilerProto.setupElement = function (options) {
         /* jshint boss: true */
         var child,
             frag = this.rawContent = document.createDocumentFragment()
+        // 将原本的 模版全部都移动到 frag 下
         while (child = el.firstChild) {
             frag.appendChild(child)
         }
         // replace option: use the first node in
         // the template directly
+        /**
+         * replace 存在时, 则将模版的第一个子元素复制插入到 el前, 移除el
+         * 来达到替换el
+         */
+        console.log(options.replace)
         if (options.replace && template.childNodes.length === 1) {
             var replacer = template.childNodes[0].cloneNode(true)
             if (el.parentNode) {
@@ -176,17 +217,21 @@ CompilerProto.setupElement = function (options) {
                 el.parentNode.removeChild(el)
             }
             // copy over attributes
+            // 将原先 el 上的属性复制到新的模版上
             each.call(el.attributes, function (attr) {
                 replacer.setAttribute(attr.name, attr.value)
             })
             // replace
+            // 替换el指向. 取消原先dom的引用
             el = replacer
         } else {
+            // 将模版里 DOM深复制一份 添加到el下
             el.appendChild(template.cloneNode(true))
         }
     }
 
     // apply element options
+    // 处理元素的属性: id, className, 以及其它 attrs属性.
     if (options.id) el.id = options.id
     if (options.className) el.className = options.className
     var attrs = options.attributes
@@ -204,12 +249,15 @@ CompilerProto.setupElement = function (options) {
  *  The observer listens for get/set/mutate events on all VM
  *  values/objects and trigger corresponding binding updates.
  *  It also listens for lifecycle hooks.
+ * 设置编译器上的观察者
+ * 还会监听 生命周期
  */
 CompilerProto.setupObserver = function () {
 
     var compiler = this,
         bindings = compiler.bindings,
         options  = compiler.options,
+        // 添加观察者
         observer = compiler.observer = new Emitter()
 
     // a hash to hold event proxies for each root level key
