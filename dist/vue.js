@@ -189,7 +189,7 @@ var utils = module.exports = {
     /**
      *  Most simple bind
      *  enough for the usecase and fast than native bind()
-     * 绑定上下文. 比原生的绑定更快?
+     * 绑定上下文.
      */
     bind: function (fn, ctx) {
         return function (arg) {
@@ -2068,22 +2068,27 @@ CompilerProto.setupObserver = function () {
 
     // a hash to hold event proxies for each root level key
     // so they can be referenced and removed later
+    // 设置 代理. 以及 上下文.
+    // 代理 追溯到 根节点 TODO:
     observer.proxies = makeHash()
     observer._ctx = compiler.vm
 
     // add own listeners which trigger binding updates
+    // 设置 三个监听
     observer
         .on('get', onGet)
         .on('set', onSet)
         .on('mutate', onSet)
 
     // register hooks
+    // 注册钩子.
     hooks.forEach(function (hook) {
         var fns = options[hook]
         if (Array.isArray(fns)) {
             var i = fns.length
             // since hooks were merged with child at head,
             // we loop reversely.
+            // 钩子方法,居然可以为一个数组... 真是意外.
             while (i--) {
                 registerHook(hook, fns[i])
             }
@@ -2093,6 +2098,7 @@ CompilerProto.setupObserver = function () {
     })
 
     // broadcast attached/detached hooks
+    // 监听 attached, detached. 触发后直接广播对应的事件到所有子组件
     observer
         .on('hook:attached', function () {
             broadcast(1)
@@ -2100,24 +2106,27 @@ CompilerProto.setupObserver = function () {
         .on('hook:detached', function () {
             broadcast(0)
         })
-
+    // 收集依赖.
     function onGet (key) {
         check(key)
+        // 触发后 可收集依赖.触发 deps-parset 里的方法.
         DepsParser.catcher.emit('get', bindings[key])
     }
-
+    // 更新
     function onSet (key, val, mutation) {
+        // 改变的时候触发 change.
         observer.emit('change:' + key, val, mutation)
         check(key)
+        // 更新对应的值.
         bindings[key].update(val)
     }
-
+    // 注册钩子. 监听钩子方法
     function registerHook (hook, fn) {
         observer.on('hook:' + hook, function () {
             fn.call(compiler.vm)
         })
     }
-
+    // 广播 这个广播 只钩子 attached, detached
     function broadcast (event) {
         var children = compiler.children
         if (children) {
@@ -2132,7 +2141,7 @@ CompilerProto.setupObserver = function () {
             }
         }
     }
-
+    // 检查 key 值是否存在. 不存在则直接创建
     function check (key) {
         if (!bindings[key]) {
             compiler.createBinding(key)
@@ -2406,46 +2415,66 @@ CompilerProto.bindDirective = function (directive, bindingOwner) {
 
 /**
  *  Create binding and attach getter/setter for a key to the viewmodel object
+ * 为 vm 创建绑定一个 getter/setter
+ * {string} key 属性名
+ * {Directive} directive 指令
  */
 CompilerProto.createBinding = function (key, directive) {
 
     utils.log('  created binding: ' + key)
 
     var compiler = this,
+        // 是否表达式
         isExp    = directive && directive.isExp,
+        // 是否方法
         isFn     = directive && directive.isFn,
+        // 捆绑集合
         bindings = compiler.bindings,
+        // 计算属性
         computed = compiler.options.computed,
+        // 捆绑
         binding  = new Binding(compiler, key, isExp, isFn)
 
+    // 这里会根据 不同的 binding 捆绑类来进行不一样的处理
     if (isExp) {
         // expression bindings are anonymous
+        // 如果指令为表达式. 则将指令封装成一个匿名方法.
         compiler.defineExp(key, binding, directive)
     } else {
         bindings[key] = binding
         if (binding.root) {
             // this is a root level binding. we need to define getter/setters for it.
+            // 根级绑定. 为其设置 getter/setter
             if (computed && computed[key]) {
+                // 处理计算属性
                 // computed property
                 compiler.defineComputed(key, binding, computed[key])
             } else if (key.charAt(0) !== '$') {
                 // normal property
+                // 普通属性. 非私有属性
                 compiler.defineProp(key, binding)
             } else {
+                // 私有属性. 以 $为开头的属性
                 compiler.defineMeta(key, binding)
             }
         } else if (computed && computed[utils.baseKey(key)]) {
             // nested path on computed property
+            // 计算属性的嵌套数据
             compiler.defineExp(key, binding)
         } else {
             // ensure path in data so that computed properties that
             // access the path don't throw an error and can collect
             // dependencies
+            // 确保 带有路径的数据可计算. 且收集依赖
+            // 将路径上的值全部都转变为可观察.
             Observer.ensurePath(compiler.data, key)
+            // 最终值的父. 有可能还会是带有路径的数据.
             var parentKey = key.slice(0, key.lastIndexOf('.'))
+            // 
             if (!bindings[parentKey]) {
                 // this is a nested value binding, but the binding for its parent
                 // has not been created yet. We better create that one too.
+                // 确保每个值都会有个对应的绑定
                 compiler.createBinding(parentKey)
             }
         }
@@ -2491,6 +2520,8 @@ CompilerProto.defineProp = function (key, binding) {
  *  Define a meta property, e.g. $index or $key,
  *  which is bindable but only accessible on the VM,
  *  not in the data.
+ * 定义开头为 $的属性. 比如 $index, $key
+ * 这两种数据只能在 vm里访问. 不能从数据里读取到该值
  */
 CompilerProto.defineMeta = function (key, binding) {
     var vm = this.vm,
@@ -2501,7 +2532,9 @@ CompilerProto.defineMeta = function (key, binding) {
     // remove initital meta in data, since the same piece
     // of data can be observed by different VMs, each have
     // its own associated meta info.
+    // 移除 原先的 私有属性.
     delete this.data[key]
+    // 给 该私有vm 设置一个 getter/setter
     defGetSet(vm, key, {
         get: function () {
             if (Observer.shouldGet) ob.emit('get', key)
@@ -2517,20 +2550,29 @@ CompilerProto.defineMeta = function (key, binding) {
 /**
  *  Define an expression binding, which is essentially
  *  an anonymous computed property
+ * 定义一个表达式绑定. 本质上还是一个计算属性.
  */
 CompilerProto.defineExp = function (key, binding, directive) {
     var filters = directive && directive.computeFilters && directive.filters,
+        // 对指令解析, 取得一个解析后的 匿名方法.
         getter  = ExpParser.parse(key, this, null, filters)
     if (getter) {
+        // 作为一个计算属性, 去处理绑定
         this.markComputed(binding, getter)
     }
 }
 
 /**
  *  Define a computed property on the VM
+ * 将 options里的 computed 里的方法. 绑定到vm实例中
+ * {string} key 键名
+ * {binding} binding 捆绑指令
+ * {function} value方法
  */
 CompilerProto.defineComputed = function (key, binding, value) {
+    // 作为一个计算属性, 去处理绑定
     this.markComputed(binding, value)
+    // 在 实例vm上, 设置该属性的 get 与 setr
     defGetSet(this.vm, key, {
         get: binding.value.$get,
         set: binding.value.$set
@@ -2540,17 +2582,24 @@ CompilerProto.defineComputed = function (key, binding, value) {
 /**
  *  Process a computed property binding
  *  so its getter/setter are bound to proper context
+ * 处理计算的属性绑定. 使得 计算属性里的 getter/setter 绑定到正确的上下文中
+ * {binding} binding 捆绑类
+ * {function} value 表达式封装的匿名方法. 或 computed对象里的方法
  */
 CompilerProto.markComputed = function (binding, value) {
     binding.isComputed = true
     // bind the accessors to the vm
+    // 将指令的方法.绑定到 当前实例vm上
     if (binding.isFn) {
         binding.value = value
     } else {
         if (typeof value === 'function') {
+            // computed 可设置成一个 对象. 或者一个 {get(){}, set(){}}
+            // 这里就是为了做这个区分.
             value = { $get: value }
         }
         binding.value = {
+            // 代理绑定上下文
             $get: utils.bind(value.$get, this.vm),
             $set: value.$set
                 ? utils.bind(value.$set, this.vm)
@@ -2558,6 +2607,7 @@ CompilerProto.markComputed = function (binding, value) {
         }
     }
     // keep track for dep parsing later
+    // 将捆绑指令推送到 计算属性中
     this.computed.push(binding)
 }
 
@@ -2747,6 +2797,7 @@ function getRoot (compiler) {
 
 /**
  *  for convenience & minification
+ * 在对象上设置属性以及值
  */
 function defGetSet (obj, key, def) {
     Object.defineProperty(obj, key, def)
@@ -2944,7 +2995,9 @@ function catchDeps (binding) {
         // TODO: subs
         dep.subs.push(binding)
     })
-    // 触发编译器上的观察者
+    // 触发编译器上的观察者.
+    // compiler里 绑定的 on 另一个 'get'事件.
+    // 会导致触发 依赖收集的 get事件.
     binding.value.$get()
     catcher.off('get')
 }
@@ -3102,7 +3155,7 @@ function Directive (dirname, definition, expression, rawKey, compiler, node) {
     } else {
         this.filters = null
     }
-    // TODO:
+    // 是否为表达式
     this.isExp =
         this.computeFilters ||
         !SINGLE_VAR_RE.test(this.key) ||

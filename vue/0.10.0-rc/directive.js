@@ -125,7 +125,7 @@ function Directive (dirname, definition, expression, rawKey, compiler, node) {
     } else {
         this.filters = null
     }
-    // TODO:
+    // 是否为表达式
     this.isExp =
         this.computeFilters ||
         !SINGLE_VAR_RE.test(this.key) ||

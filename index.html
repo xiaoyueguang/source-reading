@@ -36,18 +36,41 @@
         },
         items: ['aa', 'bb'],
         show: true,
+        test3: {
+          msg: {
+            aa: 1
+          }
+        }
         // msg: 'hehe'
       },
       computed: {
         // hehe () {return this.test + 'tete'},
-        msg () {return this.test + 'test'},
-        fff () {return this.msg}
+        msg () {return this.test2.msg + 'test'},
+        fff () {return this.msg},
+        'ggg.fff' () {
+          return {aa: this.msg}
+        },
+        xx () {
+          return this.test3.msg.aa
+        }
+        // vvv: {
+        //   get () {},
+        //   set () {}
+        // }
       },
       methods: {
         test1 () {
           console.log(1)
         }
-      }
+      },
+      ready: [
+        // function () {
+        //   console.log(111)
+        // },
+        // function () {
+        //   console.log(222)
+        // }
+      ]
     })
     new Vue({
       el: '#app2'

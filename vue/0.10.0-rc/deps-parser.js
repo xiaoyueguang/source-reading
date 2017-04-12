@@ -47,7 +47,9 @@ function catchDeps (binding) {
         // TODO: subs
         dep.subs.push(binding)
     })
-    // 触发编译器上的观察者
+    // 触发编译器上的观察者.
+    // compiler里 绑定的 on 另一个 'get'事件.
+    // 会导致触发 依赖收集的 get事件.
     binding.value.$get()
     catcher.off('get')
 }

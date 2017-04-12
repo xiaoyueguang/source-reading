@@ -117,7 +117,7 @@ var utils = module.exports = {
     /**
      *  Most simple bind
      *  enough for the usecase and fast than native bind()
-     * 绑定上下文. 比原生的绑定更快?
+     * 绑定上下文.
      */
     bind: function (fn, ctx) {
         return function (arg) {
