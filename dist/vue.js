@@ -1930,6 +1930,7 @@ function Compiler (vm, options) {
     compiler.setupObserver()
 
     // create bindings for computed properties
+    // 计算属性绑定
     var computed = options.computed
     if (computed) {
         for (var key in computed) {
@@ -1938,6 +1939,7 @@ function Compiler (vm, options) {
     }
 
     // copy paramAttributes
+    // 复制属性
     if (options.paramAttributes) {
         options.paramAttributes.forEach(function (attr) {
             var val = compiler.eval(el.getAttribute(attr))
@@ -1946,17 +1948,20 @@ function Compiler (vm, options) {
     }
 
     // beforeCompile hook
+    // 触发钩子
     compiler.execHook('created')
 
     // the user might have set some props on the vm 
     // so copy it back to the data...
+    // 将vm上设置的一些属性 props 复制到data上
     extend(data, vm)
-
     // observe the data
+    // 转换data
     compiler.observeData(data)
     
     // for repeated items, create index/key bindings
     // because they are ienumerable
+    // 启用了 v-repeat的, 则将绑定 $index 以及$key
     if (compiler.repeat) {
         compiler.createBinding('$index')
         if (data.$key) {
@@ -1966,21 +1971,26 @@ function Compiler (vm, options) {
 
     // now parse the DOM, during which we will create necessary bindings
     // and bind the parsed directives
+    // 编译生成DOM节点. 并生成指令
     compiler.compile(el, true)
 
     // bind deferred directives (child components)
+    // 子组件需要延迟绑定生成指令
     compiler.deferred.forEach(function (dir) {
         compiler.bindDirective(dir)
     })
 
     // extract dependencies for computed properties
+    // 收集计算属性依赖
     compiler.parseDeps()
 
     // done!
+    // 原始内容清空. 初始化完成
     compiler.rawContent = null
     compiler.init = false
 
     // post compile / ready hook
+    // 完成后 触发 ready声明钩子
     compiler.execHook('ready')
 }
 
@@ -2004,6 +2014,7 @@ CompilerProto.setupElement = function (options) {
         // collect anything already in there
         /* jshint boss: true */
         var child,
+            // frag 原始内容. 
             frag = this.rawContent = document.createDocumentFragment()
         // 将原本的 模版全部都移动到 frag 下
         while (child = el.firstChild) {
@@ -2148,21 +2159,24 @@ CompilerProto.setupObserver = function () {
         }
     }
 }
-
+// 监听数据
 CompilerProto.observeData = function (data) {
 
     var compiler = this,
         observer = compiler.observer
 
     // recursively observe nested properties
+    // 递归观察转换 数据
     Observer.observe(data, '', observer)
 
     // also create binding for top level $data
     // so it can be used in templates too
+    // 绑定添加$data属性, 为$data添加绑定
     var $dataBinding = compiler.bindings['$data'] = new Binding(compiler, '$data')
     $dataBinding.update(data)
 
     // allow $data to be swapped
+    // 将$data 添加到 vm下
     defGetSet(compiler.vm, '$data', {
         enumerable: false,
         get: function () {
@@ -2180,6 +2194,7 @@ CompilerProto.observeData = function (data) {
     })
 
     // emit $data change on all changes
+    // 监听观察 $data
     observer
         .on('set', onSet)
         .on('mutate', onSet)
@@ -2196,9 +2211,11 @@ CompilerProto.observeData = function (data) {
 
 /**
  *  Compile a DOM node (recursive)
+ * 编译生成DOM节点. 递归.
  */
 CompilerProto.compile = function (node, root) {
     var nodeType = node.nodeType
+    // dom元素 与 text节点处理方式不一致
     if (nodeType === 1 && node.tagName !== 'SCRIPT') { // a normal node
         this.compileElement(node, root)
     } else if (nodeType === 3 && config.interpolate) {
@@ -2209,8 +2226,13 @@ CompilerProto.compile = function (node, root) {
 /**
  *  Check for a priority directive
  *  If it is present and valid, return true to skip the rest
+ * 检查DOM节点上的指令
+ * {string} dirname 指令名称
+ * {Element} node 节点
+ * {} root TODO:
  */
 CompilerProto.checkPriorityDir = function (dirname, node, root) {
+    console.log(dirname, node, root)
     var expression, directive, Ctor
     if (dirname === 'component' && root !== true && (Ctor = this.resolveComponent(node, undefined, true))) {
         directive = Directive.parse(dirname, '', this, node)
@@ -2231,6 +2253,7 @@ CompilerProto.checkPriorityDir = function (dirname, node, root) {
 
 /**
  *  Compile normal directives on a node
+ * 将节点上的指令提取出来
  */
 CompilerProto.compileElement = function (node, root) {
 
@@ -2633,6 +2656,7 @@ CompilerProto.getOption = function (type, id) {
 
 /**
  *  Emit lifecycle events to trigger hooks
+ * 触发生命周期钩子
  */
 CompilerProto.execHook = function (event) {
     event = 'hook:' + event
@@ -2651,6 +2675,7 @@ CompilerProto.hasKey = function (key) {
 
 /**
  *  Collect dependencies for computed properties
+ * 收集计算属性依赖
  */
 CompilerProto.parseDeps = function () {
     if (!this.computed.length) return
