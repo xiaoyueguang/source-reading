@@ -2229,23 +2229,28 @@ CompilerProto.compile = function (node, root) {
  * 检查DOM节点上的指令
  * {string} dirname 指令名称
  * {Element} node 节点
- * {} root TODO:
+ * {Boolean} root 是否为根节点
  */
 CompilerProto.checkPriorityDir = function (dirname, node, root) {
-    console.log(dirname, node, root)
     var expression, directive, Ctor
+    // 非root 即非根组件
     if (dirname === 'component' && root !== true && (Ctor = this.resolveComponent(node, undefined, true))) {
+        // 解析组件
         directive = Directive.parse(dirname, '', this, node)
         directive.Ctor = Ctor
     } else {
+        // 获取表达式
         expression = utils.attr(node, dirname)
+        // 对表达式解析
         directive = expression && Directive.parse(dirname, expression, this, node)
     }
     if (directive) {
         if (root === true) {
+            // 优先指令, 不能绑定到根节点上
             utils.warn('Directive v-' + dirname + ' cannot be used on manually instantiated root node.')
             return
         }
+        // 将指令推送到 deferred 数组里, 延迟执行
         this.deferred.push(directive)
         return true
     }
@@ -2260,6 +2265,7 @@ CompilerProto.compileElement = function (node, root) {
     // textarea is pretty annoying
     // because its value creates childNodes which
     // we don't want to compile.
+    // textarea 区别对待.
     if (node.tagName === 'TEXTAREA' && node.value) {
         node.value = this.eval(node.value)
     }
@@ -2267,9 +2273,11 @@ CompilerProto.compileElement = function (node, root) {
     // only compile if this element has attributes
     // or its tagName contains a hyphen (which means it could
     // potentially be a custom element)
+    // 判断 该DOM节点是否为 组件
     if (node.hasAttributes() || node.tagName.indexOf('-') > -1) {
 
         // skip anything with v-pre
+        // 当节点上有 v-pre指令时, 跳过编译
         if (utils.attr(node, 'pre') !== null) {
             return
         }
@@ -2277,7 +2285,9 @@ CompilerProto.compileElement = function (node, root) {
         // check priority directives.
         // if any of them are present, it will take over the node with a childVM
         // so we can skip the rest
+        // 先处理优先指令.
         for (var i = 0, l = priorityDirectives.length; i < l; i++) {
+            // 检查是否为优先指令. 如果是的话. 则停止解析
             if (this.checkPriorityDir(priorityDirectives[i], node, root)) {
                 return
             }
@@ -2288,7 +2298,7 @@ CompilerProto.compileElement = function (node, root) {
         node.vue_trans  = utils.attr(node, 'transition')
         node.vue_anim   = utils.attr(node, 'animation')
         node.vue_effect = this.eval(utils.attr(node, 'effect'))
-
+        // TODO:2017/4/15
         var prefix = config.prefix + '-',
             attrs = slice.call(node.attributes),
             params = this.options.paramAttributes,
@@ -2687,6 +2697,10 @@ CompilerProto.parseDeps = function () {
  *  includes bindings. It accepts additional raw data
  *  because we need to dynamically resolve v-component
  *  before a childVM is even compiled...
+ * 接受一个只编译一次的字符串.
+ * {string} exp 表达式
+ * {object} data 组件的值
+ * @return TODO:
  */
 CompilerProto.eval = function (exp, data) {
     var parsed = TextParser.parseAttr(exp)
@@ -2698,12 +2712,18 @@ CompilerProto.eval = function (exp, data) {
 /**
  *  Resolve a Component constructor for an element
  *  with the data to be used
+ * 获取组件的生成方法
+ * {Element} node 节点
+ * {Object} data 数据
+ * {} test TODO: 表达式?
+ * @return {function} 返回一个方法. 这个方法即会对组件 执行实例化.
  */
 CompilerProto.resolveComponent = function (node, data, test) {
 
     // late require to avoid circular deps
+    // 加载 viewmodel
     ViewModel = ViewModel || __webpack_require__(2)
-
+    
     var exp     = utils.attr(node, 'component'),
         tagName = node.tagName,
         id      = this.eval(exp, data),
@@ -2723,11 +2743,13 @@ CompilerProto.resolveComponent = function (node, data, test) {
 
 /**
  *  Unbind and remove element
+ * 摧毁
  */
 CompilerProto.destroy = function () {
 
     // avoid being called more than once
     // this is irreversible!
+    // 避免多次摧毁
     if (this.destroyed) return
 
     var compiler = this,
@@ -2740,13 +2762,15 @@ CompilerProto.destroy = function () {
         delegators  = compiler.delegators,
         children    = compiler.children,
         parent      = compiler.parent
-
+    // 触发生命周期钩子 beforeDestroy
     compiler.execHook('beforeDestroy')
 
     // unobserve data
+    // 取消监听
     Observer.unobserve(compiler.data, '', compiler.observer)
 
     // unbind all direcitves
+    // 解绑指令
     i = directives.length
     while (i--) {
         dir = directives[i]
@@ -2754,20 +2778,25 @@ CompilerProto.destroy = function () {
         // e.g. a directive that refers to a variable on the parent VM
         // we need to remove it from that binding's directives
         // * empty and literal bindings do not have binding.
+        // 指令所绑定的编译器 与当前编译器不一致
         if (dir.binding && dir.binding.compiler !== compiler) {
             dirs = dir.binding.dirs
+            // 将该指令从外部的 编译器上移除掉
             if (dirs) dirs.splice(dirs.indexOf(dir), 1)
         }
+        // 接触绑定
         dir.unbind()
     }
 
     // unbind all computed, anonymous bindings
+    // 将计算属性生成的指令解绑
     i = computed.length
     while (i--) {
         computed[i].unbind()
     }
 
     // unbind all keypath bindings
+    // 解绑所有的路径绑定类
     for (key in bindings) {
         binding = bindings[key]
         if (binding) {
@@ -2776,34 +2805,41 @@ CompilerProto.destroy = function () {
     }
 
     // remove all event delegators
+    // 移除事件绑定
     for (key in delegators) {
         el.removeEventListener(key, delegators[key].handler)
     }
 
     // destroy all children
+    // 有子组件的话, 全部都调用子组件的 destroy
     i = children.length
     while (i--) {
         children[i].destroy()
     }
 
     // remove self from parent
+    // 如果被移除的是 某个子组件, 则将自身从父组件里移除
     if (parent) {
         parent.children.splice(parent.children.indexOf(compiler), 1)
     }
 
     // finally remove dom element
+    // 移除掉 DOM 元素
     if (el === document.body) {
         el.innerHTML = ''
     } else {
         vm.$remove()
     }
+    // 取消 dom元素上的 vm引用
     el.vue_vm = null
-
+    // 标记为已被摧毁
     compiler.destroyed = true
     // emit destroy hook
+    // 触发生命钩子 afterDestroy
     compiler.execHook('afterDestroy')
 
     // finally, unregister all listeners
+    // 取消编译器上 观察者 和触发器 所有的监听事件
     compiler.observer.off()
     compiler.emitter.off()
 }
@@ -2812,6 +2848,7 @@ CompilerProto.destroy = function () {
 
 /**
  *  shorthand for getting root compiler
+ * 获取 编译器的根节点
  */
 function getRoot (compiler) {
     while (compiler.parent) {
