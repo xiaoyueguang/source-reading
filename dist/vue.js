@@ -2297,32 +2297,35 @@ CompilerProto.compileElement = function (node, root) {
         // 检查动画或过渡属性
         node.vue_trans  = utils.attr(node, 'transition')
         node.vue_anim   = utils.attr(node, 'animation')
-        node.vue_effect = this.eval(utils.attr(node, 'effect'))
-        // TODO:2017/4/15
+        node.vue_effect = this.eval(utils.attr(node, 'effect'))        //  前缀
         var prefix = config.prefix + '-',
+            // 将 节点上的属性转为数组方式
             attrs = slice.call(node.attributes),
+            // 读取传入的 参数属性
             params = this.options.paramAttributes,
             attr, isDirective, exps, exp, directive, dirname
 
         i = attrs.length
         while (i--) {
-
             attr = attrs[i]
-            isDirective = false
 
+            isDirective = false
+            // 判断是否为指令
             if (attr.name.indexOf(prefix) === 0) {
                 // a directive - split, parse and bind it.
                 isDirective = true
+                // 将表达式切割
                 exps = Directive.split(attr.value)
                 // loop through clauses (separated by ",")
                 // inside each attribute
                 l = exps.length
+                // 循环表达式 绑定
                 while (l--) {
                     exp = exps[l]
                     dirname = attr.name.slice(prefix.length)
                     directive = Directive.parse(dirname, exp, this, node)
-
                     if (dirname === 'with') {
+                        // with 指令 继承父类数据
                         this.bindDirective(directive, this.parent)
                     } else {
                         this.bindDirective(directive)
@@ -2331,19 +2334,22 @@ CompilerProto.compileElement = function (node, root) {
                 }
             } else if (config.interpolate) {
                 // non directive attribute, check interpolation tags
+                // 非指令属性.
+                // 将文本值 转为表达式
                 exp = TextParser.parseAttr(attr.value)
                 if (exp) {
                     directive = Directive.parse('attr', attr.name + ':' + exp, this, node)
                     if (params && params.indexOf(attr.name) > -1) {
                         // a param attribute... we should use the parent binding
                         // to avoid circular updates like size={{size}}
+                        // 属性较多的时候 通过父 绑定. 避免更新多次
                         this.bindDirective(directive, this.parent)
                     } else {
                         this.bindDirective(directive)
                     }
                 }
             }
-
+            // 移除 dom上的 指令. v-cloak则在整个vm解析完成之后再移除
             if (isDirective && dirname !== 'cloak') {
                 node.removeAttribute(attr.name)
             }
@@ -2352,6 +2358,7 @@ CompilerProto.compileElement = function (node, root) {
     }
 
     // recursively compile childNodes
+    // 如果有子节点的话. 递归编译
     if (node.hasChildNodes()) {
         slice.call(node.childNodes).forEach(this.compile, this)
     }
@@ -2359,56 +2366,70 @@ CompilerProto.compileElement = function (node, root) {
 
 /**
  *  Compile a text node
+ * 解析文字节点
  */
 CompilerProto.compileTextNode = function (node) {
-
+    // 文字节点解析. 获得一个令牌. 令牌类型看该方法注释
     var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
     var el, token, directive
-
     for (var i = 0, l = tokens.length; i < l; i++) {
 
         token = tokens[i]
         directive = null
 
+        // 检查该令牌绑定的键值
         if (token.key) { // a binding
             if (token.key.charAt(0) === '>') { // a partial
                 el = document.createComment('ref')
                 directive = Directive.parse('partial', token.key.slice(1), this, el)
             } else {
+                // 文字绑定
                 if (!token.html) { // text binding
+                    // 创建一个文字节点
                     el = document.createTextNode('')
                     directive = Directive.parse('text', token.key, this, el)
-                } else { // html binding
+            } else { // html binding
+                // html绑定. 指令调用html内容
                     el = document.createComment(config.prefix + '-html')
+                    window.a = el
                     directive = Directive.parse('html', token.key, this, el)
                 }
             }
         } else { // a plain string
+            // 纯字符 直接创建文字节点. 不绑定.
             el = document.createTextNode(token)
         }
 
         // insert node
+        // 插入被绑定了指令的 节点
         node.parentNode.insertBefore(el, node)
         // bind directive
+        // 将指令绑定到 绑定类和vm中
         this.bindDirective(directive)
 
     }
+    // 移除原先的, 未绑定的节点
     node.parentNode.removeChild(node)
 }
 
 /**
  *  Add a directive instance to the correct binding & viewmodel
+ * 将指令绑定到 绑定类和vm中. 即如何处理生成的指令.
+ * {Directive} directive 指令
+ * {Binding} bindingOwner 绑定类
  */
 CompilerProto.bindDirective = function (directive, bindingOwner) {
 
     if (!directive) return
 
     // keep track of it so we can unbind() later
+    // 将指令传入 指令集
     this.dirs.push(directive)
 
     // for empty or literal directives, simply call its bind()
     // and we're done.
+    // 这里涉及到指令的特殊处理. 是否为空或 为文字 则只进行绑定操作
     if (directive.isEmpty || directive.isLiteral) {
         if (directive.bind) directive.bind()
         return
@@ -2418,12 +2439,15 @@ CompilerProto.bindDirective = function (directive, bindingOwner) {
     var binding,
         compiler = bindingOwner || this,
         key      = directive.key
-
+    // 指令是否为表达式
     if (directive.isExp) {
+        console.log(directive)
         // expression bindings are always created on current compiler
+        // 如果指令里为表达式的话, 则在当前的编译器里绑定表达式
         binding = compiler.createBinding(key, directive)
     } else {
         // recursively locate which compiler owns the binding
+        // 从当前编译器上往上查找. 找到拥有该 绑定类的 编译器
         while (compiler) {
             if (compiler.hasKey(key)) {
                 break
@@ -2432,23 +2456,28 @@ CompilerProto.bindDirective = function (directive, bindingOwner) {
             }
         }
         compiler = compiler || this
+        // 取出从某个编译器上找到的 指令绑定..
         binding = compiler.bindings[key] || compiler.createBinding(key)
     }
+    // 将指令传入该指令集中
     binding.dirs.push(directive)
+    // 更新指令的绑定
     directive.binding = binding
-
+    // 从指令上获取一个新的值.
     var value = binding.val()
     // invoke bind hook if exists
+    // 如果指令上有 bind, 则添加绑定这个值
     if (directive.bind) {
         directive.bind(value)
     }
     // set initial value
+    // 设置值
     directive.update(value, true)
 }
 
 /**
  *  Create binding and attach getter/setter for a key to the viewmodel object
- * 为 vm 创建绑定一个 getter/setter
+ * 为 vm 创建绑定一个 getter/setter. 即 绑定表达式
  * {string} key 属性名
  * {Directive} directive 指令
  */
@@ -2514,7 +2543,7 @@ CompilerProto.createBinding = function (key, directive) {
     }
     return binding
 }
-
+// TODO:2017/4/18
 /**
  *  Define the getter/setter for a root-level property on the VM
  *  and observe the initial value
