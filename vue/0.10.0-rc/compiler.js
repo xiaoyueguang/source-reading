@@ -220,7 +220,6 @@ CompilerProto.setupElement = function (options) {
          * replace 存在时, 则将模版的第一个子元素复制插入到 el前, 移除el
          * 来达到替换el
          */
-        console.log(options.replace)
         if (options.replace && template.childNodes.length === 1) {
             var replacer = template.childNodes[0].cloneNode(true)
             if (el.parentNode) {
@@ -635,7 +634,6 @@ CompilerProto.bindDirective = function (directive, bindingOwner) {
         key      = directive.key
     // 指令是否为表达式
     if (directive.isExp) {
-        console.log(directive)
         // expression bindings are always created on current compiler
         // 如果指令里为表达式的话, 则在当前的编译器里绑定表达式
         binding = compiler.createBinding(key, directive)
@@ -707,7 +705,7 @@ CompilerProto.createBinding = function (key, directive) {
                 compiler.defineComputed(key, binding, computed[key])
             } else if (key.charAt(0) !== '$') {
                 // normal property
-                // 普通属性. 非私有属性
+                // 普通属性. 非私有属性. 转换值
                 compiler.defineProp(key, binding)
             } else {
                 // 私有属性. 以 $为开头的属性
@@ -737,10 +735,11 @@ CompilerProto.createBinding = function (key, directive) {
     }
     return binding
 }
-// TODO:2017/4/18
+
 /**
  *  Define the getter/setter for a root-level property on the VM
  *  and observe the initial value
+ * 在根 vm实例上, 定义 getter/setter. 观察初始值
  */
 CompilerProto.defineProp = function (key, binding) {
     
@@ -750,18 +749,21 @@ CompilerProto.defineProp = function (key, binding) {
 
     // make sure the key is present in data
     // so it can be observed
+    // 确定 该值是否在 data中. 确定可观察
     if (!(hasOwn.call(data, key))) {
         data[key] = undefined
     }
 
     // if the data object is already observed, but the key
     // is not observed, we need to add it to the observed keys.
+    // 如果该值 可在 __emitter__ 中找到. 则表明该值已经被观察.
+    // 否者将其转换
     if (ob && !(hasOwn.call(ob.values, key))) {
         Observer.convertKey(data, key)
     }
 
     binding.value = data[key]
-
+    // 在当前编译器上 设置 getter/setter
     defGetSet(compiler.vm, key, {
         get: function () {
             return compiler.data[key]
@@ -869,6 +871,7 @@ CompilerProto.markComputed = function (binding, value) {
 
 /**
  *  Retrive an option from the compiler
+ * 从编译器检索一个元素
  */
 CompilerProto.getOption = function (type, id) {
     var opts = this.options,
@@ -882,7 +885,7 @@ CompilerProto.getOption = function (type, id) {
                 : globalAssets[type] && globalAssets[type][id]
         )
     } catch (e) {
-        
+        // console.error(type, id)
     }
     return result
 }
@@ -899,6 +902,7 @@ CompilerProto.execHook = function (event) {
 
 /**
  *  Check if a compiler's data contains a keypath
+ * 判断该值 是否在编译器上.
  */
 CompilerProto.hasKey = function (key) {
     var baseKey = utils.baseKey(key)
@@ -923,9 +927,10 @@ CompilerProto.parseDeps = function () {
  * 接受一个只编译一次的字符串.
  * {string} exp 表达式
  * {object} data 组件的值
- * @return TODO:
+ * @return 表达式
  */
 CompilerProto.eval = function (exp, data) {
+    console.log(exp, data)
     var parsed = TextParser.parseAttr(exp)
     return parsed
         ? ExpParser.eval(parsed, this, data)
