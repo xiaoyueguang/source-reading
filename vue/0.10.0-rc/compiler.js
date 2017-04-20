@@ -67,7 +67,7 @@ function Compiler (vm, options) {
     var data = compiler.data = options.data || {}
     extend(vm, data, true)
     extend(vm, options.methods, true)
-    // TODO: compilerOptions
+    // 组件上的 选项.
     extend(compiler, options.compilerOptions)
 
     // initialize element
@@ -84,7 +84,7 @@ function Compiler (vm, options) {
     compiler.bindings = makeHash()
     // 指令
     compiler.dirs = []
-    // TODO:
+    // 指令集
     compiler.deferred = []
     // 计算属性.
     // 不仅包含 computed属性里的方法
@@ -930,7 +930,6 @@ CompilerProto.parseDeps = function () {
  * @return 表达式
  */
 CompilerProto.eval = function (exp, data) {
-    console.log(exp, data)
     var parsed = TextParser.parseAttr(exp)
     return parsed
         ? ExpParser.eval(parsed, this, data)

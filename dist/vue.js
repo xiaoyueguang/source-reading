@@ -1873,7 +1873,7 @@ function Compiler (vm, options) {
     var data = compiler.data = options.data || {}
     extend(vm, data, true)
     extend(vm, options.methods, true)
-    // TODO: compilerOptions
+    // 组件上的 选项.
     extend(compiler, options.compilerOptions)
 
     // initialize element
@@ -1890,7 +1890,7 @@ function Compiler (vm, options) {
     compiler.bindings = makeHash()
     // 指令
     compiler.dirs = []
-    // TODO:
+    // 指令集
     compiler.deferred = []
     // 计算属性.
     // 不仅包含 computed属性里的方法
@@ -2736,7 +2736,6 @@ CompilerProto.parseDeps = function () {
  * @return 表达式
  */
 CompilerProto.eval = function (exp, data) {
-    console.log(exp, data)
     var parsed = TextParser.parseAttr(exp)
     return parsed
         ? ExpParser.eval(parsed, this, data)
@@ -3420,14 +3419,22 @@ module.exports = Directive
 /* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * html 有两种.
+ * 一种是指令 v-html
+ * 一种是 {{{}}}
+ */
 var guard = __webpack_require__(0).guard,
     slice = [].slice
-
 module.exports = {
-
+    // 绑定 默认放到 div 标签中
     bind: function () {
         // a comment node means this is a binding for
         // {{{ inline unescaped html }}}
+        // 如果是 通过 {{{}}}去绑定的.
+        // this.el 将会是一个注释.
+        // <!--v-html-->. 用来做位置标记
+        // 需要创建一个 holder属性.以及节点 来暂存生成的 dom
         if (this.el.nodeType === 8) {
             // hold nodes
             this.holder = document.createElement('div')
@@ -3438,23 +3445,28 @@ module.exports = {
     update: function (value) {
         value = guard(value)
         if (this.holder) {
+            // {{{}}} 更新
             this.swap(value)
         } else {
+            // v-html 更新. 直接将 dom里的 整个替换掉
             this.el.innerHTML = value
         }
     },
-
+    // {{{}}} 更新
     swap: function (value) {
         var parent = this.el.parentNode,
             holder = this.holder,
             nodes = this.nodes,
             i = nodes.length, l
+        // 将父类的移除掉节点. 因为有其它节点. 所以通过以下方式去移除
         while (i--) {
             parent.removeChild(nodes[i])
         }
+        // 重新放入节点
         holder.innerHTML = value
         nodes = this.nodes = slice.call(holder.childNodes)
         for (i = 0, l = nodes.length; i < l; i++) {
+            // 将元素插入到 <!--v-html--> 前.
             parent.insertBefore(nodes[i], this.el)
         }
     }
@@ -3464,6 +3476,15 @@ module.exports = {
 /* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * v-if 是采取将 起本身元素 解析为一个实例.
+ * 而后对该实例进行 显示隐藏操作.
+ * 通过$before 来保证实现过渡效果
+ * 由于是一个实例. 因此每次切换的时候都会对其进行实例化.
+ * 导致切换的开销会变得很大...
+ * 但是因为它只是在 值为 true时, 才会开始渲染. 因此有一种惰性.
+ * 使得初始渲染基本为0.
+ */
 var utils    = __webpack_require__(0)
 
 module.exports = {
@@ -3471,13 +3492,18 @@ module.exports = {
     bind: function () {
         
         this.parent = this.el.parentNode
+        // 标记
         this.ref    = document.createComment('vue-if')
+        // 获得 编译器生成器
         this.Ctor   = this.compiler.resolveComponent(this.el)
 
         // insert ref
+        // 插入标记
         this.parent.insertBefore(this.ref, this.el)
+        // 移除原先模版
         this.parent.removeChild(this.el)
-
+        // v-if 不能与 v-view 以及 v-repeat 同时存在
+        // 因为都进行了组件的实例化
         if (utils.attr(this.el, 'view')) {
             utils.warn('Conflict: v-if cannot be used together with v-view')
         }
@@ -3485,19 +3511,25 @@ module.exports = {
             utils.warn('Conflict: v-if cannot be used together with v-repeat')
         }
     },
-
+    /**
+     * {boolean} value 是否显示
+     * 因为这个的
+     */
     update: function (value) {
-
         if (!value) {
+            // 摧毁解绑
             this._unbind()
         } else if (!this.childVM) {
+            // 如果还没有创建子组件. 则新建一个且将实例赋值给 childVM
             this.childVM = new this.Ctor({
                 el: this.el.cloneNode(true),
                 parent: this.vm
             })
             if (this.compiler.init) {
+                // 这里插入不会产生过渡效果
                 this.parent.insertBefore(this.childVM.$el, this.ref)
             } else {
+                // $before 会执行过渡方法
                 this.childVM.$before(this.ref)
             }
         }
@@ -3505,6 +3537,8 @@ module.exports = {
     },
 
     unbind: function () {
+        // 解绑. 如果有子组件时. 执行 摧毁方法.
+        // 而destroy 会自动摧毁本身以及全部的子组件.
         if (this.childVM) {
             this.childVM.$destroy()
             this.childVM = null

@@ -50,7 +50,7 @@
 13. binding
 14. directive
 - directives文件夹
-- compiler
+16. compiler
 
 > 从 `filters`, `transition`开始感觉有点抽象了.  
 > 需要写类似的代码, 利用调试来明白各个参数的意义了
