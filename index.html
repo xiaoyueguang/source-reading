@@ -30,9 +30,32 @@
       <!--<div v-text="msg + '!'"></div>
       <div v-text="msg + '!'"></div>
       <div v-show = "show" v-transition="v">{{test}}!</div>-->
+      <input type="text" id="input">
   </body>
   <script src="./dist/vue.js"></script>
   <script>
+    document.getElementById('input').addEventListener('compositionstart', function (e) {
+      console.log(this.value, e)
+    })
+
+    document.getElementById('input').addEventListener('compositionupdate', function (e) {
+      console.log(this.value)
+    })
+
+    document.getElementById('input').addEventListener('compositionend', function (e) {
+      console.log(this.value, e)
+    })
+
+    // setInterval(() => {
+    //   input.value = Math.random()
+    // }, 1000)
+    // setInterval(() => {
+    //   var length = input.selectionStart
+    //   var random = Math.floor(Math.random() * length)
+    //   console.log(length)
+    //   input.setSelectionRange(length, length)
+    // })
+  
     Vue.prototype.$msg = 'xxxxx'
     window.$vm = new Vue({
       el: '#app',
