@@ -619,7 +619,6 @@ CompilerProto.bindDirective = function (directive, bindingOwner) {
     // keep track of it so we can unbind() later
     // 将指令传入 指令集
     this.dirs.push(directive)
-
     // for empty or literal directives, simply call its bind()
     // and we're done.
     // 这里涉及到指令的特殊处理. 是否为空或 为文字 则只进行绑定操作

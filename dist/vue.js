@@ -74,8 +74,8 @@
  * 助手方法
  */
 var config    = __webpack_require__(1),
-    toString  = ({}).toString,
     win       = window,
+    toString  = ({}).toString,
     console   = win.console,
     timeout   = win.setTimeout,
     THIS_RE   = /[^\w]this[^\w]/,
@@ -2425,7 +2425,6 @@ CompilerProto.bindDirective = function (directive, bindingOwner) {
     // keep track of it so we can unbind() later
     // 将指令传入 指令集
     this.dirs.push(directive)
-
     // for empty or literal directives, simply call its bind()
     // and we're done.
     // 这里涉及到指令的特殊处理. 是否为空或 为文字 则只进行绑定操作
@@ -3899,12 +3898,15 @@ module.exports = {
 /* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 绑定事件
+ */
 var utils    = __webpack_require__(0)
 
 module.exports = {
-
+    // 方法
     isFn: true,
-
+    // 绑定上下文
     bind: function () {
         this.context = this.binding.isExp
             ? this.vm
@@ -3912,24 +3914,30 @@ module.exports = {
     },
 
     update: function (handler) {
+        // 判断是否为 方法.
         if (typeof handler !== 'function') {
             utils.warn('Directive "on" expects a function value.')
             return
         }
+        // 解绑 每次更新后, 需要接触原先的绑定. 再绑定新的方法.
+        // 确保只绑定一次.
         this._unbind()
         var vm = this.vm,
             context = this.context
         this.handler = function (e) {
             e.targetVM = vm
             context.$event = e
+            // 执行方法.
             var res = handler.call(context, e)
             context.$event = null
             return res
         }
+        // 绑定方法
         this.el.addEventListener(this.arg, this.handler)
     },
 
     unbind: function () {
+        // 解绑
         this.el.removeEventListener(this.arg, this.handler)
     }
 }
@@ -4257,6 +4265,11 @@ function indexOf (vms, obj) {
 /* 19 */
 /***/ (function(module, exports) {
 
+/**
+ * 样式
+ * 这个 v-style 与 以后的 :style 用法不一样.
+ * v-style = 'font-size: "12px"'
+ */
 var camelRE = /-([a-z])/g,
     prefixes = ['webkit', 'moz', 'ms']
 
@@ -4267,32 +4280,41 @@ function camelReplacer (m) {
 module.exports = {
 
     bind: function () {
+        // prop 为 样式名称
         var prop = this.arg
         if (!prop) return
         var first = prop.charAt(0)
         if (first === '$') {
             // properties that start with $ will be auto-prefixed
+            // 前面有 $标记的时. 需要自动添加前缀
             prop = prop.slice(1)
             this.prefixed = true
         } else if (first === '-') {
             // normal starting hyphens should not be converted
             prop = prop.slice(1)
         }
+        // 将 带有 - 的属性名 转为 驼峰
         this.prop = prop.replace(camelRE, camelReplacer)
+        
     },
 
     update: function (value) {
+        // 更新 判断键值
         var prop = this.prop
         if (prop) {
+            // 更新对应的值
             this.el.style[prop] = value
+            // 添加浏览器前缀
             if (this.prefixed) {
                 prop = prop.charAt(0).toUpperCase() + prop.slice(1)
                 var i = prefixes.length
                 while (i--) {
+                    // 添加各个前缀符
                     this.el.style[prefixes[i] + prop] = value
                 }
             }
         } else {
+            // 直接更新 style上的值
             this.el.style.cssText = value
         }
     }

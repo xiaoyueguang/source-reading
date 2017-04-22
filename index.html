@@ -20,7 +20,7 @@
       <p v-repeat="items">{{$value}} <span>12</span></p>
       <aaa :hehe = '123'></aaa>
       <div>
-        <p>ceshi1 </p>
+        <div v-style='background: "#000", width: "100px", color: color, font-size: "100px", $transform: "scale(2)"'>ceshi1</div>
         {{{html}}}
         <div v-html="html"></div>
       </div>
@@ -71,17 +71,21 @@
             aa: 1
           }
         },
-        html: '<p>Hello Html</p><p>Hello Html</p>'
+        html: '<p>Hello Html</p><p>Hello Html</p>',
+        styleObject: {
+          background: '#000',
+        },
+        color: '#fff'
         // msg: 'hehe'
       },
       computed: {
         // hehe () {return this.test + 'tete'},
-        msg () {return this.test2.msg + 'test'},
-        fff () {return this.msg},
-        'ggg.fff' () {
+        msg: function () {return this.test2.msg + 'test'},
+        fff: function () {return this.msg},
+        'ggg.fff': function () {
           return {aa: this.msg}
         },
-        xx () {
+        xx: function () {
           return this.test3.msg.aa
         }
         // vvv: {
@@ -90,7 +94,7 @@
         // }
       },
       methods: {
-        test1 () {
+        test1: function () {
           console.log(1)
         }
       },

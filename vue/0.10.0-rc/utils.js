@@ -2,8 +2,8 @@
  * 助手方法
  */
 var config    = require('./config'),
-    toString  = ({}).toString,
     win       = window,
+    toString  = ({}).toString,
     console   = win.console,
     timeout   = win.setTimeout,
     THIS_RE   = /[^\w]this[^\w]/,
