@@ -4052,7 +4052,8 @@ module.exports = {
     },
 
     update: function (collection) {
-
+        // v-repeat 支持 循环 数组和对象
+        // 这一步就是将 对象转为数组
         if (utils.typeOf(collection) === 'Object') {
             collection = utils.objectToArray(collection)
         }
@@ -4060,29 +4061,34 @@ module.exports = {
         // if initiating with an empty collection, we need to
         // force a compile so that we get all the bindings for
         // dependency extraction.
+        // 如果 收集到的依赖为空的话. 那就通过 创建子组件的方式 收集依赖
         if (!this.initiated && (!collection || !collection.length)) {
             this.dryBuild()
         }
 
         // keep reference of old data and VMs
         // so we can reuse them if possible
+        // 将现有的 子组件实例 传到一个 旧实例中
         this.oldVMs = this.vms
+        // 同样收集也是
         this.oldCollection = this.collection
         collection = this.collection = collection || []
-
+        // 判断 收集器里的长度. 以及判断 元素是否为 对象
         var isObject = collection[0] && utils.typeOf(collection[0]) === 'Object'
+        // 判断旧的收集器里是否存在元素.
+        // 从而决定是进行 diff 操作 还是 init 操作
         this.vms = this.oldCollection
             ? this.diff(collection, isObject)
             : this.init(collection, isObject)
-
+        // 父组件下 添加该子组件集合
         if (this.childId) {
             this.vm.$[this.childId] = this.vms
         }
-
     },
 
     /**
      *  Run a dry build just to collect bindings
+     * 循环创建子组件
      */
     dryBuild: function () {
         var el = this.el.cloneNode(true),
@@ -4093,12 +4099,15 @@ module.exports = {
             compilerOptions: {
                 repeat: true
             }
+        // TODO: $destroy 有什么用?
         }).$destroy()
+        // 初始化完成
         this.initiated = true
     },
-
+    // 初始化
     init: function (collection, isObject) {
         var vm, vms = []
+        // 创建一个数组
         for (var i = 0, l = collection.length; i < l; i++) {
             vm = this.build(collection[i], i, isObject)
             vms.push(vm)
