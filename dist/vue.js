@@ -3576,6 +3576,7 @@ module.exports = {
     partial   : __webpack_require__(17),
     view      : __webpack_require__(20),
 
+    // 组件创建以及摧毁
     component : {
         isLiteral: true,
         bind: function () {
@@ -3594,10 +3595,12 @@ module.exports = {
     },
 
     attr: {
+        // 值 读取
         bind: function () {
             var params = this.vm.$options.paramAttributes
             this.isParam = params && params.indexOf(this.arg) > -1
         },
+        // 更新
         update: function (value) {
             if (value || value === 0) {
                 this.el.setAttribute(this.arg, value)
@@ -3624,6 +3627,8 @@ module.exports = {
     },
 
     show: function (value) {
+        // 改变display, 触发 过渡
+        // 不会引起子组件重新渲染
         var el = this.el,
             target = value ? '' : 'none',
             change = function () {
@@ -3633,6 +3638,7 @@ module.exports = {
     },
 
     'class': function (value) {
+        // 添加删除类
         if (this.arg) {
             utils[value ? 'addClass' : 'removeClass'](this.el, this.arg)
         } else {
@@ -3946,6 +3952,16 @@ module.exports = {
 /* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * v-partial = {{partialId}}
+ * data: {
+ *  partialId: 'temp'
+ * },
+ * partials: {
+ *          // 片段中也可引用 变量
+ *   temp: '<p>{{test}}</p>'
+ * }
+ */
 var utils = __webpack_require__(0)
 
 module.exports = {
@@ -3957,22 +3973,25 @@ module.exports = {
         var compiler = this.compiler,
             id = this.expression
         if (!id) return
-
+        // 读取表达式里的 变量.
+        // 当表达式为 yield 的时候. 读取原先的 html 片段
         var partial = id === 'yield'
             ? this.compiler.rawContent
+            // 查找对应的片段
             : this.compiler.getOption('partials', id)
-
+        // 片段为空的时候 警告报错
         if (!partial) {
             utils.warn('Unknown partial: ' + id)
             return
         }
-
+        // 复制一份新的片段
         partial = partial.cloneNode(true)
 
         // comment ref node means inline partial
         if (this.el.nodeType === 8) {
 
             // keep a ref for the partial's content nodes
+            // 将片段插入到 dom中
             var nodes = [].slice.call(partial.childNodes),
                 ref = this.el,
                 parent = ref.parentNode
@@ -3981,11 +4000,13 @@ module.exports = {
             // compile partial after appending, because its children's parentNode
             // will change from the fragment to the correct parentNode.
             // This could affect directives that need access to its element's parentNode.
+            // 将node 节点编译
             nodes.forEach(compiler.compile, compiler)
 
         } else {
 
             // just set innerHTML...
+            // 元素下为空的时候直接插入
             this.el.innerHTML = ''
             this.el.appendChild(partial.cloneNode(true))
 
@@ -3998,26 +4019,32 @@ module.exports = {
 /* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 循环
+ * 
+ */
 var utils      = __webpack_require__(0),
     config     = __webpack_require__(1)
 
 module.exports = {
 
     bind: function () {
-
+        // 独一无二
         this.identifier = '$repeat' + this.id
 
         var el   = this.el,
             ctn  = this.container = el.parentNode
 
         // extract child Id, if any
+        // 取出节点里的内容 并且编译
         this.childId = this.compiler.eval(utils.attr(el, 'ref'))
 
         // create a comment node as a reference node for DOM insertions
+        // 创建一个路标注释
         this.ref = document.createComment(config.prefix + '-repeat-' + this.key)
         ctn.insertBefore(this.ref, el)
         ctn.removeChild(el)
-
+        // 定义
         this.initiated = false
         this.collection = null
         this.vms = null
@@ -4325,6 +4352,9 @@ module.exports = {
 /* 20 */
 /***/ (function(module, exports) {
 
+/**
+ * v-view 子组件
+ */
 module.exports = {
 
     bind: function () {
@@ -4332,6 +4362,7 @@ module.exports = {
         // track position in DOM with a ref node
         var el       = this.raw = this.el,
             parent   = el.parentNode,
+            // 通过 注释 v-view 跟踪
             ref      = this.ref = document.createComment('v-view')
         parent.insertBefore(ref, el)
         parent.removeChild(el)
@@ -4349,12 +4380,12 @@ module.exports = {
     update: function(value) {
 
         this._unbind()
-
+        // 
         var Ctor  = this.compiler.getOption('components', value)
         if (!Ctor) return
 
         var inner = this.inner.cloneNode(true)
-
+        // 创建一个新的组件
         this.childVM = new Ctor({
             el: this.raw.cloneNode(true),
             parent: this.vm,
@@ -4364,6 +4395,7 @@ module.exports = {
         })
 
         this.el = this.childVM.$el
+        // 更新完成后插入 这里应该是直接更新整个组件
         if (this.compiler.init) {
             this.ref.parentNode.insertBefore(this.el, this.ref)
         } else {
@@ -4371,7 +4403,7 @@ module.exports = {
         }
 
     },
-
+    // 摧毁子组件
     unbind: function() {
         if (this.childVM) {
             this.childVM.$destroy()
@@ -4384,6 +4416,9 @@ module.exports = {
 /* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * v-with. 组件传值
+ */
 var utils = __webpack_require__(0)
 
 module.exports = {
@@ -4391,24 +4426,30 @@ module.exports = {
     bind: function () {
 
         var self      = this,
+            // 监听值
             childKey  = self.arg,
+            // 父值
             parentKey = self.key,
             compiler  = self.compiler,
             owner     = self.binding.compiler
 
         if (compiler === owner) {
+            // TODO: 未知.
             this.alone = true
             return
         }
 
         if (childKey) {
+            // 检查当前编译器上是否有监听值.
             if (!compiler.bindings[childKey]) {
                 compiler.createBinding(childKey)
             }
             // sync changes on child back to parent
+            // 监听. 父组件值更新时, 触发子组件更新
             compiler.observer.on('change:' + childKey, function (val) {
                 if (compiler.init) return
                 if (!self.lock) {
+                    // 锁定 更新
                     self.lock = true
                     utils.nextTick(function () {
                         self.lock = false
@@ -4421,6 +4462,7 @@ module.exports = {
 
     update: function (value) {
         // sync from parent
+        // 更新
         if (!this.alone && !this.lock) {
             if (this.arg) {
                 this.vm.$set(this.arg, value)

@@ -1,23 +1,29 @@
+/**
+ * 循环
+ * 
+ */
 var utils      = require('../utils'),
     config     = require('../config')
 
 module.exports = {
 
     bind: function () {
-
+        // 独一无二
         this.identifier = '$repeat' + this.id
 
         var el   = this.el,
             ctn  = this.container = el.parentNode
 
         // extract child Id, if any
+        // 取出节点里的内容 并且编译
         this.childId = this.compiler.eval(utils.attr(el, 'ref'))
 
         // create a comment node as a reference node for DOM insertions
+        // 创建一个路标注释
         this.ref = document.createComment(config.prefix + '-repeat-' + this.key)
         ctn.insertBefore(this.ref, el)
         ctn.removeChild(el)
-
+        // 定义
         this.initiated = false
         this.collection = null
         this.vms = null

@@ -25,6 +25,7 @@ module.exports = {
     partial   : require('./partial'),
     view      : require('./view'),
 
+    // 组件创建以及摧毁
     component : {
         isLiteral: true,
         bind: function () {
@@ -43,10 +44,12 @@ module.exports = {
     },
 
     attr: {
+        // 值 读取
         bind: function () {
             var params = this.vm.$options.paramAttributes
             this.isParam = params && params.indexOf(this.arg) > -1
         },
+        // 更新
         update: function (value) {
             if (value || value === 0) {
                 this.el.setAttribute(this.arg, value)
@@ -73,6 +76,8 @@ module.exports = {
     },
 
     show: function (value) {
+        // 改变display, 触发 过渡
+        // 不会引起子组件重新渲染
         var el = this.el,
             target = value ? '' : 'none',
             change = function () {
@@ -82,6 +87,7 @@ module.exports = {
     },
 
     'class': function (value) {
+        // 添加删除类
         if (this.arg) {
             utils[value ? 'addClass' : 'removeClass'](this.el, this.arg)
         } else {
