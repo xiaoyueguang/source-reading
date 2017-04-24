@@ -17,8 +17,8 @@
   <body>
     <div id="app">
       <div  v-on="click: test1" id="hehe">{{ $msg + msg + 'fff' + test2.msg + '11'}}</div>
-      <p v-repeat="items">{{$value}} <span>12</span></p>
-      <p v-repeat="items">{{$value}} <span>12</span></p>
+      <p v-repeat="item: items">{{item}} <span>12</span></p>
+      <p v-repeat="itemsObject">{{text}} <span>object</span></p>
       <aaa :hehe = '123'></aaa>
       <div>
         <div v-style='background: "#000", width: "100px", color: color, font-size: "100px", $transform: "scale(1)"'>ceshi1</div>
@@ -70,6 +70,7 @@
           msg: 123
         },
         items: ['aa', 'bb'],
+        itemsObject: [{text: 'aaa'}, {text: 'bbb'}],
         show: true,
         test3: {
           msg: {

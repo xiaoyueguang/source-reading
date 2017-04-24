@@ -49,7 +49,7 @@
 12. batcher
 13. binding
 14. directive
-- directives文件夹
+15. directives文件夹
 16. compiler
 
 > 从 `filters`, `transition`开始感觉有点抽象了.  
