@@ -26,31 +26,17 @@
           index.js  
           model.js  // v-model
           on.js     // 绑定事件
-          partial.js // 
+          partial.js // 片段
           repeat.js // v-repeat
           style.js  // v-style
           view.js   // 
-          with.js   // 
+          with.js   // 将父值传给子组件
 ```
 
-## 顺序
-
-1. utils
-2. config
-3. observer
-4. viewmodel
-5. main
-6. filters
-7. transition
-8. emitter
-9. text-parser
-10. exp-parser
-11. deps-parser
-12. batcher
-13. binding
-14. directive
-15. directives文件夹
-16. compiler
-
-> 从 `filters`, `transition`开始感觉有点抽象了.  
+> 从 `filters,transition`开始感觉有点抽象了.  
 > 需要写类似的代码, 利用调试来明白各个参数的意义了
+
+## vue的实例化的过程
+1. 默认引用的`Vue`由 `vviewmodel.js`中导出
+2. `viewmodel.js`该文件中定义了 `Vue`的一些私有方法, 比如 `$get, $set`等. 同时定义了 Vue 实例化所需要的操作`new Compiler`.
+3. `Compiler`文件,

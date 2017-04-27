@@ -1,5 +1,7 @@
 /**
  * 编译器
+ * 定义 Compiler 编译器.
+ * 定义了 编译, 摧毁, 子组件生成等一系列方法
  */
 var Emitter     = require('./emitter'),
     Observer    = require('./observer'),
@@ -13,6 +15,7 @@ var Emitter     = require('./emitter'),
     ViewModel,
     
     // cache methods
+    // 缓存方法
     slice       = [].slice,
     each        = [].forEach,
     makeHash    = utils.hash,
@@ -44,6 +47,32 @@ var Emitter     = require('./emitter'),
  *  The DOM compiler
  *  scans a DOM node and compile bindings for a ViewModel
  * DOM编译器. 扫描DOM节点, 将指令绑定到一个 Vue 实例上
+ * 定义了三种状态, init, repeat, 以及 destroyed.
+ * 扩展属性后, 处理对应的属性.
+ * 将传入的data值和methods方法放到实例下. 方便实例中直接查询值和使用方法.
+ * 组件还会有自己的自定义属性.
+ * ======================
+ * 开始处理dom. 利用 setupElement方法, 将节点中的 DOM节点移动到JS中.
+ * 并复制到原节点中. 来完成dom挂载.
+ * 定义自身实例, 捆绑类, 指令集. 指令, 可计算, 子编译器集合, 观察者, 上下文 以及代理.
+ * 定义 $:组件集合, $el: 自身元素, $options: 选项, $compiler: 本身编译器, $event: 事件
+ * 定义根编译器以及父编译器.
+ * ======================
+ * 在 编译器上新增一个全新的观察者observer.
+ * 利用 依赖收集, 分别将 值的 get, set, mutate 的依赖收集起来.
+ * 监听 生命周期钩子.
+ * ======================
+ * 收集 计算属性, 同时为计算属性创建绑定.
+ * 收集属性上的表达式. 存放到实例上.
+ * ======================
+ * 触发声明钩子: created
+ * 将 data上的值转换, 转为可观察的. 当值改变的时候,
+ * 通知 compiler.observer. 来更新值
+ * 如果是 循环, 还将要创建 $index 和 $key值
+ * 递归编译生成的DOM节点, 将节点上的指令提取出来.
+ * 当前组件编译完成后 则开始子组件的编译提取指令
+ * 可计算的属性已经完成, 则开始收集他们的依赖.
+ * 触发声明钩子: ready
  */
 function Compiler (vm, options) {
 
