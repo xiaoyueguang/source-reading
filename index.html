@@ -16,109 +16,13 @@
   </head>
   <body>
     <div id="app">
-      <div  v-on="click: test1" id="hehe">{{ $msg + msg + 'fff' + test2.msg + '11'}}</div>
-      <p v-repeat="item: items">{{item}} <span>12</span></p>
-      <p v-repeat="itemsObject">{{text}} <span>object</span></p>
-      <aaa :hehe = '123'></aaa>
-      <div>
-        <div v-style='background: "#000", width: "100px", color: color, font-size: "100px", $transform: "scale(1)"'>ceshi1</div>
-        {{{html}}}
-        <div v-html="html"></div>
-      </div>
-      <div v-if = 'show' v-with="test2">
-        with: {{msg}}
-      </div>
-      <div v-partial="{{partialId}}"></div>
-      1234
     </div>
-    <div id="app2"></div>
-      <!--<div v-text="msg + '!'"></div>
-      <div v-text="msg + '!'"></div>
-      <div v-show = "show" v-transition="v">{{test}}!</div>-->
-      <input type="text" id="input">
   </body>
   <script src="./dist/vue.js"></script>
   <script>
-    document.getElementById('input').addEventListener('compositionstart', function (e) {
-      console.log(this.value, e)
-    })
-
-    document.getElementById('input').addEventListener('compositionupdate', function (e) {
-      console.log(this.value)
-    })
-
-    document.getElementById('input').addEventListener('compositionend', function (e) {
-      console.log(this.value, e)
-    })
-
-    // setInterval(() => {
-    //   input.value = Math.random()
-    // }, 1000)
-    // setInterval(() => {
-    //   var length = input.selectionStart
-    //   var random = Math.floor(Math.random() * length)
-    //   console.log(length)
-    //   input.setSelectionRange(length, length)
-    // })
-  
-    Vue.prototype.$msg = 'xxxxx'
-    window.$vm = new Vue({
+    var $vm = new Vue({
       el: '#app',
-      data: {
-        test: 'hello',
-        test2: {
-          msg: 123
-        },
-        items: ['aa', 'bb'],
-        itemsObject: [{text: 'aaa'}, {text: 'bbb'}],
-        show: true,
-        test3: {
-          msg: {
-            aa: 1
-          }
-        },
-        partialId: 'aaa',
-        html: '<p>Hello Html</p><p>Hello Html</p>',
-        styleObject: {
-          background: '#000',
-        },
-        color: '#fff'
-        // msg: 'hehe'
-      },
-      partials: {
-        aaa: '<p>{{test}}</p>'
-      },
-      computed: {
-        // hehe () {return this.test + 'tete'},
-        msg: function () {return this.test2.msg + 'test'},
-        fff: function () {return this.msg},
-        'ggg.fff': function () {
-          return {aa: this.msg}
-        },
-        xx: function () {
-          return this.test3.msg.aa
-        }
-        // vvv: {
-        //   get () {},
-        //   set () {}
-        // }
-      },
-      methods: {
-        test1: function () {
-          console.log(1)
-        }
-      },
-      ready: [
-        // function () {
-        //   console.log(111)
-        // },
-        // function () {
-        //   console.log(222)
-        // }
-      ]
     })
-    new Vue({
-      el: '#app2'
-    })
+    var $com = $vm.$compiler
   </script>
 </html>

@@ -1,9 +1,12 @@
 /**
  * 观察者
  */
+var i = 0;
 function Emitter () {
     // 上下文
     this._ctx = this
+    i++
+    window['emitter' + i] = this
 }
 
 var EmitterProto = Emitter.prototype,

@@ -40,3 +40,21 @@
 1. 默认引用的`Vue`由 `vviewmodel.js`中导出
 2. `viewmodel.js`该文件中定义了 `Vue`的一些私有方法, 比如 `$get, $set`等. 同时定义了 Vue 实例化所需要的操作`new Compiler`.
 3. `Compiler`文件,
+
+## vue $compiler 属性解析
+1. bindings: {object} 绑定类
+2. children: {array} 子组件
+3. computed: {array} 计算属性
+4. data: {object} 监听的值
+5. deferred: {array} 
+6. delegators: {object}
+7. destroyed: {boolean} 是否摧毁
+8. dirs: {array} 指令集
+9. el: {node} 节点
+10. emitter: {Emitter} 观察
+11. init: {boolean} 属性值
+12. observer: {Emitter} 观察
+13. options: {object} 选项
+14. rawContent: {}
+15. repeat: {boolean} 是否为repeat
+16. vm: {ViewModel} 当前compoiler所属的实例
