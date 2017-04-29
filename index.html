@@ -16,13 +16,30 @@
   </head>
   <body>
     <div id="app">
+      <span v-text="msg"></span>
+      <span v-text="msg"></span>
+      <span>{{msg}}</span>
+      <div>
+        <!--<span v-repeat="item in items">{{item}}</span>-->
+      </div>
     </div>
   </body>
   <script src="./dist/vue.js"></script>
   <script>
     var $vm = new Vue({
       el: '#app',
+      data: {
+        // items: [1, 2],
+        msg: 'Hello World!',
+        msg1: 'Hello?'
+      },
+      computed: {
+        msgText () {
+          return this.msg + 'text'
+        }
+      }
     })
     var $com = $vm.$compiler
+    console.dir($com)
   </script>
 </html>

@@ -66,7 +66,7 @@ function Directive (dirname, definition, expression, rawKey, compiler, node) {
     this.vm             = compiler.vm
     // 指令要改的元素
     this.el             = node
-    // TODO:是否计算过滤器
+    // 是否计算过滤器
     this.computeFilters = false
     // 表达式是否为空. v-cloak的表达式 即为空.
     var isEmpty   = expression === ''

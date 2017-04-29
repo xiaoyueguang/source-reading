@@ -2970,11 +2970,11 @@ function Binding (compiler, key, isExp, isFn) {
     this.compiler = compiler
     // key值
     this.key = key
-    // 依赖
+    // 指令集合. 该值更新后 所需要通知的指令
     this.dirs = []
     // 对应的值的监听数组
     this.subs = []
-    // TODO: 啥东西
+    // 当 deps里的指令更新后, 会通知到本指令
     this.deps = []
     // 绑定状态值. 一开始设置为绑定.
     this.unbound = false
@@ -3015,8 +3015,10 @@ BindingProto._update = function () {
     var i = this.dirs.length,
         value = this.val()
     while (i--) {
+        // 更新指令集合里的值
         this.dirs[i].update(value)
     }
+    // 本身指令更新后, 需要派发到其它指令更新指令
     this.pub()
 }
 
@@ -3040,6 +3042,7 @@ BindingProto.val = function () {
 BindingProto.pub = function () {
     var i = this.subs.length
     while (i--) {
+        // 通知 该指令集合里的指令 进行值更新
         this.subs[i].update()
     }
 }
@@ -3053,15 +3056,18 @@ BindingProto.unbind = function () {
     // It's possible this binding will be in
     // the batcher's flush queue when its owner
     // compiler has already been destroyed.
+    // 指令状态 改为解绑
     this.unbound = true
     var i = this.dirs.length
     while (i--) {
+        // 解绑 需要对指令集里的指令进行解绑.
         this.dirs[i].unbind()
     }
     i = this.deps.length
     var subs
     while (i--) {
         subs = this.deps[i].subs
+        // 监听该指令的指令里移除对该指令的监听
         subs.splice(subs.indexOf(this), 1)
     }
 }
@@ -3222,7 +3228,7 @@ function Directive (dirname, definition, expression, rawKey, compiler, node) {
     this.vm             = compiler.vm
     // 指令要改的元素
     this.el             = node
-    // TODO:是否计算过滤器
+    // 是否计算过滤器
     this.computeFilters = false
     // 表达式是否为空. v-cloak的表达式 即为空.
     var isEmpty   = expression === ''
