@@ -1,0 +1,25 @@
+{
+  "name": "source-reading",
+  "version": "1.0.0",
+  "description": "源码阅读, 旨在提高自己的编码水平, 丰富自己的见闻.",
+  "main": "index.js",
+  "dependencies": {
+    "webpack": "^2.3.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev:vue-0.10": "webpack -w --config ./vue/0.10.0-rc/webpack.config.js",
+    "dev:vue-0.12": "webpack -w --config ./vue/0.12.9/webpack.config.js"    
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiaoyueguang/source-reading.git"
+  },
+  "author": "Ray",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xiaoyueguang/source-reading/issues"
+  },
+  "homepage": "https://github.com/xiaoyueguang/source-reading#readme"
+}
