@@ -1600,7 +1600,6 @@ function ensurePath (obj, key) {
  *  Observe an object with a given path,
  *  and proxy get/set/mutate events to the provided observer.
  * 观察给定的路径, 给观察者代理 get set mutate事件
- * TODO:
  * 给对象或数组的每个属性监听.
  * 代理事件则绑定到父级上. 以便观察者引用触发.
  */
@@ -2111,7 +2110,7 @@ CompilerProto.setupObserver = function () {
     // a hash to hold event proxies for each root level key
     // so they can be referenced and removed later
     // 设置 代理. 以及 上下文.
-    // 代理 追溯到 根节点 TODO:
+    // 代理 追溯到 根节点
     observer.proxies = makeHash()
     observer._ctx = compiler.vm
 

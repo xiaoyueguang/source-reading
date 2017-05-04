@@ -302,7 +302,7 @@ CompilerProto.setupObserver = function () {
     // a hash to hold event proxies for each root level key
     // so they can be referenced and removed later
     // 设置 代理. 以及 上下文.
-    // 代理 追溯到 根节点 TODO:
+    // 代理 追溯到 根节点
     observer.proxies = makeHash()
     observer._ctx = compiler.vm
 

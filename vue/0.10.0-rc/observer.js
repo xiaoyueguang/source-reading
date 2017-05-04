@@ -418,7 +418,6 @@ function ensurePath (obj, key) {
  *  Observe an object with a given path,
  *  and proxy get/set/mutate events to the provided observer.
  * 观察给定的路径, 给观察者代理 get set mutate事件
- * TODO:
  * 给对象或数组的每个属性监听.
  * 代理事件则绑定到父级上. 以便观察者引用触发.
  */
