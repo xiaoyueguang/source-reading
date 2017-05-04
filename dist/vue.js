@@ -1403,7 +1403,7 @@ function convert (obj) {
 
 /**
  *  Propagate an array element's change to its owner arrays
- * 当一个数组变化时, 广播数组下所有的子数组.
+ * 当一个数组变化时, 设置拥有该元素的所有监听的数组.
  */
 function propagateChange (obj) {
     var owners = obj.__emitter__.owners,

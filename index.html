@@ -16,9 +16,10 @@
   </head>
   <body>
     <div id="app">
-      <span v-text="msg"></span>
-      <span v-text="msg"></span>
-      <span>{{msg}}</span>
+      {{{aa.bb.cc}}}
+      <!--<span v-text="msg"></span>-->
+      <!--<span v-text="name.firstName"></span>-->
+      <!--<span>{{msg}}</span>-->
       <div>
         <!--<span v-repeat="item in items">{{item}}</span>-->
       </div>
@@ -29,17 +30,36 @@
     var $vm = new Vue({
       el: '#app',
       data: {
-        // items: [1, 2],
-        msg: 'Hello World!',
-        msg1: 'Hello?'
+        // items: [{name: 1}, {name: 2}],
+        // items1: [1, 2],
+        aa: {
+          bb: {
+            cc: 1
+          }
+        }
+        // msg: 'Hello World!',
+        // msg1: 'Hello?',
+        // name: {
+        //   firstName: 'JiLei',
+        //   lastName: 'Lin'
+        // }
       },
       computed: {
-        msgText () {
-          return this.msg + 'text'
-        }
+        // msgText () {
+        //   return this.msg + 'text'
+        // }
       }
     })
     var $com = $vm.$compiler
     console.dir($com)
+
+
+    function aa () {
+      for (let i = 0; i < 20; i++) {
+        if (window['emitter' + i] && window['emitter' + i].proxies) {
+          console.log(window['emitter' + i])
+        }
+      }
+    }
   </script>
 </html>

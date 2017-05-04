@@ -98,4 +98,25 @@
 * _update: {function} 更新节点的方法.
 
 ## Emitter
+* _ctx {Emitter} 当前上下文
+* _cbs {object} 存储的监听队列
+* values {object} 存储的值. 当监听 object 的时候监听的值.
+* proxies {object} 代理
+* owners {array} 拥有该值的被观察的数组
 
+### values
+`Observer`会在`Emitter`上设置该值, 设置一个暂存区
+通过 `Object.defineProperty`读取或写入值
+### proxies
+代理. 方便`emitter`通过该代理, 快速读取到对应的值.  
+比如 一个 对象路径为 aa.bb.cc  
+则会在 `compiler`下的`data`属性下的`__emitter__`添加一个 `aa.`的代理.  
+然后再在该`aa`下的 `__emitter__` 添加一个 `bb.`的代理.直接调用该该方法.  
+```
+$compiler.data.aa.__emitter__.proxies['bb.'].set('cc', 123)
+```
+设置值的时候则无需再调用路径上的值.
+### owners
+被观察的数组. 当数组元素变化的时, 通过该数组广播修改所有数组
+
+## 
