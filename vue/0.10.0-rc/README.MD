@@ -51,16 +51,16 @@
 * data: {object} 监听的值
   * key: {any} 经过监听的值
   * __emitter__: {Emitter} 监听
-* deferred: {array} 
-* delegators: {object}
+* deferred: {array} 子组件的指令. 延迟生成指令
+* delegators: {object} 绑定方法. 当前版本还为用到
 * destroyed: {boolean} 是否摧毁
 * dirs: {array} 指令集
-* el: {node} 节点
-* emitter: {Emitter} 观察
-* init: {boolean} 属性值
-* observer: {Emitter} 观察
+* el: {node} 节点 挂载的节点
+* emitter: {Emitter} 观察 观察监听. 没啥用
+* init: {boolean} 属性值 初始化完成
+* observer: {Emitter} 观察 监听值变化以及生命钩子
 * options: {object} 选项
-* rawContent: {}
+* rawContent: {} 这个地方是在 进行`new Vue`时暂时保存的模版
 * repeat: {boolean} 是否为repeat
 * vm: {ViewModel} 当前compoiler所属的实例
 

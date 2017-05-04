@@ -16,21 +16,20 @@
   </head>
   <body>
     <div id="app">
-      {{{aa.bb.cc}}}
+      <div v-on="click: test">{{{aa.bb.cc}}}</div>
       <!--<span v-text="msg"></span>-->
       <!--<span v-text="name.firstName"></span>-->
       <!--<span>{{msg}}</span>-->
-      <div>
-        <!--<span v-repeat="item in items">{{item}}</span>-->
-      </div>
+      <span v-repeat="item in items">{{item.name}}</span>
     </div>
   </body>
   <script src="./dist/vue.js"></script>
   <script>
+    
     var $vm = new Vue({
       el: '#app',
       data: {
-        // items: [{name: 1}, {name: 2}],
+        items: [{name: 1}, {name: 2}],
         // items1: [1, 2],
         aa: {
           bb: {
@@ -48,10 +47,18 @@
         // msgText () {
         //   return this.msg + 'text'
         // }
+      },
+      methods: {
+        test () {
+          console.log(1)
+        }
+      },
+      ready () {
+
       }
     })
     var $com = $vm.$compiler
-    console.dir($com)
+    console.dir($vm)
 
 
     function aa () {
