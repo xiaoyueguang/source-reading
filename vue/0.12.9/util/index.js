@@ -1,6 +1,8 @@
+/**
+ * 这个文件本质上就是扩展了 lang 这个助手函数.
+ */
 var lang = require('./lang')
 var extend = lang.extend
-
 extend(exports, lang)
 extend(exports, require('./env'))
 extend(exports, require('./dom'))

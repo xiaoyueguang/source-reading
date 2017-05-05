@@ -16,57 +16,20 @@
   </head>
   <body>
     <div id="app">
-      <div v-on="click: test">{{{msgText}}}</div>
-      <!--<span v-text="msg"></span>-->
-      <!--<span v-text="name.firstName"></span>-->
-      <!--<span>{{msg}}</span>-->
-      <!--<span v-repeat="item in items">{{item.name}}</span>-->
     </div>
   </body>
   <script src="./dist/vue.js"></script>
   <script>
-    
     var $vm = new Vue({
       el: '#app',
       data: {
-        // items: [{name: 1}, {name: 2}],
-        // items1: [1, 2],
-        // aa: {
-        //   bb: {
-        //     cc: 1
-        //   }
-        // }
-        msg: 'Hello World!',
-        // msg1: 'Hello?',
-        // name: {
-        //   firstName: 'JiLei',
-        //   lastName: 'Lin'
-        // }
       },
       computed: {
-        msgText () {
-          return this.msg + 'text'
-        }
       },
       methods: {
-        test () {
-          console.log(1)
-        }
       },
       ready () {
-
       }
     })
-    var $com = $vm.$compiler
-    console.dir($com)
-
-
-    function aa () {
-      for (let i = 0; i < 20; i++) {
-        if (window['emitter' + i] && window['emitter' + i].proxies) {
-          console.log(window['emitter' + i])
-        }
-      }
-    }
   </script>
 </html>

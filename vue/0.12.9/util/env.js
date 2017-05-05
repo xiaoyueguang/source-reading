@@ -1,3 +1,8 @@
+/**
+ * 环境嗅探. 查看 proto IE9 android.
+ * 定义transition animation等系列名称.
+ * 定义 nextTick 方法
+ */
 // can we use __proto__?
 exports.hasProto = '__proto__' in {}
 
