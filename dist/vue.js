@@ -273,6 +273,13 @@ process.umask = function() { return 0; };
 /* 2 */
 /***/ (function(module, exports) {
 
+/**
+ * 配置文件.
+ * 定义前缀, 调试模式, 严格模式, 安静模式, 观察者修改值, 启用{{}}标签,
+ * 异步渲染, 评估模版里的表达式, 文本节点符是否改变, 组件拥有的默认属性列表,
+ * 绑定模式, 一次冲刷次数限制
+ * 外加一个定义 文本界定符的设置
+ */
 module.exports = {
 
   /**
@@ -8904,8 +8911,11 @@ function formatValue (val) {
 
 /* WEBPACK VAR INJECTION */(function(process) {/**
  * Enable debug utilities.
+ * 调试
  */
-
+/**
+ * 调试只能在 调试模式下启用
+ */
 if (process.env.NODE_ENV !== 'production') {
 
   var config = __webpack_require__(2)
@@ -8915,6 +8925,7 @@ if (process.env.NODE_ENV !== 'production') {
    * Log a message.
    *
    * @param {String} msg
+   * 打印信息
    */
 
   exports.log = function (msg) {
@@ -8927,6 +8938,7 @@ if (process.env.NODE_ENV !== 'production') {
    * We've got a problem here.
    *
    * @param {String} msg
+   * 警告信息
    */
 
   exports.warn = function (msg, e) {
@@ -8941,6 +8953,7 @@ if (process.env.NODE_ENV !== 'production') {
 
   /**
    * Assert asset exists
+   * 断言判断信息.
    */
 
   exports.assertAsset = function (val, type, id) {
@@ -8973,14 +8986,17 @@ if (process.env.NODE_ENV !== 'production') {
 /* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 与 dom操作有关的内容
+ */
+var _ = __webpack_require__(0)
 var config = __webpack_require__(2)
 
 /**
  * Query an element selector if it's not an element already.
- *
  * @param {String|Element} el
  * @return {Element}
+ * 查找 DOM
  */
 
 exports.query = function (el) {
@@ -9006,6 +9022,7 @@ exports.query = function (el) {
  *
  * @param {Node} node
  * @return {Boolean}
+ * 判断节点是否在文档流里
  */
 
 exports.inDoc = function (node) {
@@ -9021,6 +9038,7 @@ exports.inDoc = function (node) {
  *
  * @param {Node} node
  * @param {String} attr
+ * 读取并移除 节点上的值
  */
 
 exports.attr = function (node, attr) {
@@ -9037,6 +9055,7 @@ exports.attr = function (node, attr) {
  *
  * @param {Element} el
  * @param {Element} target
+ * 将节点插入到目标节点前
  */
 
 exports.before = function (el, target) {
@@ -9048,6 +9067,7 @@ exports.before = function (el, target) {
  *
  * @param {Element} el
  * @param {Element} target
+ * 将节点插入到目标节点后
  */
 
 exports.after = function (el, target) {
@@ -9062,6 +9082,7 @@ exports.after = function (el, target) {
  * Remove el from DOM
  *
  * @param {Element} el
+ * 移除节点
  */
 
 exports.remove = function (el) {
@@ -9073,6 +9094,7 @@ exports.remove = function (el) {
  *
  * @param {Element} el
  * @param {Element} target
+ * 将节点插入到目标节点中的第一个子节点位置
  */
 
 exports.prepend = function (el, target) {
@@ -9088,6 +9110,7 @@ exports.prepend = function (el, target) {
  *
  * @param {Element} target
  * @param {Element} el
+ * 将节点 替换掉目标节点
  */
 
 exports.replace = function (target, el) {
@@ -9103,6 +9126,7 @@ exports.replace = function (target, el) {
  * @param {Element} el
  * @param {String} event
  * @param {Function} cb
+ * 添加节点监听事件
  */
 
 exports.on = function (el, event, cb) {
@@ -9115,6 +9139,7 @@ exports.on = function (el, event, cb) {
  * @param {Element} el
  * @param {String} event
  * @param {Function} cb
+ * 移除节点监听事件
  */
 
 exports.off = function (el, event, cb) {
@@ -9126,6 +9151,7 @@ exports.off = function (el, event, cb) {
  *
  * @param {Element} el
  * @param {Strong} cls
+ * 节点上添加类
  */
 
 exports.addClass = function (el, cls) {
@@ -9144,6 +9170,7 @@ exports.addClass = function (el, cls) {
  *
  * @param {Element} el
  * @param {Strong} cls
+ * 节点上移除类
  */
 
 exports.removeClass = function (el, cls) {
@@ -9166,6 +9193,7 @@ exports.removeClass = function (el, cls) {
  * @param {Element} el
  * @param {Boolean} asFragment
  * @return {Element}
+ * 从节点中提取内容, 移动到另一个节点中
  */
 
 exports.extractContent = function (el, asFragment) {
@@ -9192,7 +9220,10 @@ exports.extractContent = function (el, asFragment) {
   }
   return rawContent
 }
-
+/**
+ * 移除空节点.
+ * 方法: 判断节点类型是否为文本节点, 且节点移除空格后 取反为真
+ */
 function trim (content, node) {
   if (node && node.nodeType === 3 && !node.data.trim()) {
     content.removeChild(node)
@@ -9205,6 +9236,7 @@ function trim (content, node) {
  * will be in lowercase.
  *
  * @param {Element} el
+ * 判断是否为 template 标签
  */
 
 exports.isTemplate = function (el) {
@@ -9228,6 +9260,9 @@ exports.isTemplate = function (el) {
  *                            non-empty to be persisted in
  *                            templates.
  * @return {Comment|Text}
+ * 创建锚点. 适用于 片段实例, v-html, v-if, component, repeat
+ * 调试模式下 创建一条注释作为锚点. 方便调试.
+ * 非调试模式下, 创建一个空文本节点作为锚点. IE模式必须要有一个空格. 否则容易丢失该锚点
  */
 
 exports.createAnchor = function (content, persist) {
@@ -9662,7 +9697,10 @@ exports.cancellable = function (fn) {
 /* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 
+ */
+var _ = __webpack_require__(0)
 var config = __webpack_require__(2)
 var extend = _.extend
 
@@ -9677,11 +9715,14 @@ var extend = _.extend
  * @param {*} childVal
  * @param {Vue} [vm]
  */
-
+/**
+ * 空属性的对象
+ */
 var strats = Object.create(null)
 
 /**
  * Helper that recursively merges two data objects together.
+ * 合并对象
  */
 
 function mergeData (to, from) {
@@ -9697,7 +9738,7 @@ function mergeData (to, from) {
   }
   return to
 }
-
+window.a = mergeData
 /**
  * Data
  */

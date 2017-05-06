@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 var _ = require('./index')
 var config = require('../config')
 var extend = _.extend
@@ -13,11 +16,14 @@ var extend = _.extend
  * @param {*} childVal
  * @param {Vue} [vm]
  */
-
+/**
+ * 空属性的对象
+ */
 var strats = Object.create(null)
 
 /**
  * Helper that recursively merges two data objects together.
+ * 合并对象
  */
 
 function mergeData (to, from) {
@@ -33,7 +39,7 @@ function mergeData (to, from) {
   }
   return to
 }
-
+window.a = mergeData
 /**
  * Data
  */

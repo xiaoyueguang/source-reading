@@ -1,11 +1,14 @@
+/**
+ * 与 dom操作有关的内容
+ */
 var _ = require('./index')
 var config = require('../config')
 
 /**
  * Query an element selector if it's not an element already.
- *
  * @param {String|Element} el
  * @return {Element}
+ * 查找 DOM
  */
 
 exports.query = function (el) {
@@ -31,6 +34,7 @@ exports.query = function (el) {
  *
  * @param {Node} node
  * @return {Boolean}
+ * 判断节点是否在文档流里
  */
 
 exports.inDoc = function (node) {
@@ -46,6 +50,7 @@ exports.inDoc = function (node) {
  *
  * @param {Node} node
  * @param {String} attr
+ * 读取并移除 节点上的值
  */
 
 exports.attr = function (node, attr) {
@@ -62,6 +67,7 @@ exports.attr = function (node, attr) {
  *
  * @param {Element} el
  * @param {Element} target
+ * 将节点插入到目标节点前
  */
 
 exports.before = function (el, target) {
@@ -73,6 +79,7 @@ exports.before = function (el, target) {
  *
  * @param {Element} el
  * @param {Element} target
+ * 将节点插入到目标节点后
  */
 
 exports.after = function (el, target) {
@@ -87,6 +94,7 @@ exports.after = function (el, target) {
  * Remove el from DOM
  *
  * @param {Element} el
+ * 移除节点
  */
 
 exports.remove = function (el) {
@@ -98,6 +106,7 @@ exports.remove = function (el) {
  *
  * @param {Element} el
  * @param {Element} target
+ * 将节点插入到目标节点中的第一个子节点位置
  */
 
 exports.prepend = function (el, target) {
@@ -113,6 +122,7 @@ exports.prepend = function (el, target) {
  *
  * @param {Element} target
  * @param {Element} el
+ * 将节点 替换掉目标节点
  */
 
 exports.replace = function (target, el) {
@@ -128,6 +138,7 @@ exports.replace = function (target, el) {
  * @param {Element} el
  * @param {String} event
  * @param {Function} cb
+ * 添加节点监听事件
  */
 
 exports.on = function (el, event, cb) {
@@ -140,6 +151,7 @@ exports.on = function (el, event, cb) {
  * @param {Element} el
  * @param {String} event
  * @param {Function} cb
+ * 移除节点监听事件
  */
 
 exports.off = function (el, event, cb) {
@@ -151,6 +163,7 @@ exports.off = function (el, event, cb) {
  *
  * @param {Element} el
  * @param {Strong} cls
+ * 节点上添加类
  */
 
 exports.addClass = function (el, cls) {
@@ -169,6 +182,7 @@ exports.addClass = function (el, cls) {
  *
  * @param {Element} el
  * @param {Strong} cls
+ * 节点上移除类
  */
 
 exports.removeClass = function (el, cls) {
@@ -191,6 +205,7 @@ exports.removeClass = function (el, cls) {
  * @param {Element} el
  * @param {Boolean} asFragment
  * @return {Element}
+ * 从节点中提取内容, 移动到另一个节点中
  */
 
 exports.extractContent = function (el, asFragment) {
@@ -217,7 +232,10 @@ exports.extractContent = function (el, asFragment) {
   }
   return rawContent
 }
-
+/**
+ * 移除空节点.
+ * 方法: 判断节点类型是否为文本节点, 且节点移除空格后 取反为真
+ */
 function trim (content, node) {
   if (node && node.nodeType === 3 && !node.data.trim()) {
     content.removeChild(node)
@@ -230,6 +248,7 @@ function trim (content, node) {
  * will be in lowercase.
  *
  * @param {Element} el
+ * 判断是否为 template 标签
  */
 
 exports.isTemplate = function (el) {
@@ -253,6 +272,9 @@ exports.isTemplate = function (el) {
  *                            non-empty to be persisted in
  *                            templates.
  * @return {Comment|Text}
+ * 创建锚点. 适用于 片段实例, v-html, v-if, component, repeat
+ * 调试模式下 创建一条注释作为锚点. 方便调试.
+ * 非调试模式下, 创建一个空文本节点作为锚点. IE模式必须要有一个空格. 否则容易丢失该锚点
  */
 
 exports.createAnchor = function (content, persist) {

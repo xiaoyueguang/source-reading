@@ -1,7 +1,10 @@
 /**
  * Enable debug utilities.
+ * 调试
  */
-
+/**
+ * 调试只能在 调试模式下启用
+ */
 if (process.env.NODE_ENV !== 'production') {
 
   var config = require('../config')
@@ -11,6 +14,7 @@ if (process.env.NODE_ENV !== 'production') {
    * Log a message.
    *
    * @param {String} msg
+   * 打印信息
    */
 
   exports.log = function (msg) {
@@ -23,6 +27,7 @@ if (process.env.NODE_ENV !== 'production') {
    * We've got a problem here.
    *
    * @param {String} msg
+   * 警告信息
    */
 
   exports.warn = function (msg, e) {
@@ -37,6 +42,7 @@ if (process.env.NODE_ENV !== 'production') {
 
   /**
    * Assert asset exists
+   * 断言判断信息.
    */
 
   exports.assertAsset = function (val, type, id) {
