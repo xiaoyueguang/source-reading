@@ -1,3 +1,6 @@
+/**
+ * 这里是入口文件.
+ */
 var _ = require('./util')
 var extend = _.extend
 

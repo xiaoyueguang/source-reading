@@ -6,11 +6,13 @@
   "dependencies": {
     "webpack": "^2.3.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "webpack": "^2.6.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:vue-0.10": "webpack -w --config ./vue/0.10.0-rc/webpack.config.js",
-    "dev:vue-0.12": "webpack -w --config ./vue/0.12.9/webpack.config.js"    
+    "dev:vue-0.12": "webpack -w --config ./vue/0.12.9/webpack.config.js"
   },
   "repository": {
     "type": "git",
