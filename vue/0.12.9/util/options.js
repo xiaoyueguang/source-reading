@@ -1,5 +1,5 @@
 /**
- * 
+ * 该文件是为了将父子选项 合并到 一个最终的值
  */
 var _ = require('./index')
 var config = require('../config')
@@ -18,6 +18,7 @@ var extend = _.extend
  */
 /**
  * 空属性的对象
+ * 
  */
 var strats = Object.create(null)
 
@@ -39,17 +40,19 @@ function mergeData (to, from) {
   }
   return to
 }
-window.a = mergeData
 /**
  * Data
  */
-
+/**
+ * data 数据处理
+ */
 strats.data = function (parentVal, childVal, vm) {
   if (!vm) {
     // in a Vue.extend merge, both should be functions
     if (!childVal) {
       return parentVal
     }
+    // 子组件的 data 类型得为 function.
     if (typeof childVal !== 'function') {
       process.env.NODE_ENV !== 'production' && _.warn(
         'The "data" option should be a function ' +
@@ -93,7 +96,9 @@ strats.data = function (parentVal, childVal, vm) {
 /**
  * El
  */
-
+/**
+ * el 数据处理
+ */
 strats.el = function (parentVal, childVal, vm) {
   if (!vm && childVal && typeof childVal !== 'function') {
     process.env.NODE_ENV !== 'production' && _.warn(
@@ -113,7 +118,9 @@ strats.el = function (parentVal, childVal, vm) {
 /**
  * Hooks and param attributes are merged as arrays.
  */
-
+/**
+ * 钩子方法以及 props. 都合并为 数组
+ */
 strats.created =
 strats.ready =
 strats.attached =
@@ -135,7 +142,9 @@ strats.props = function (parentVal, childVal) {
 /**
  * 0.11 deprecation warning
  */
-
+/**
+ * 升级提醒. deprecation 属性改写为 props
+ */
 strats.paramAttributes = function () {
   /* istanbul ignore next */
   process.env.NODE_ENV !== 'production' && _.warn(
@@ -150,6 +159,7 @@ strats.paramAttributes = function () {
  * When a vm is present (instance creation), we need to do
  * a three-way merge between constructor options, instance
  * options and parent options.
+ * 当合并很多的时候, 比如 实例选项 父选项 子选项. 则需要进行三项合并
  */
 
 function mergeAssets (parentVal, childVal) {
@@ -165,7 +175,7 @@ config._assetTypes.forEach(function (type) {
 
 /**
  * Events & Watchers.
- *
+ * 事件或者监听的合并
  * Events & watchers hashes should not overwrite one
  * another, so we merge them as arrays.
  */
@@ -191,6 +201,7 @@ strats.events = function (parentVal, childVal) {
 
 /**
  * Other object hashes.
+ * 可计算 和方法合并
  */
 
 strats.methods =
@@ -204,6 +215,7 @@ strats.computed = function (parentVal, childVal) {
 
 /**
  * Default strategy.
+ * 默认的值
  */
 
 var defaultStrat = function (parentVal, childVal) {
@@ -215,6 +227,7 @@ var defaultStrat = function (parentVal, childVal) {
 /**
  * Make sure component options get converted to actual
  * constructors.
+ * 确保组件选项转为 类...
  *
  * @param {Object} options
  */
@@ -227,6 +240,7 @@ function guardComponents (options) {
     var ids = Object.keys(components)
     for (var i = 0, l = ids.length; i < l; i++) {
       var key = ids[i]
+      // 判断组件名
       if (_.commonTagRE.test(key)) {
         process.env.NODE_ENV !== 'production' && _.warn(
           'Do not use built-in HTML elements as component ' +
@@ -246,6 +260,7 @@ function guardComponents (options) {
 /**
  * Ensure all props option syntax are normalized into the
  * Object-based format.
+ * 确保将 props 正确格式化
  *
  * @param {Object} options
  */
@@ -273,7 +288,7 @@ function guardProps (options) {
 /**
  * Guard an Array-format assets option and converted it
  * into the key-value Object format.
- *
+ * 保证数组格式的选项能转为 键值对的对象格式
  * @param {Object|Array} assets
  * @return {Object}
  */
@@ -302,7 +317,8 @@ function guardArrayAssets (assets) {
 /**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
- *
+ * 合并两个选项值为一个新值
+ * 
  * @param {Object} parent
  * @param {Object} child
  * @param {Vue} [vm] - if vm is present, indicates this is
@@ -314,19 +330,23 @@ exports.mergeOptions = function merge (parent, child, vm) {
   guardProps(child)
   var options = {}
   var key
+  // mixins 合并
   if (child.mixins) {
     for (var i = 0, l = child.mixins.length; i < l; i++) {
       parent = merge(parent, child.mixins[i], vm)
     }
   }
+  // 从父类上键名合并
   for (key in parent) {
     mergeField(key)
   }
+  // 从子类上键名合并
   for (key in child) {
     if (!(parent.hasOwnProperty(key))) {
       mergeField(key)
     }
   }
+  // 合并字段
   function mergeField (key) {
     var strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
@@ -338,6 +358,7 @@ exports.mergeOptions = function merge (parent, child, vm) {
  * Resolve an asset.
  * This function is used because child instances need access
  * to assets defined in its ancestor chain.
+ * 保证子组件能访问父类的值
  *
  * @param {Object} options
  * @param {String} type

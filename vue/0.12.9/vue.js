@@ -13,6 +13,10 @@ var extend = _.extend
  * - non-prefixed properties are assumed to be proxied user
  *   data.
  *
+ * 这里对 vue 做了一些定义.
+ * $开头的 为 公共的 API 方法或属性
+ * _开头的 为 内部的 API 方法或属性
+ * 不属于以上两种的为用户数据
  * @constructor
  * @param {Object} [options]
  * @public
@@ -24,6 +28,7 @@ function Vue (options) {
 
 /**
  * Mixin global API
+ * 全局API
  */
 
 extend(Vue, require('./api/global'))
@@ -35,6 +40,7 @@ extend(Vue, require('./api/global'))
  *
  * These can be seen as the default options of every
  * Vue instance.
+ * 设置选项属性
  */
 
 Vue.options = {
@@ -56,6 +62,7 @@ var p = Vue.prototype
 /**
  * $data has a setter which does a bunch of
  * teardown/setup work
+ * 定义 $data的 getter/setter
  */
 
 Object.defineProperty(p, '$data', {
@@ -71,6 +78,7 @@ Object.defineProperty(p, '$data', {
 
 /**
  * Mixin internal instance methods
+ * 扩展内部方法
  */
 
 extend(p, require('./instance/init'))
@@ -81,6 +89,7 @@ extend(p, require('./instance/misc'))
 
 /**
  * Mixin public API methods
+ * 扩展一些公共方法
  */
 
 extend(p, require('./api/data'))

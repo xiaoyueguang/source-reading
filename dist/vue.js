@@ -76,10 +76,15 @@
 var lang = __webpack_require__(64)
 var extend = lang.extend
 extend(exports, lang)
+// 部分环境
 extend(exports, __webpack_require__(63))
+// 操作 dom 相关
 extend(exports, __webpack_require__(62))
+// 处理 父组件和 自组件的 合并事项
 extend(exports, __webpack_require__(65))
+// 组件初始化相关
 extend(exports, __webpack_require__(60))
+// 调试相关
 extend(exports, __webpack_require__(61))
 
 
@@ -288,6 +293,7 @@ module.exports = {
 
   /**
    * The prefix to look for when parsing directives.
+   * 前缀
    *
    * @type {String}
    */
@@ -297,6 +303,7 @@ module.exports = {
   /**
    * Whether to print debug messages.
    * Also enables stack trace for warnings.
+   * 开启 debug
    *
    * @type {Boolean}
    */
@@ -306,12 +313,14 @@ module.exports = {
   /**
    * Strict mode.
    * Disables asset lookup in the view parent chain.
+   * 严格模式
    */
 
   strict: false,
 
   /**
    * Whether to suppress warnings.
+   * 安静模式
    *
    * @type {Boolean}
    */
@@ -321,7 +330,7 @@ module.exports = {
   /**
    * Whether allow observer to alter data objects'
    * __proto__.
-   *
+   * 是否允许观察者修改 原型
    * @type {Boolean}
    */
 
@@ -329,6 +338,7 @@ module.exports = {
 
   /**
    * Whether to parse mustache tags in templates.
+   * 是否在模板中解析胡子标签
    *
    * @type {Boolean}
    */
@@ -337,6 +347,7 @@ module.exports = {
 
   /**
    * Whether to use async rendering.
+   * 是否启用异步更新
    */
 
   async: true,
@@ -344,6 +355,7 @@ module.exports = {
   /**
    * Whether to warn against errors caught when evaluating
    * expressions.
+   * 是否评估表达式中遇到的错误
    */
 
   warnExpressionErrors: true,
@@ -351,7 +363,7 @@ module.exports = {
   /**
    * Internal flag to indicate the delimiters have been
    * changed.
-   *
+   * 改变大胡子标签的格式
    * @type {Boolean}
    */
 
@@ -359,7 +371,7 @@ module.exports = {
 
   /**
    * List of asset types that a component can own.
-   *
+   * 定义一个 组件所需的资源类型
    * @type {Array}
    */
 
@@ -374,6 +386,7 @@ module.exports = {
 
   /**
    * prop binding modes
+   * 指定 props 绑定模式
    */
 
   _propBindingModes: {
@@ -384,6 +397,7 @@ module.exports = {
 
   /**
    * Max circular updates allowed in a batcher flush cycle.
+   * 重刷程序最大的更新次数(性能优化)
    */
 
   _maxUpdateCount: 100
@@ -394,7 +408,7 @@ module.exports = {
  * Interpolation delimiters.
  * We need to mark the changed flag so that the text parser
  * knows it needs to recompile the regex.
- *
+ * 设置标签类型
  * @type {Array<String>}
  */
 
@@ -697,6 +711,14 @@ exports.parse = function (template, clone, noSelector) {
  * @constructor
  */
 
+/**
+ * 这里是引用了别人的 缓存库.
+ * 这个缓存库很有意思.
+ * 可以不停的往一个有限制的缓存库里塞数据.
+ * 缓存库里会有一个维护的内容队列.
+ * 当该内容被命中时, 他在队列里的优先级就越高, 不容易从缓存库中移除.
+ */
+
 function Cache (limit) {
   this.size = 0
   this.limit = limit
@@ -711,7 +733,7 @@ var p = Cache.prototype
  * Returns the entry which was removed to make room for
  * the new entry. Otherwise undefined is returned.
  * (i.e. if there was enough room already).
- *
+ * Put 数据的时候会对数据检查, 超出的将会被移除
  * @param {String} key
  * @param {*} value
  * @return {Entry|undefined}
@@ -741,6 +763,7 @@ p.put = function (key, value) {
  * Purge the least recently used (oldest) entry from the
  * cache. Returns the removed entry or undefined if the
  * cache was empty.
+ * 移除最旧的缓存
  */
 
 p.shift = function () {
@@ -761,6 +784,7 @@ p.shift = function () {
  * @param {String} key
  * @param {Boolean} returnEntry
  * @return {Entry|*}
+ * 获取数据. 获取数据的时候会导致该数据的优先级变高
  */
 
 p.get = function (key, returnEntry) {
@@ -4653,7 +4677,10 @@ exports._defineMeta = function (key, value) {
 /* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 批处理
+ */
+var _ = __webpack_require__(0)
 var config = __webpack_require__(2)
 
 // we have two separate queues: one for directive updates
@@ -4662,6 +4689,12 @@ var config = __webpack_require__(2)
 // before user watchers so that when user watchers are
 // triggered, the DOM would have already been in updated
 // state.
+/**
+ * 现在升级到两个单独的队列了.
+ * 一个是用来执行指令的队列
+ * 一个是用户 watcher 的队列
+ * 这是为了保证在 在执行 watcher 队列之前能先执行完指令的队列
+ */
 var queue = []
 var userQueue = []
 var has = {}
@@ -4671,6 +4704,7 @@ var internalQueueDepleted = false
 
 /**
  * Reset the batcher's state.
+ * 更新复位
  */
 
 function reset () {
@@ -4683,6 +4717,7 @@ function reset () {
 
 /**
  * Flush both queues and run the watchers.
+ * 重刷队列
  */
 
 function flush () {
@@ -4694,7 +4729,7 @@ function flush () {
 
 /**
  * Run the watchers in a single queue.
- *
+ * 重刷对类
  * @param {Array} queue
  */
 
@@ -4707,6 +4742,8 @@ function run (queue) {
     has[id] = null
     watcher.run()
     // in dev build, check and stop circular updates.
+    // 这里的警告是为了防止 watcher 重刷的时候 循环次数过高. 导致性能损耗太大.
+    // 当出现这种情况时, 说明编写的 watch 有问题, 得优化
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > config._maxUpdateCount) {
@@ -4724,6 +4761,7 @@ function run (queue) {
  * Push a watcher into the watcher queue.
  * Jobs with duplicate IDs will be skipped unless it's
  * pushed when the queue is being flushed.
+ * 将程序推入 队列, 已经重复定义过的 ID 讲被跳过
  *
  * @param {Watcher} watcher
  *   properties:
@@ -4747,6 +4785,7 @@ exports.push = function (watcher) {
     // queue the flush
     if (!waiting) {
       waiting = true
+      // 程序总是在推入到队列后, 才异步执行
       _.nextTick(flush)
     }
   }
@@ -8782,7 +8821,10 @@ module.exports = Transition
 /* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 
+ */
+var _ = __webpack_require__(0)
 
 /**
  * Check if an element is a component, if yes return its
@@ -8792,8 +8834,13 @@ module.exports = Transition
  * @param {Object} options
  * @return {String|undefined}
  */
-
+/**
+ * 原生标签
+ */
 exports.commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
+/**
+ * 判断标签是否为组件
+ */
 exports.checkComponent = function (el, options) {
   var tag = el.tagName.toLowerCase()
   if (tag === 'component') {
@@ -8817,7 +8864,7 @@ exports.checkComponent = function (el, options) {
  * Set a prop's initial value on a vm and its data object.
  * The vm may have inherit:true so we need to make sure
  * we don't accidentally overwrite parent value.
- *
+ * 设置 props 值. 且不污染到父级
  * @param {Vue} vm
  * @param {Object} prop
  * @param {*} value
@@ -8837,6 +8884,7 @@ exports.initProp = function (vm, prop, value) {
 
 /**
  * Assert whether a prop is valid.
+ * 判断 props 是否有效
  *
  * @param {Object} prop
  * @param {*} value
@@ -8876,6 +8924,7 @@ exports.assertProp = function (prop, value) {
     }
   }
   if (!valid) {
+    // 非有效的时候 直接打印.
     process.env.NODE_ENV !== 'production' && _.warn(
       'Invalid prop: type check failed for ' +
       prop.path + '="' + prop.raw + '".' +
@@ -8885,6 +8934,7 @@ exports.assertProp = function (prop, value) {
     return false
   }
   var validator = options.validator
+  // 验证
   if (validator) {
     if (!validator.call(null, value)) {
       process.env.NODE_ENV !== 'production' && _.warn(
@@ -8896,13 +8946,19 @@ exports.assertProp = function (prop, value) {
   }
   return true
 }
-
+/**
+ * 格式化 首位大写 或 返回自定义 type
+ * @param {*} val 
+ */
 function formatType (val) {
   return val
     ? val.charAt(0).toUpperCase() + val.slice(1)
     : 'custom type'
 }
-
+/**
+ * 格式化 类型值
+ * @param {*} val 
+ */
 function formatValue (val) {
   return Object.prototype.toString.call(val).slice(8, -1)
 }
@@ -9293,16 +9349,17 @@ exports.hasProto = '__proto__' in {}
 var inBrowser = exports.inBrowser =
   typeof window !== 'undefined' &&
   Object.prototype.toString.call(window) !== '[object Object]'
-
+// 判断IE9
 exports.isIE9 =
   inBrowser &&
   navigator.userAgent.toLowerCase().indexOf('msie 9.0') > 0
-
+// 判断 android
 exports.isAndroid =
   inBrowser &&
   navigator.userAgent.toLowerCase().indexOf('android') > 0
 
 // Transition property/event sniffing
+// 不同系统的 transition别名
 if (inBrowser && !exports.isIE9) {
   var isWebkitTrans =
     window.ontransitionend === undefined &&
@@ -9329,6 +9386,7 @@ if (inBrowser && !exports.isIE9) {
  * should be executed as a microtask, so we leverage
  * MutationObserver if it's available, and fallback to
  * setTimeout(0).
+ * nextTick异步执行. 等 DOM 执行完毕后执行回调
  *
  * @param {Function} cb
  * @param {Object} ctx
@@ -9702,7 +9760,7 @@ exports.cancellable = function (fn) {
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {/**
- * 
+ * 该文件是为了将父子选项 合并到 一个最终的值
  */
 var _ = __webpack_require__(0)
 var config = __webpack_require__(2)
@@ -9721,6 +9779,7 @@ var extend = _.extend
  */
 /**
  * 空属性的对象
+ * 
  */
 var strats = Object.create(null)
 
@@ -9742,17 +9801,19 @@ function mergeData (to, from) {
   }
   return to
 }
-window.a = mergeData
 /**
  * Data
  */
-
+/**
+ * data 数据处理
+ */
 strats.data = function (parentVal, childVal, vm) {
   if (!vm) {
     // in a Vue.extend merge, both should be functions
     if (!childVal) {
       return parentVal
     }
+    // 子组件的 data 类型得为 function.
     if (typeof childVal !== 'function') {
       process.env.NODE_ENV !== 'production' && _.warn(
         'The "data" option should be a function ' +
@@ -9796,7 +9857,9 @@ strats.data = function (parentVal, childVal, vm) {
 /**
  * El
  */
-
+/**
+ * el 数据处理
+ */
 strats.el = function (parentVal, childVal, vm) {
   if (!vm && childVal && typeof childVal !== 'function') {
     process.env.NODE_ENV !== 'production' && _.warn(
@@ -9816,7 +9879,9 @@ strats.el = function (parentVal, childVal, vm) {
 /**
  * Hooks and param attributes are merged as arrays.
  */
-
+/**
+ * 钩子方法以及 props. 都合并为 数组
+ */
 strats.created =
 strats.ready =
 strats.attached =
@@ -9838,7 +9903,9 @@ strats.props = function (parentVal, childVal) {
 /**
  * 0.11 deprecation warning
  */
-
+/**
+ * 升级提醒. deprecation 属性改写为 props
+ */
 strats.paramAttributes = function () {
   /* istanbul ignore next */
   process.env.NODE_ENV !== 'production' && _.warn(
@@ -9853,6 +9920,7 @@ strats.paramAttributes = function () {
  * When a vm is present (instance creation), we need to do
  * a three-way merge between constructor options, instance
  * options and parent options.
+ * 当合并很多的时候, 比如 实例选项 父选项 子选项. 则需要进行三项合并
  */
 
 function mergeAssets (parentVal, childVal) {
@@ -9868,7 +9936,7 @@ config._assetTypes.forEach(function (type) {
 
 /**
  * Events & Watchers.
- *
+ * 事件或者监听的合并
  * Events & watchers hashes should not overwrite one
  * another, so we merge them as arrays.
  */
@@ -9894,6 +9962,7 @@ strats.events = function (parentVal, childVal) {
 
 /**
  * Other object hashes.
+ * 可计算 和方法合并
  */
 
 strats.methods =
@@ -9907,6 +9976,7 @@ strats.computed = function (parentVal, childVal) {
 
 /**
  * Default strategy.
+ * 默认的值
  */
 
 var defaultStrat = function (parentVal, childVal) {
@@ -9918,6 +9988,7 @@ var defaultStrat = function (parentVal, childVal) {
 /**
  * Make sure component options get converted to actual
  * constructors.
+ * 确保组件选项转为 类...
  *
  * @param {Object} options
  */
@@ -9930,6 +10001,7 @@ function guardComponents (options) {
     var ids = Object.keys(components)
     for (var i = 0, l = ids.length; i < l; i++) {
       var key = ids[i]
+      // 判断组件名
       if (_.commonTagRE.test(key)) {
         process.env.NODE_ENV !== 'production' && _.warn(
           'Do not use built-in HTML elements as component ' +
@@ -9949,6 +10021,7 @@ function guardComponents (options) {
 /**
  * Ensure all props option syntax are normalized into the
  * Object-based format.
+ * 确保将 props 正确格式化
  *
  * @param {Object} options
  */
@@ -9976,7 +10049,7 @@ function guardProps (options) {
 /**
  * Guard an Array-format assets option and converted it
  * into the key-value Object format.
- *
+ * 保证数组格式的选项能转为 键值对的对象格式
  * @param {Object|Array} assets
  * @return {Object}
  */
@@ -10005,7 +10078,8 @@ function guardArrayAssets (assets) {
 /**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
- *
+ * 合并两个选项值为一个新值
+ * 
  * @param {Object} parent
  * @param {Object} child
  * @param {Vue} [vm] - if vm is present, indicates this is
@@ -10017,19 +10091,23 @@ exports.mergeOptions = function merge (parent, child, vm) {
   guardProps(child)
   var options = {}
   var key
+  // mixins 合并
   if (child.mixins) {
     for (var i = 0, l = child.mixins.length; i < l; i++) {
       parent = merge(parent, child.mixins[i], vm)
     }
   }
+  // 从父类上键名合并
   for (key in parent) {
     mergeField(key)
   }
+  // 从子类上键名合并
   for (key in child) {
     if (!(parent.hasOwnProperty(key))) {
       mergeField(key)
     }
   }
+  // 合并字段
   function mergeField (key) {
     var strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
@@ -10041,6 +10119,7 @@ exports.mergeOptions = function merge (parent, child, vm) {
  * Resolve an asset.
  * This function is used because child instances need access
  * to assets defined in its ancestor chain.
+ * 保证子组件能访问父类的值
  *
  * @param {Object} options
  * @param {String} type
@@ -10082,6 +10161,10 @@ var extend = _.extend
  * - non-prefixed properties are assumed to be proxied user
  *   data.
  *
+ * 这里对 vue 做了一些定义.
+ * $开头的 为 公共的 API 方法或属性
+ * _开头的 为 内部的 API 方法或属性
+ * 不属于以上两种的为用户数据
  * @constructor
  * @param {Object} [options]
  * @public
@@ -10093,6 +10176,7 @@ function Vue (options) {
 
 /**
  * Mixin global API
+ * 全局API
  */
 
 extend(Vue, __webpack_require__(20))
@@ -10104,6 +10188,7 @@ extend(Vue, __webpack_require__(20))
  *
  * These can be seen as the default options of every
  * Vue instance.
+ * 设置选项属性
  */
 
 Vue.options = {
@@ -10125,6 +10210,7 @@ var p = Vue.prototype
 /**
  * $data has a setter which does a bunch of
  * teardown/setup work
+ * 定义 $data的 getter/setter
  */
 
 Object.defineProperty(p, '$data', {
@@ -10140,6 +10226,7 @@ Object.defineProperty(p, '$data', {
 
 /**
  * Mixin internal instance methods
+ * 扩展内部方法
  */
 
 extend(p, __webpack_require__(27))
@@ -10150,6 +10237,7 @@ extend(p, __webpack_require__(28))
 
 /**
  * Mixin public API methods
+ * 扩展一些公共方法
  */
 
 extend(p, __webpack_require__(17))

@@ -9,6 +9,7 @@ module.exports = {
 
   /**
    * The prefix to look for when parsing directives.
+   * 前缀
    *
    * @type {String}
    */
@@ -18,6 +19,7 @@ module.exports = {
   /**
    * Whether to print debug messages.
    * Also enables stack trace for warnings.
+   * 开启 debug
    *
    * @type {Boolean}
    */
@@ -27,12 +29,14 @@ module.exports = {
   /**
    * Strict mode.
    * Disables asset lookup in the view parent chain.
+   * 严格模式
    */
 
   strict: false,
 
   /**
    * Whether to suppress warnings.
+   * 安静模式
    *
    * @type {Boolean}
    */
@@ -42,7 +46,7 @@ module.exports = {
   /**
    * Whether allow observer to alter data objects'
    * __proto__.
-   *
+   * 是否允许观察者修改 原型
    * @type {Boolean}
    */
 
@@ -50,6 +54,7 @@ module.exports = {
 
   /**
    * Whether to parse mustache tags in templates.
+   * 是否在模板中解析胡子标签
    *
    * @type {Boolean}
    */
@@ -58,6 +63,7 @@ module.exports = {
 
   /**
    * Whether to use async rendering.
+   * 是否启用异步更新
    */
 
   async: true,
@@ -65,6 +71,7 @@ module.exports = {
   /**
    * Whether to warn against errors caught when evaluating
    * expressions.
+   * 是否评估表达式中遇到的错误
    */
 
   warnExpressionErrors: true,
@@ -72,7 +79,7 @@ module.exports = {
   /**
    * Internal flag to indicate the delimiters have been
    * changed.
-   *
+   * 改变大胡子标签的格式
    * @type {Boolean}
    */
 
@@ -80,7 +87,7 @@ module.exports = {
 
   /**
    * List of asset types that a component can own.
-   *
+   * 定义一个 组件所需的资源类型
    * @type {Array}
    */
 
@@ -95,6 +102,7 @@ module.exports = {
 
   /**
    * prop binding modes
+   * 指定 props 绑定模式
    */
 
   _propBindingModes: {
@@ -105,6 +113,7 @@ module.exports = {
 
   /**
    * Max circular updates allowed in a batcher flush cycle.
+   * 重刷程序最大的更新次数(性能优化)
    */
 
   _maxUpdateCount: 100
@@ -115,7 +124,7 @@ module.exports = {
  * Interpolation delimiters.
  * We need to mark the changed flag so that the text parser
  * knows it needs to recompile the regex.
- *
+ * 设置标签类型
  * @type {Array<String>}
  */
 

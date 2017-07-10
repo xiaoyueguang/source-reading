@@ -11,6 +11,14 @@
  * @constructor
  */
 
+/**
+ * 这里是引用了别人的 缓存库.
+ * 这个缓存库很有意思.
+ * 可以不停的往一个有限制的缓存库里塞数据.
+ * 缓存库里会有一个维护的内容队列.
+ * 当该内容被命中时, 他在队列里的优先级就越高, 不容易从缓存库中移除.
+ */
+
 function Cache (limit) {
   this.size = 0
   this.limit = limit
@@ -25,7 +33,7 @@ var p = Cache.prototype
  * Returns the entry which was removed to make room for
  * the new entry. Otherwise undefined is returned.
  * (i.e. if there was enough room already).
- *
+ * Put 数据的时候会对数据检查, 超出的将会被移除
  * @param {String} key
  * @param {*} value
  * @return {Entry|undefined}
@@ -55,6 +63,7 @@ p.put = function (key, value) {
  * Purge the least recently used (oldest) entry from the
  * cache. Returns the removed entry or undefined if the
  * cache was empty.
+ * 移除最旧的缓存
  */
 
 p.shift = function () {
@@ -75,6 +84,7 @@ p.shift = function () {
  * @param {String} key
  * @param {Boolean} returnEntry
  * @return {Entry|*}
+ * 获取数据. 获取数据的时候会导致该数据的优先级变高
  */
 
 p.get = function (key, returnEntry) {

@@ -39,19 +39,19 @@ Vue
 > 从`util`助手函数开始读吧. 然后再是入口文件, 按照 `Vue`实例化的过程顺序来读
 
 
-* util
-* vue
-* batcher
-* cache
-* config
-* directive
-* watcher
-* api
-* compiler
-* directives
-* element
-* filters
-* instance
-* observer
-* parsers
-* transition
+- [x] util
+- [x] vue
+- [x] batcher
+- [x] cache
+- [x] config
+- [ ] directive
+- [ ] watcher
+- [ ] api
+- [ ] compiler
+- [ ] directives
+- [ ] element
+- [ ] filters
+- [ ] instance
+- [ ] observer
+- [ ] parsers
+- [ ] transition

@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 var _ = require('./index')
 
 /**
@@ -8,8 +11,13 @@ var _ = require('./index')
  * @param {Object} options
  * @return {String|undefined}
  */
-
+/**
+ * 原生标签
+ */
 exports.commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
+/**
+ * 判断标签是否为组件
+ */
 exports.checkComponent = function (el, options) {
   var tag = el.tagName.toLowerCase()
   if (tag === 'component') {
@@ -33,7 +41,7 @@ exports.checkComponent = function (el, options) {
  * Set a prop's initial value on a vm and its data object.
  * The vm may have inherit:true so we need to make sure
  * we don't accidentally overwrite parent value.
- *
+ * 设置 props 值. 且不污染到父级
  * @param {Vue} vm
  * @param {Object} prop
  * @param {*} value
@@ -53,6 +61,7 @@ exports.initProp = function (vm, prop, value) {
 
 /**
  * Assert whether a prop is valid.
+ * 判断 props 是否有效
  *
  * @param {Object} prop
  * @param {*} value
@@ -92,6 +101,7 @@ exports.assertProp = function (prop, value) {
     }
   }
   if (!valid) {
+    // 非有效的时候 直接打印.
     process.env.NODE_ENV !== 'production' && _.warn(
       'Invalid prop: type check failed for ' +
       prop.path + '="' + prop.raw + '".' +
@@ -101,6 +111,7 @@ exports.assertProp = function (prop, value) {
     return false
   }
   var validator = options.validator
+  // 验证
   if (validator) {
     if (!validator.call(null, value)) {
       process.env.NODE_ENV !== 'production' && _.warn(
@@ -112,13 +123,19 @@ exports.assertProp = function (prop, value) {
   }
   return true
 }
-
+/**
+ * 格式化 首位大写 或 返回自定义 type
+ * @param {*} val 
+ */
 function formatType (val) {
   return val
     ? val.charAt(0).toUpperCase() + val.slice(1)
     : 'custom type'
 }
-
+/**
+ * 格式化 类型值
+ * @param {*} val 
+ */
 function formatValue (val) {
   return Object.prototype.toString.call(val).slice(8, -1)
 }

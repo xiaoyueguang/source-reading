@@ -10,16 +10,17 @@ exports.hasProto = '__proto__' in {}
 var inBrowser = exports.inBrowser =
   typeof window !== 'undefined' &&
   Object.prototype.toString.call(window) !== '[object Object]'
-
+// 判断IE9
 exports.isIE9 =
   inBrowser &&
   navigator.userAgent.toLowerCase().indexOf('msie 9.0') > 0
-
+// 判断 android
 exports.isAndroid =
   inBrowser &&
   navigator.userAgent.toLowerCase().indexOf('android') > 0
 
 // Transition property/event sniffing
+// 不同系统的 transition别名
 if (inBrowser && !exports.isIE9) {
   var isWebkitTrans =
     window.ontransitionend === undefined &&
@@ -46,6 +47,7 @@ if (inBrowser && !exports.isIE9) {
  * should be executed as a microtask, so we leverage
  * MutationObserver if it's available, and fallback to
  * setTimeout(0).
+ * nextTick异步执行. 等 DOM 执行完毕后执行回调
  *
  * @param {Function} cb
  * @param {Object} ctx
