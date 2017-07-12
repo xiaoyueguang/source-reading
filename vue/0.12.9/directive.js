@@ -1,3 +1,6 @@
+/**
+ * vue 的指令系统
+ */
 var _ = require('./util')
 var config = require('./config')
 var Watcher = require('./watcher')
@@ -5,10 +8,13 @@ var textParser = require('./parsers/text')
 var expParser = require('./parsers/expression')
 
 /**
+ * 指令构造方法
  * A directive links a DOM element with a piece of data,
  * which is the result of evaluating an expression.
  * It registers a watcher with the expression and calls
  * the DOM update function when a change is triggered.
+ * 一个指令就像 dom 上的一个数据. 将会注册一个 watcher
+ * 在当值变化触发时会使得 dom 更新
  *
  * @param {String} name
  * @param {Node} el
@@ -35,6 +41,7 @@ function Directive (name, el, vm, descriptor, def, host) {
   // private
   this._descriptor = descriptor
   this._host = host
+  // 锁定更新
   this._locked = false
   this._bound = false
   // init
@@ -44,10 +51,16 @@ function Directive (name, el, vm, descriptor, def, host) {
 var p = Directive.prototype
 
 /**
+ * 每种指令都会有以下方法
+ * bind 用来初始化
+ * update 用来更新
+ */
+
+/**
+ * 初始化
  * Initialize the directive, mixin definition properties,
  * setup the watcher, call definition bind() and update()
  * if present.
- *
  * @param {Object} def
  */
 
@@ -56,15 +69,18 @@ p._bind = function (def) {
     (this.name !== 'cloak' || this.vm._isCompiled) &&
     this.el && this.el.removeAttribute
   ) {
+    // v-cloak 初始化后马上移除该属性
     this.el.removeAttribute(config.prefix + this.name)
   }
   if (typeof def === 'function') {
+    // 传入的指令只有一个方法时, 为 update 方法
     this.update = def
   } else {
     _.extend(this, def)
   }
   this._watcherExp = this.expression
   this._checkDynamicLiteral()
+  // 有自定义的初始化则执行初始化
   if (this.bind) {
     this.bind()
   }
@@ -73,9 +89,11 @@ p._bind = function (def) {
       (!this.isLiteral || this._isDynamicLiteral) &&
       !this._checkStatement()) {
     // wrapped updater for context
+    // 绑定更新方法
     var dir = this
     var update = this._update = this.update
       ? function (val, oldVal) {
+          // 不锁定 才更新
           if (!dir._locked) {
             dir.update(val, oldVal)
           }
@@ -83,6 +101,7 @@ p._bind = function (def) {
       : function () {} // noop if no update is provided
     // pre-process hook called before the value is piped
     // through the filters. used in v-repeat.
+    // 绑定上下文. v-repeat
     var preProcess = this._preProcess
       ? _.bind(this._preProcess, this)
       : null
@@ -108,7 +127,7 @@ p._bind = function (def) {
 
 /**
  * check if this is a dynamic literal binding.
- *
+ * 检查是否为 动态绑定
  * e.g. v-component="{{currentView}}"
  */
 
@@ -130,7 +149,8 @@ p._checkDynamicLiteral = function () {
  * and if the expression is a callable one. If both true,
  * we wrap up the expression and use it as the event
  * handler.
- *
+ * 指令里如果是一个方法调用. 则将指令里的表达式包起来.
+ * 并绑定
  * e.g. v-on="click: a++"
  *
  * @return {Boolean}
@@ -157,7 +177,7 @@ p._checkStatement = function () {
 
 /**
  * Check for an attribute directive param, e.g. lazy
- *
+ * 检查指令的修饰符
  * @param {String} name
  * @return {String}
  */
@@ -173,6 +193,7 @@ p._checkParam = function (name) {
 
 /**
  * Teardown the watcher and call unbind.
+ * 移除指令. 不仅移除指令, 还移除对应的 watcher
  */
 
 p._teardown = function () {
@@ -192,7 +213,7 @@ p._teardown = function () {
  * Set the corresponding value with the setter.
  * This should only be used in two-way directives
  * e.g. v-model.
- *
+ * 设置对应的值
  * @param {*} value
  * @public
  */
@@ -208,6 +229,7 @@ p.set = function (value) {
 /**
  * Execute a function while preventing that function from
  * triggering updates on this directive instance.
+ * 执行方法.自带锁定 解锁. 防止方法被执行多次
  *
  * @param {Function} fn
  */
