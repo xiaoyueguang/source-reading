@@ -44,8 +44,8 @@ Vue
 - [x] batcher
 - [x] cache
 - [x] config
-- [ ] directive
-- [ ] watcher
+- [x] directive
+- [x] watcher
 - [ ] api
 - [ ] compiler
 - [ ] directives
