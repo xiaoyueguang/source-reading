@@ -4,7 +4,7 @@ var _ = require('../util')
  * Create a child instance that prototypally inherits
  * data on parent. To achieve that we create an intermediate
  * constructor with its prototype pointing to parent.
- *
+ * 添加子元素
  * @param {Object} opts
  * @param {Function} [BaseCtor]
  * @return {Vue}
@@ -27,6 +27,7 @@ exports.$addChild = function (opts, BaseCtor) {
       var className = optionName
         ? _.classify(optionName)
         : 'VueComponent'
+      // new Function...
       ChildVue = new Function(
         'return function ' + className + ' (options) {' +
         'this.constructor = ' + className + ';' +

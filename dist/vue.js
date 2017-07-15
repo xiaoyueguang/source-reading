@@ -1829,7 +1829,10 @@ function warnNonExistent (path) {
 /* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * watcher 系统
+ */
+var _ = __webpack_require__(0)
 var config = __webpack_require__(2)
 var Dep = __webpack_require__(11)
 var expParser = __webpack_require__(8)
@@ -1840,16 +1843,19 @@ var uid = 0
  * A watcher parses an expression, collects dependencies,
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
- *
- * @param {Vue} vm
- * @param {String} expression
- * @param {Function} cb
- * @param {Object} options
- *                 - {Array} filters
- *                 - {Boolean} twoWay
- *                 - {Boolean} deep
- *                 - {Boolean} user
- *                 - {Boolean} lazy
+ * watch 构造函数
+ * watch 用于解析表达式, 收集依赖.
+ * 当表达式改变时, 触发回调.
+ * $watch 和 指令里都讲会用到 watch
+ * @param {Vue} vm 实例
+ * @param {String} expression 表达式
+ * @param {Function} cb 回调
+ * @param {Object} options 选项
+ *                 - {Array} filters 过滤
+ *                 - {Boolean} twoWay 双向绑定
+ *                 - {Boolean} deep 深度观察
+ *                 - {Boolean} user 
+ *                 - {Boolean} lazy 懒观察
  *                 - {Function} [preProcess]
  * @constructor
  */
@@ -1857,11 +1863,15 @@ var uid = 0
 function Watcher (vm, expOrFn, cb, options) {
   var isFn = typeof expOrFn === 'function'
   this.vm = vm
+  // 每次实例化就将会在对应的 vue 实例上推入观察者
   vm._watchers.push(this)
+  // 获取表达式. 如果为方法, 则取出方法的表达式
   this.expression = isFn ? expOrFn.toString() : expOrFn
   this.cb = cb
+  // watch 的 ID 都将是唯一的
   this.id = ++uid // uid for batching
   this.active = true
+  // 设置属性
   options = options || {}
   this.deep = !!options.deep
   this.user = !!options.user
@@ -1870,13 +1880,16 @@ function Watcher (vm, expOrFn, cb, options) {
   this.dirty = this.lazy
   this.filters = options.filters
   this.preProcess = options.preProcess
+  // 依赖关系数组
   this.deps = []
   this.newDeps = null
   // parse expression for getter/setter
   if (isFn) {
+    // 为方法的时候 设置 getter
     this.getter = expOrFn
     this.setter = undefined
   } else {
+    // 为表达式的时候 利用表达式解析, 设置 setter/getter
     var res = expParser.parse(expOrFn, options.twoWay)
     this.getter = res.get
     this.setter = res.set
@@ -1886,6 +1899,7 @@ function Watcher (vm, expOrFn, cb, options) {
     : this.get()
   // state for avoiding false triggers for deep and Array
   // watchers during vm._digest()
+  // 设置队列. 避免观察过深(deep)或过多(Array) 导致触发多次
   this.queued = this.shallow = false
 }
 
@@ -1893,6 +1907,7 @@ var p = Watcher.prototype
 
 /**
  * Add a dependency to this directive.
+ * 给 指令 添加依赖
  *
  * @param {Dep} dep
  */
@@ -1900,10 +1915,12 @@ var p = Watcher.prototype
 p.addDep = function (dep) {
   var newDeps = this.newDeps
   var old = this.deps
+  // 将 原先的依赖 按照顺序添加. 顺便检查 避免添加重复的依赖函数
   if (_.indexOf(newDeps, dep) < 0) {
     newDeps.push(dep)
     var i = _.indexOf(old, dep)
     if (i < 0) {
+      // TODO: addSub
       dep.addSub(this)
     } else {
       old[i] = null
@@ -1913,13 +1930,16 @@ p.addDep = function (dep) {
 
 /**
  * Evaluate the getter, and re-collect dependencies.
+ * 评估 getter. 并重新收集依赖
  */
 
 p.get = function () {
+  // 清空收集依赖
   this.beforeGet()
   var vm = this.vm
   var value
   try {
+    // 获取值. 并且利用 try 来报错
     value = this.getter.call(vm, vm)
   } catch (e) {
     if (
@@ -1938,12 +1958,14 @@ p.get = function () {
   }
   // "touch" every property so they are all tracked as
   // dependencies for deep watching
+  // 如果带有 deep 属性. 则将整个对象或数组进行监视
   if (this.deep) {
     traverse(value)
   }
   if (this.preProcess) {
     value = this.preProcess(value)
   }
+  // 过滤
   if (this.filters) {
     value = vm._applyFilters(value, null, this.filters, false)
   }
@@ -1953,7 +1975,7 @@ p.get = function () {
 
 /**
  * Set the corresponding value with the setter.
- *
+ * 设置值, 利用 setter 去设置
  * @param {*} value
  */
 
@@ -1980,6 +2002,7 @@ p.set = function (value) {
 
 /**
  * Prepare for dependency collection.
+ * 清空新的依赖数组
  */
 
 p.beforeGet = function () {
@@ -1989,6 +2012,7 @@ p.beforeGet = function () {
 
 /**
  * Clean up for dependency collection.
+ * 清空依赖收集 将依赖清空, 并将收集到的新依赖放到原本的依赖数组里
  */
 
 p.afterGet = function () {
@@ -2007,7 +2031,7 @@ p.afterGet = function () {
 /**
  * Subscriber interface.
  * Will be called when a dependency changes.
- *
+ * 更新值. 依赖有变化时, 进行调用
  * @param {Boolean} shallow
  */
 
@@ -2032,6 +2056,7 @@ p.update = function (shallow) {
 /**
  * Batcher job interface.
  * Will be called by the batcher.
+ * 依赖执行. 收集依赖
  */
 
 p.run = function () {
@@ -2056,6 +2081,7 @@ p.run = function () {
 /**
  * Evaluate the value of the watcher.
  * This only gets called for lazy watchers.
+ * 评估. 收集依赖
  */
 
 p.evaluate = function () {
@@ -2069,17 +2095,22 @@ p.evaluate = function () {
 
 /**
  * Depend on all deps collected by this watcher.
+ * 执行 watcher 上的 依赖上更新依赖
  */
 
 p.depend = function () {
   var i = this.deps.length
   while (i--) {
+    // TODO:
     this.deps[i].depend()
   }
 }
 
 /**
  * Remove self from all dependencies' subcriber list.
+ * 移除 watcher.
+ * 从vue 实例的 watchers 里移除.
+ * 依赖中也移除
  */
 
 p.teardown = function () {
@@ -2103,6 +2134,7 @@ p.teardown = function () {
  * Recrusively traverse an object to evoke all converted
  * getters, so that every nested property inside the object
  * is collected as a "deep" dependency.
+ * 将一个对象里的所有属性都进行观察
  *
  * @param {Object} obj
  */
@@ -2843,7 +2875,7 @@ var _ = __webpack_require__(0)
  * Create a child instance that prototypally inherits
  * data on parent. To achieve that we create an intermediate
  * constructor with its prototype pointing to parent.
- *
+ * 添加子元素
  * @param {Object} opts
  * @param {Function} [BaseCtor]
  * @return {Vue}
@@ -2866,6 +2898,7 @@ exports.$addChild = function (opts, BaseCtor) {
       var className = optionName
         ? _.classify(optionName)
         : 'VueComponent'
+      // new Function...
       ChildVue = new Function(
         'return function ' + className + ' (options) {' +
         'this.constructor = ' + className + ';' +
@@ -2892,6 +2925,10 @@ exports.$addChild = function (opts, BaseCtor) {
 /* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 关于数据的 API
+ */
+
 var Watcher = __webpack_require__(10)
 var Path = __webpack_require__(9)
 var textParser = __webpack_require__(6)
@@ -2901,6 +2938,7 @@ var filterRE = /[^|]\|[^|]/
 
 /**
  * Get the value from an expression on this vm.
+ * 从表达式上获取值.
  *
  * @param {String} exp
  * @return {*}
@@ -2908,6 +2946,7 @@ var filterRE = /[^|]\|[^|]/
 
 exports.$get = function (exp) {
   var res = expParser.parse(exp)
+  console.log(2)
   if (res) {
     try {
       return res.get.call(this, this)
@@ -2919,12 +2958,14 @@ exports.$get = function (exp) {
  * Set the value from an expression on this vm.
  * The expression must be a valid left-hand
  * expression in an assignment.
+ * 通过表达式去设置值
  *
  * @param {String} exp
  * @param {*} val
  */
 
 exports.$set = function (exp, val) {
+  console.log(1)
   var res = expParser.parse(exp, true)
   if (res && res.set) {
     res.set.call(this, this, val)
@@ -2933,7 +2974,7 @@ exports.$set = function (exp, val) {
 
 /**
  * Add a property on the VM
- *
+ * 在实例上添加 可监听的数据
  * @param {String} key
  * @param {*} val
  */
@@ -2944,6 +2985,7 @@ exports.$add = function (key, val) {
 
 /**
  * Delete a property on the VM
+ * 在实例上删除 数据
  *
  * @param {String} key
  */
@@ -2955,10 +2997,10 @@ exports.$delete = function (key) {
 /**
  * Watch an expression, trigger callback when its
  * value changes.
- *
- * @param {String} exp
- * @param {Function} cb
- * @param {Object} [options]
+ * 添加一个 watcher. 观察一个表达式.
+ * @param {String} exp 监听的路径
+ * @param {Function} cb 监听的方法
+ * @param {Object} [options] 配置值
  *                 - {Boolean} deep
  *                 - {Boolean} immediate
  *                 - {Boolean} user
@@ -2977,6 +3019,7 @@ exports.$watch = function (exp, cb, options) {
   if (options && options.immediate) {
     wrappedCb(watcher.value)
   }
+  // 返回一个取消观察的方法
   return function unwatchFn () {
     watcher.teardown()
   }
@@ -2984,7 +3027,7 @@ exports.$watch = function (exp, cb, options) {
 
 /**
  * Evaluate a text directive, including filters.
- *
+ * 解析字符串.
  * @param {String} text
  * @return {String}
  */
@@ -3008,6 +3051,7 @@ exports.$eval = function (text) {
 
 /**
  * Interpolate a piece of template text.
+ * 插入一个文本模板. 并尝试解析
  *
  * @param {String} text
  * @return {String}
@@ -3033,7 +3077,7 @@ exports.$interpolate = function (text) {
  * Log instance data as a plain JS object
  * so that it is easier to inspect in console.
  * This method assumes console is available.
- *
+ * 打印被观察的数据. 不会有一堆乱七八糟的 getter/setter
  * @param {String} [path]
  */
 
@@ -5776,6 +5820,9 @@ function mergeAttrs (from, to) {
 /* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * vue 的指令系统
+ */
 var _ = __webpack_require__(0)
 var config = __webpack_require__(2)
 var Watcher = __webpack_require__(10)
@@ -5783,10 +5830,13 @@ var textParser = __webpack_require__(6)
 var expParser = __webpack_require__(8)
 
 /**
+ * 指令构造方法
  * A directive links a DOM element with a piece of data,
  * which is the result of evaluating an expression.
  * It registers a watcher with the expression and calls
  * the DOM update function when a change is triggered.
+ * 一个指令就像 dom 上的一个数据. 将会注册一个 watcher
+ * 在当值变化触发时会使得 dom 更新
  *
  * @param {String} name
  * @param {Node} el
@@ -5813,6 +5863,7 @@ function Directive (name, el, vm, descriptor, def, host) {
   // private
   this._descriptor = descriptor
   this._host = host
+  // 锁定更新
   this._locked = false
   this._bound = false
   // init
@@ -5822,10 +5873,16 @@ function Directive (name, el, vm, descriptor, def, host) {
 var p = Directive.prototype
 
 /**
+ * 每种指令都会有以下方法
+ * bind 用来初始化
+ * update 用来更新
+ */
+
+/**
+ * 初始化
  * Initialize the directive, mixin definition properties,
  * setup the watcher, call definition bind() and update()
  * if present.
- *
  * @param {Object} def
  */
 
@@ -5834,15 +5891,18 @@ p._bind = function (def) {
     (this.name !== 'cloak' || this.vm._isCompiled) &&
     this.el && this.el.removeAttribute
   ) {
+    // v-cloak 初始化后马上移除该属性
     this.el.removeAttribute(config.prefix + this.name)
   }
   if (typeof def === 'function') {
+    // 传入的指令只有一个方法时, 为 update 方法
     this.update = def
   } else {
     _.extend(this, def)
   }
   this._watcherExp = this.expression
   this._checkDynamicLiteral()
+  // 有自定义的初始化则执行初始化
   if (this.bind) {
     this.bind()
   }
@@ -5851,9 +5911,11 @@ p._bind = function (def) {
       (!this.isLiteral || this._isDynamicLiteral) &&
       !this._checkStatement()) {
     // wrapped updater for context
+    // 绑定更新方法
     var dir = this
     var update = this._update = this.update
       ? function (val, oldVal) {
+          // 不锁定 才更新
           if (!dir._locked) {
             dir.update(val, oldVal)
           }
@@ -5861,6 +5923,7 @@ p._bind = function (def) {
       : function () {} // noop if no update is provided
     // pre-process hook called before the value is piped
     // through the filters. used in v-repeat.
+    // 绑定上下文. v-repeat
     var preProcess = this._preProcess
       ? _.bind(this._preProcess, this)
       : null
@@ -5886,7 +5949,7 @@ p._bind = function (def) {
 
 /**
  * check if this is a dynamic literal binding.
- *
+ * 检查是否为 动态绑定
  * e.g. v-component="{{currentView}}"
  */
 
@@ -5908,7 +5971,8 @@ p._checkDynamicLiteral = function () {
  * and if the expression is a callable one. If both true,
  * we wrap up the expression and use it as the event
  * handler.
- *
+ * 指令里如果是一个方法调用. 则将指令里的表达式包起来.
+ * 并绑定
  * e.g. v-on="click: a++"
  *
  * @return {Boolean}
@@ -5935,7 +5999,7 @@ p._checkStatement = function () {
 
 /**
  * Check for an attribute directive param, e.g. lazy
- *
+ * 检查指令的修饰符
  * @param {String} name
  * @return {String}
  */
@@ -5951,6 +6015,7 @@ p._checkParam = function (name) {
 
 /**
  * Teardown the watcher and call unbind.
+ * 移除指令. 不仅移除指令, 还移除对应的 watcher
  */
 
 p._teardown = function () {
@@ -5970,7 +6035,7 @@ p._teardown = function () {
  * Set the corresponding value with the setter.
  * This should only be used in two-way directives
  * e.g. v-model.
- *
+ * 设置对应的值
  * @param {*} value
  * @public
  */
@@ -5986,6 +6051,7 @@ p.set = function (value) {
 /**
  * Execute a function while preventing that function from
  * triggering updates on this directive instance.
+ * 执行方法.自带锁定 解锁. 防止方法被执行多次
  *
  * @param {Function} fn
  */

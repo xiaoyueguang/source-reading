@@ -1,3 +1,7 @@
+/**
+ * 关于数据的 API
+ */
+
 var Watcher = require('../watcher')
 var Path = require('../parsers/path')
 var textParser = require('../parsers/text')
@@ -7,6 +11,7 @@ var filterRE = /[^|]\|[^|]/
 
 /**
  * Get the value from an expression on this vm.
+ * 从表达式上获取值.
  *
  * @param {String} exp
  * @return {*}
@@ -14,6 +19,7 @@ var filterRE = /[^|]\|[^|]/
 
 exports.$get = function (exp) {
   var res = expParser.parse(exp)
+  console.log(2)
   if (res) {
     try {
       return res.get.call(this, this)
@@ -25,12 +31,14 @@ exports.$get = function (exp) {
  * Set the value from an expression on this vm.
  * The expression must be a valid left-hand
  * expression in an assignment.
+ * 通过表达式去设置值
  *
  * @param {String} exp
  * @param {*} val
  */
 
 exports.$set = function (exp, val) {
+  console.log(1)
   var res = expParser.parse(exp, true)
   if (res && res.set) {
     res.set.call(this, this, val)
@@ -39,7 +47,7 @@ exports.$set = function (exp, val) {
 
 /**
  * Add a property on the VM
- *
+ * 在实例上添加 可监听的数据
  * @param {String} key
  * @param {*} val
  */
@@ -50,6 +58,7 @@ exports.$add = function (key, val) {
 
 /**
  * Delete a property on the VM
+ * 在实例上删除 数据
  *
  * @param {String} key
  */
@@ -61,10 +70,10 @@ exports.$delete = function (key) {
 /**
  * Watch an expression, trigger callback when its
  * value changes.
- *
- * @param {String} exp
- * @param {Function} cb
- * @param {Object} [options]
+ * 添加一个 watcher. 观察一个表达式.
+ * @param {String} exp 监听的路径
+ * @param {Function} cb 监听的方法
+ * @param {Object} [options] 配置值
  *                 - {Boolean} deep
  *                 - {Boolean} immediate
  *                 - {Boolean} user
@@ -83,6 +92,7 @@ exports.$watch = function (exp, cb, options) {
   if (options && options.immediate) {
     wrappedCb(watcher.value)
   }
+  // 返回一个取消观察的方法
   return function unwatchFn () {
     watcher.teardown()
   }
@@ -90,7 +100,7 @@ exports.$watch = function (exp, cb, options) {
 
 /**
  * Evaluate a text directive, including filters.
- *
+ * 解析字符串.
  * @param {String} text
  * @return {String}
  */
@@ -114,6 +124,7 @@ exports.$eval = function (text) {
 
 /**
  * Interpolate a piece of template text.
+ * 插入一个文本模板. 并尝试解析
  *
  * @param {String} text
  * @return {String}
@@ -139,7 +150,7 @@ exports.$interpolate = function (text) {
  * Log instance data as a plain JS object
  * so that it is easier to inspect in console.
  * This method assumes console is available.
- *
+ * 打印被观察的数据. 不会有一堆乱七八糟的 getter/setter
  * @param {String} [path]
  */
 
