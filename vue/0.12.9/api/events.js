@@ -1,8 +1,11 @@
+/**
+ * 事件相关
+ */
 var _ = require('../util')
 
 /**
  * Listen on the given `event` with `fn`.
- *
+ * 监听事件. 监听事件基本为一个数组
  * @param {String} event
  * @param {Function} fn
  */
@@ -17,7 +20,7 @@ exports.$on = function (event, fn) {
 /**
  * Adds an `event` listener that will be invoked a single
  * time then automatically removed.
- *
+ * 添加监听方法. 只允许触发一次
  * @param {String} event
  * @param {Function} fn
  */
@@ -36,7 +39,7 @@ exports.$once = function (event, fn) {
 /**
  * Remove the given callback for `event` or all
  * registered callbacks.
- *
+ * 取消监听. 有传入函数 则取消监听函数. 没有则取消监听所有
  * @param {String} event
  * @param {Function} fn
  */
@@ -82,11 +85,12 @@ exports.$off = function (event, fn) {
 
 /**
  * Trigger an event on self.
- *
+ * 触发事件
  * @param {String} event
  */
 
 exports.$emit = function (event) {
+  // 事件是否中止
   this._eventCancelled = false
   var cbs = this._events[event]
   if (cbs) {
@@ -102,6 +106,7 @@ exports.$emit = function (event) {
       ? _.toArray(cbs)
       : cbs
     for (var l = cbs.length; i < l; i++) {
+      // 当子组件调用返回 false 时, 表明可中止了
       if (cbs[i].apply(this, args) === false) {
         this._eventCancelled = true
       }
@@ -112,7 +117,7 @@ exports.$emit = function (event) {
 
 /**
  * Recursively broadcast an event to all children instances.
- *
+ * 广播. 触发所有的子组件的事件
  * @param {String} event
  * @param {...*} additional arguments
  */
@@ -120,6 +125,7 @@ exports.$emit = function (event) {
 exports.$broadcast = function (event) {
   // if no child has registered for this event,
   // then there's no need to broadcast.
+  // 当没有一个子组件注册该事件时, 则表明不需要广播到此处
   if (!this._eventsCount[event]) return
   var children = this.$children
   for (var i = 0, l = children.length; i < l; i++) {
@@ -134,7 +140,7 @@ exports.$broadcast = function (event) {
 
 /**
  * Recursively propagate an event up the parent chain.
- *
+ * 派发. 沿着父链向上一层层派发事件
  * @param {String} event
  * @param {...*} additional arguments
  */
@@ -171,4 +177,5 @@ function modifyListenerCount (vm, event, count) {
       (parent._eventsCount[event] || 0) + count
     parent = parent.$parent
   }
+  console.log('TODO: api/events', parent._eventsCount)
 }
