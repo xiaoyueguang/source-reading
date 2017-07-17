@@ -3096,6 +3096,9 @@ exports.$log = function (path) {
 /* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * DOM 操作相关
+ */
 var _ = __webpack_require__(0)
 var transition = __webpack_require__(12)
 
@@ -3103,7 +3106,8 @@ var transition = __webpack_require__(12)
  * Convenience on-instance nextTick. The callback is
  * auto-bound to the instance, and this avoids component
  * modules having to rely on the global Vue.
- *
+ * 异步回调. 因为界面刷新的时候是同步的
+ * 调用 异步方法即可实现 界面更新完成后再执行回调
  * @param {Function} fn
  */
 
@@ -3113,7 +3117,7 @@ exports.$nextTick = function (fn) {
 
 /**
  * Append instance to target
- *
+ * 将实例插入到目标 DOM 中. 为目标的最后个子节点
  * @param {Node} target
  * @param {Function} [cb]
  * @param {Boolean} [withTransition] - defaults to true
@@ -3128,7 +3132,7 @@ exports.$appendTo = function (target, cb, withTransition) {
 
 /**
  * Prepend instance to target
- *
+ * 将实例插入到目标 DOM 中. 为目标的第一个子节点
  * @param {Node} target
  * @param {Function} [cb]
  * @param {Boolean} [withTransition] - defaults to true
@@ -3146,7 +3150,7 @@ exports.$prependTo = function (target, cb, withTransition) {
 
 /**
  * Insert instance before target
- *
+ * 将实例添加到目标节点前
  * @param {Node} target
  * @param {Function} [cb]
  * @param {Boolean} [withTransition] - defaults to true
@@ -3161,7 +3165,7 @@ exports.$before = function (target, cb, withTransition) {
 
 /**
  * Insert instance after target
- *
+ * 将实例添加到目标节点后
  * @param {Node} target
  * @param {Function} [cb]
  * @param {Boolean} [withTransition] - defaults to true
@@ -3179,7 +3183,7 @@ exports.$after = function (target, cb, withTransition) {
 
 /**
  * Remove instance from DOM
- *
+ * 从节点中移除实例
  * @param {Function} [cb]
  * @param {Boolean} [withTransition] - defaults to true
  */
@@ -3195,6 +3199,7 @@ exports.$remove = function (cb, withTransition) {
   var op
   var self = this
   var realCb = function () {
+    // 触发生命钩子
     if (inDoc) self._callHook('detached')
     if (cb) cb()
   }
@@ -3217,13 +3222,13 @@ exports.$remove = function (cb, withTransition) {
 
 /**
  * Shared DOM insertion function.
- *
- * @param {Vue} vm
- * @param {Element} target
- * @param {Function} [cb]
- * @param {Boolean} [withTransition]
- * @param {Function} op1 - op for non-transition insert
- * @param {Function} op2 - op for transition insert
+ * DOM 插入方法.
+ * @param {Vue} vm 实例
+ * @param {Element} target 目标 DOM 节点
+ * @param {Function} [cb] 
+ * @param {Boolean} [withTransition] 是否启用过渡
+ * @param {Function} op1 - op for non-transition insert 无过渡插入 方法
+ * @param {Function} op2 - op for transition insert 有过渡插入 方法
  * @return vm
  */
 
@@ -3249,6 +3254,7 @@ function insert (vm, target, cb, withTransition, op1, op2) {
 }
 
 /**
+ * TODO:
  * Execute a transition operation on a fragment instance,
  * iterating through all its block nodes.
  *
@@ -3272,7 +3278,7 @@ function blockOp (vm, target, op, cb) {
 
 /**
  * Check for selectors
- *
+ * 查找 DOM 节点
  * @param {String|Element} el
  */
 
@@ -3284,7 +3290,7 @@ function query (el) {
 
 /**
  * Append operation that takes a callback.
- *
+ * 将 节点添加到 目标 节点下 并执行回调
  * @param {Node} el
  * @param {Node} target
  * @param {Vue} vm - unused
@@ -3298,7 +3304,7 @@ function append (el, target, vm, cb) {
 
 /**
  * InsertBefore operation that takes a callback.
- *
+ * 将 节点 添加到目标节点前, 并执行回调
  * @param {Node} el
  * @param {Node} target
  * @param {Vue} vm - unused
@@ -3312,7 +3318,7 @@ function before (el, target, vm, cb) {
 
 /**
  * Remove operation that takes a callback.
- *
+ * 移除节点, 并执行回调
  * @param {Node} el
  * @param {Vue} vm - unused
  * @param {Function} [cb]
@@ -3328,11 +3334,14 @@ function remove (el, vm, cb) {
 /* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 事件相关
+ */
 var _ = __webpack_require__(0)
 
 /**
  * Listen on the given `event` with `fn`.
- *
+ * 监听事件. 监听事件基本为一个数组
  * @param {String} event
  * @param {Function} fn
  */
@@ -3347,7 +3356,7 @@ exports.$on = function (event, fn) {
 /**
  * Adds an `event` listener that will be invoked a single
  * time then automatically removed.
- *
+ * 添加监听方法. 只允许触发一次
  * @param {String} event
  * @param {Function} fn
  */
@@ -3366,7 +3375,7 @@ exports.$once = function (event, fn) {
 /**
  * Remove the given callback for `event` or all
  * registered callbacks.
- *
+ * 取消监听. 有传入函数 则取消监听函数. 没有则取消监听所有
  * @param {String} event
  * @param {Function} fn
  */
@@ -3412,11 +3421,12 @@ exports.$off = function (event, fn) {
 
 /**
  * Trigger an event on self.
- *
+ * 触发事件
  * @param {String} event
  */
 
 exports.$emit = function (event) {
+  // 事件是否中止
   this._eventCancelled = false
   var cbs = this._events[event]
   if (cbs) {
@@ -3432,6 +3442,7 @@ exports.$emit = function (event) {
       ? _.toArray(cbs)
       : cbs
     for (var l = cbs.length; i < l; i++) {
+      // 当子组件调用返回 false 时, 表明可中止了
       if (cbs[i].apply(this, args) === false) {
         this._eventCancelled = true
       }
@@ -3442,7 +3453,7 @@ exports.$emit = function (event) {
 
 /**
  * Recursively broadcast an event to all children instances.
- *
+ * 广播. 触发所有的子组件的事件
  * @param {String} event
  * @param {...*} additional arguments
  */
@@ -3450,6 +3461,7 @@ exports.$emit = function (event) {
 exports.$broadcast = function (event) {
   // if no child has registered for this event,
   // then there's no need to broadcast.
+  // 当没有一个子组件注册该事件时, 则表明不需要广播到此处
   if (!this._eventsCount[event]) return
   var children = this.$children
   for (var i = 0, l = children.length; i < l; i++) {
@@ -3464,7 +3476,7 @@ exports.$broadcast = function (event) {
 
 /**
  * Recursively propagate an event up the parent chain.
- *
+ * 派发. 沿着父链向上一层层派发事件
  * @param {String} event
  * @param {...*} additional arguments
  */
@@ -3501,6 +3513,7 @@ function modifyListenerCount (vm, event, count) {
       (parent._eventsCount[event] || 0) + count
     parent = parent.$parent
   }
+  console.log('TODO: api/events', parent._eventsCount)
 }
 
 
@@ -3508,11 +3521,15 @@ function modifyListenerCount (vm, event, count) {
 /* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 暴露出全局方法
+ */
 var _ = __webpack_require__(0)
 var config = __webpack_require__(2)
 
 /**
  * Expose useful internals
+ * 暴露一些方法.
  */
 
 exports.util = _
@@ -3520,6 +3537,7 @@ exports.config = config
 exports.nextTick = _.nextTick
 exports.compiler = __webpack_require__(5)
 
+// 解析
 exports.parsers = {
   path: __webpack_require__(9),
   text: __webpack_require__(6),
@@ -3532,6 +3550,7 @@ exports.parsers = {
  * Each instance constructor, including Vue, has a unique
  * cid. This enables us to create wrapped "child
  * constructors" for prototypal inheritance and cache them.
+ * 每个 Vue 的实例, 都将会有一个唯一的标识
  */
 
 exports.cid = 0
@@ -3539,6 +3558,7 @@ var cid = 1
 
 /**
  * Class inheritance
+ * 定义扩展组件方法
  *
  * @param {Object} extendOptions
  */
@@ -3563,6 +3583,7 @@ exports.extend = function (extendOptions) {
   Sub.extend = Super.extend
   // create asset registers, so extended classes
   // can have their private assets too.
+  // 定义资源
   config._assetTypes.forEach(function (type) {
     Sub[type] = Super[type]
   })
@@ -3573,13 +3594,14 @@ exports.extend = function (extendOptions) {
  * A function that returns a sub-class constructor with the
  * given name. This gives us much nicer output when
  * logging instances in the console.
- *
+ * 创建一个方法. 返回一个 由 new Function 定义的方法.
  * @param {String} name
  * @return {Function}
  */
 
 function createClass (name) {
   return new Function(
+    // classify 组件名字的破折转驼峰
     'return function ' + _.classify(name) +
     ' (options) { this._init(options) }'
   )()
@@ -3587,7 +3609,7 @@ function createClass (name) {
 
 /**
  * Plugin system
- *
+ * Vue 的插件系统. 通过 USE 去调用
  * @param {Object} plugin
  */
 
@@ -3595,6 +3617,7 @@ exports.use = function (plugin) {
   // additional parameters
   var args = _.toArray(arguments, 1)
   args.unshift(this)
+  // 插件默认会有个 install 方法.
   if (typeof plugin.install === 'function') {
     plugin.install.apply(plugin, args)
   } else {
@@ -3606,6 +3629,7 @@ exports.use = function (plugin) {
 /**
  * Create asset registration methods with the following
  * signature:
+ * 将资源类型 转为 方法导出
  *
  * @param {String} id
  * @param {*} definition
@@ -3633,7 +3657,10 @@ config._assetTypes.forEach(function (type) {
 /* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 生命周期
+ */
+var _ = __webpack_require__(0)
 var compiler = __webpack_require__(5)
 
 /**
@@ -3641,12 +3668,14 @@ var compiler = __webpack_require__(5)
  * process. The passed in `el` can be a selector string, an
  * existing Element, or a DocumentFragment (for block
  * instances).
+ * 将实例插入到 目标节点中
  *
  * @param {Element|DocumentFragment|string} el
  * @public
  */
 
 exports.$mount = function (el) {
+  // 防止重复mount
   if (this._isCompiled) {
     process.env.NODE_ENV !== 'production' && _.warn(
       '$mount() should be called only once.'
@@ -3655,16 +3684,21 @@ exports.$mount = function (el) {
   }
   el = _.query(el)
   if (!el) {
+    // 没有节点则自己创建节点
     el = document.createElement('div')
   }
+  // 编译 vue
   this._compile(el)
   this._isCompiled = true
+  // 钩子
   this._callHook('compiled')
   this._initDOMHooks()
   if (_.inDoc(this.$el)) {
+    // 在 document 中则执行钩子
     this._callHook('attached')
     ready.call(this)
   } else {
+    // 不在文档中则先监听.
     this.$once('hook:attached', ready)
   }
   return this
@@ -3672,6 +3706,7 @@ exports.$mount = function (el) {
 
 /**
  * Mark an instance as ready.
+ * 触发 ready 钩子
  */
 
 function ready () {
@@ -3683,6 +3718,7 @@ function ready () {
 /**
  * Teardown the instance, simply delegate to the internal
  * _destroy.
+ * 移除实例时触发方法
  */
 
 exports.$destroy = function (remove, deferCleanup) {
@@ -3692,6 +3728,7 @@ exports.$destroy = function (remove, deferCleanup) {
 /**
  * Partially compile a piece of DOM and return a
  * decompile function.
+ * 编译
  *
  * @param {Element|DocumentFragment} el
  * @param {Vue} [host]

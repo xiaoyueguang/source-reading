@@ -46,8 +46,7 @@ Vue
 - [x] config
 - [x] directive
 - [x] watcher
-- [ ] api
-- [ ] compiler
+- [x] api
 - [ ] directives
 - [ ] element
 - [ ] filters
@@ -55,3 +54,4 @@ Vue
 - [ ] observer
 - [ ] parsers
 - [ ] transition
+- [ ] compiler

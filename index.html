@@ -21,6 +21,20 @@
   </body>
   <script src="./dist/vue.js"></script>
   <script>
+
+    Vue.component('test', {
+      template: '<p>{{msg}}</p>',
+      data () {
+        return {
+          msg: hehe
+        }
+      },
+      on: {
+        test () {
+          console.log('test in component')
+        }
+      }
+    })
     var $vm = new Vue({
       el: '#app',
       data: {
@@ -33,5 +47,11 @@
       ready () {
       }
     })
+
+    $vm.$on('test', function () {
+      console.log('test in $on')
+    })
+
+    $vm.$emit('test')
   </script>
 </html>
