@@ -1,3 +1,6 @@
+/**
+ * 组件传值
+ */
 // NOTE: the prop internal directive is compiled and linked
 // during _initScope(), before the created hook is called.
 // The purpose is to make the initial prop values available
@@ -17,7 +20,7 @@ module.exports = {
     var prop = this._descriptor
     var childKey = prop.path
     var parentKey = prop.parentPath
-
+    
     this.parentWatcher = new Watcher(
       parent,
       parentKey,

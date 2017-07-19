@@ -1,3 +1,6 @@
+/**
+ * v-html 指令
+ */
 var _ = require('../util')
 var templateParser = require('../parsers/template')
 
@@ -6,6 +9,7 @@ module.exports = {
   bind: function () {
     // a comment node means this is a binding for
     // {{{ inline unescaped html }}}
+    // 内联指令
     if (this.el.nodeType === 8) {
       // hold nodes
       this.nodes = []
@@ -14,17 +18,20 @@ module.exports = {
       _.replace(this.el, this.anchor)
     }
   },
-
+  // 直接将 html 片段插入到 节点中
   update: function (value) {
     value = _.toString(value)
+    // {{{}}}指令
     if (this.nodes) {
       this.swap(value)
     } else {
+      // v-html指令.
       this.el.innerHTML = value
     }
   },
 
   swap: function (value) {
+    // 解析
     // remove old nodes
     var i = this.nodes.length
     while (i--) {

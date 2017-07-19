@@ -1,10 +1,13 @@
+/**
+ * v-ref 指令
+ */
 var _ = require('../util')
 
 module.exports = {
 
   isLiteral: true,
-
   bind: function () {
+    // 绑定. 将组件直接绑到该 ID 上
     var vm = this.el.__vue__
     if (!vm) {
       process.env.NODE_ENV !== 'production' && _.warn(

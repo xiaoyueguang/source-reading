@@ -16,7 +16,7 @@
   </head>
   <body>
     <div id="app">
-      {{msg}}
+      <p class='{{classname}}' v-html="msg"></p>
     </div>
   </body>
   <script src="./dist/vue.js"></script>
@@ -26,7 +26,7 @@
       template: '<p>{{msg}}</p>',
       data () {
         return {
-          msg: hehe
+          msg: 'hehe'
         }
       },
       on: {
@@ -38,7 +38,8 @@
     var $vm = new Vue({
       el: '#app',
       data: {
-        msg: 'HELLO'
+        msg: '<p><span>测试</span></p>',
+        classname: 'test'
       },
       computed: {
       },
@@ -49,7 +50,7 @@
     })
 
     $vm.$on('test', function () {
-      console.log('test in $on')
+      // console.log('test in $on')
     })
 
     $vm.$emit('test')

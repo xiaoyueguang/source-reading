@@ -1,3 +1,6 @@
+/**
+ * v-text 指令
+ */
 var _ = require('../util')
 
 module.exports = {

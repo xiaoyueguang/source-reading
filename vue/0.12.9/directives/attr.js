@@ -1,11 +1,15 @@
-// xlink
+/**
+ * 属性指令
+ */
+
+// xlink SVG
 var xlinkNS = 'http://www.w3.org/1999/xlink'
 var xlinkRE = /^xlink:/
 
 module.exports = {
 
   priority: 850,
-
+  // 更新
   update: function (value) {
     if (this.arg) {
       this.setAttr(this.arg, value)
@@ -13,7 +17,7 @@ module.exports = {
       this.objectHandler(value)
     }
   },
-
+  // 对象的时候 设置更新对象
   objectHandler: function (value) {
     // cache object attrs so that only changed attrs
     // are actually updated.
@@ -33,7 +37,7 @@ module.exports = {
       }
     }
   },
-
+  // 设置值 基于 DOM 操作去设置
   setAttr: function (attr, value) {
     if (value != null && value !== false) {
       if (xlinkRE.test(attr)) {

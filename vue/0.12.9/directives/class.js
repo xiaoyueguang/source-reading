@@ -1,9 +1,12 @@
+/**
+ * class指令
+ */
 var _ = require('../util')
 var addClass = _.addClass
 var removeClass = _.removeClass
 
 module.exports = {
-
+  // 绑定.
   bind: function () {
     // interpolations like class="{{abc}}" are converted
     // to v-class, and we need to remove the raw,
@@ -17,6 +20,7 @@ module.exports = {
   update: function (value) {
     if (this.arg) {
       // single toggle
+      // 单个值更新
       if (value) {
         addClass(this.el, this.arg)
       } else {
@@ -33,6 +37,7 @@ module.exports = {
     }
   },
 
+  // 对象处理
   handleObject: function (value) {
     this.cleanup(value)
     var keys = this.prevKeys = Object.keys(value)
@@ -45,7 +50,7 @@ module.exports = {
       }
     }
   },
-
+  // 清空
   cleanup: function (value) {
     if (this.prevKeys) {
       var i = this.prevKeys.length
@@ -58,7 +63,7 @@ module.exports = {
     }
   }
 }
-
+// 字符串转对象
 function stringToObject (value) {
   var res = {}
   var keys = value.trim().split(/\s+/)

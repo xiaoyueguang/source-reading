@@ -1,3 +1,6 @@
+/**
+ * if 指令
+ */
 var _ = require('../util')
 var compiler = require('../compiler')
 var templateParser = require('../parsers/template')

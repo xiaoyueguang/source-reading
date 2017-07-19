@@ -2668,7 +2668,10 @@ module.exports = {
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * if 指令
+ */
+var _ = __webpack_require__(0)
 var compiler = __webpack_require__(5)
 var templateParser = __webpack_require__(3)
 var transition = __webpack_require__(12)
@@ -2801,6 +2804,9 @@ function callDetach (child) {
 /* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 组件传值
+ */
 // NOTE: the prop internal directive is compiled and linked
 // during _initScope(), before the created hook is called.
 // The purpose is to make the initial prop values available
@@ -2820,7 +2826,7 @@ module.exports = {
     var prop = this._descriptor
     var childKey = prop.path
     var parentKey = prop.parentPath
-
+    
     this.parentWatcher = new Watcher(
       parent,
       parentKey,
@@ -3745,6 +3751,9 @@ exports.$compile = function (el, host) {
 /* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ *  导出所有指令
+ */
 // manipulation directives
 exports.text = __webpack_require__(50)
 exports.html = __webpack_require__(39)
@@ -6109,14 +6118,18 @@ module.exports = Directive
 /* 35 */
 /***/ (function(module, exports) {
 
-// xlink
+/**
+ * 属性指令
+ */
+
+// xlink SVG
 var xlinkNS = 'http://www.w3.org/1999/xlink'
 var xlinkRE = /^xlink:/
 
 module.exports = {
 
   priority: 850,
-
+  // 更新
   update: function (value) {
     if (this.arg) {
       this.setAttr(this.arg, value)
@@ -6124,7 +6137,7 @@ module.exports = {
       this.objectHandler(value)
     }
   },
-
+  // 对象的时候 设置更新对象
   objectHandler: function (value) {
     // cache object attrs so that only changed attrs
     // are actually updated.
@@ -6144,7 +6157,7 @@ module.exports = {
       }
     }
   },
-
+  // 设置值 基于 DOM 操作去设置
   setAttr: function (attr, value) {
     if (value != null && value !== false) {
       if (xlinkRE.test(attr)) {
@@ -6166,12 +6179,15 @@ module.exports = {
 /* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * class指令
+ */
 var _ = __webpack_require__(0)
 var addClass = _.addClass
 var removeClass = _.removeClass
 
 module.exports = {
-
+  // 绑定.
   bind: function () {
     // interpolations like class="{{abc}}" are converted
     // to v-class, and we need to remove the raw,
@@ -6185,6 +6201,7 @@ module.exports = {
   update: function (value) {
     if (this.arg) {
       // single toggle
+      // 单个值更新
       if (value) {
         addClass(this.el, this.arg)
       } else {
@@ -6201,6 +6218,7 @@ module.exports = {
     }
   },
 
+  // 对象处理
   handleObject: function (value) {
     this.cleanup(value)
     var keys = this.prevKeys = Object.keys(value)
@@ -6213,7 +6231,7 @@ module.exports = {
       }
     }
   },
-
+  // 清空
   cleanup: function (value) {
     if (this.prevKeys) {
       var i = this.prevKeys.length
@@ -6226,7 +6244,7 @@ module.exports = {
     }
   }
 }
-
+// 字符串转对象
 function stringToObject (value) {
   var res = {}
   var keys = value.trim().split(/\s+/)
@@ -6242,11 +6260,15 @@ function stringToObject (value) {
 /* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * v-cloak
+ */
 var config = __webpack_require__(2)
 
 module.exports = {
   bind: function () {
     var el = this.el
+    // 初始化后移除.
     this.vm.$once('hook:compiled', function () {
       el.removeAttribute(config.prefix + 'cloak')
     })
@@ -6258,11 +6280,15 @@ module.exports = {
 /* 38 */
 /***/ (function(module, exports) {
 
+/**
+ *  v-el
+ */
 module.exports = {
-
+  // 文字. 区别于普通指令
   isLiteral: true,
 
   bind: function () {
+    // 直接将当前 dom 节点放到 $$ 上
     this.vm.$$[this.expression] = this.el
   },
 
@@ -6276,6 +6302,9 @@ module.exports = {
 /* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * v-html 指令
+ */
 var _ = __webpack_require__(0)
 var templateParser = __webpack_require__(3)
 
@@ -6284,6 +6313,7 @@ module.exports = {
   bind: function () {
     // a comment node means this is a binding for
     // {{{ inline unescaped html }}}
+    // 内联指令
     if (this.el.nodeType === 8) {
       // hold nodes
       this.nodes = []
@@ -6292,17 +6322,20 @@ module.exports = {
       _.replace(this.el, this.anchor)
     }
   },
-
+  // 直接将 html 片段插入到 节点中
   update: function (value) {
     value = _.toString(value)
+    // {{{}}}指令
     if (this.nodes) {
       this.swap(value)
     } else {
+      // v-html指令.
       this.el.innerHTML = value
     }
   },
 
   swap: function (value) {
+    // 解析
     // remove old nodes
     var i = this.nodes.length
     while (i--) {
@@ -6838,7 +6871,10 @@ module.exports = {
 /* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 事件绑定
+ */
+var _ = __webpack_require__(0)
 
 module.exports = {
 
@@ -6847,6 +6883,7 @@ module.exports = {
 
   bind: function () {
     // deal with iframes
+    // 处理 iframes
     if (
       this.el.tagName === 'IFRAME' &&
       this.arg !== 'load'
@@ -6858,7 +6895,7 @@ module.exports = {
       _.on(this.el, 'load', this.iframeBind)
     }
   },
-
+  // 添加监听
   update: function (handler) {
     if (typeof handler !== 'function') {
       process.env.NODE_ENV !== 'production' && _.warn(
@@ -6871,6 +6908,7 @@ module.exports = {
     this.reset()
     var vm = this.vm
     this.handler = function (e) {
+      // 处理原生 events
       e.targetVM = vm
       vm.$event = e
       var res = handler(e)
@@ -6883,7 +6921,7 @@ module.exports = {
       _.on(this.el, this.arg, this.handler)
     }
   },
-
+  // 重置 取消监听
   reset: function () {
     var el = this.iframeBind
       ? this.el.contentWindow
@@ -6905,13 +6943,16 @@ module.exports = {
 /* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * v-ref 指令
+ */
+var _ = __webpack_require__(0)
 
 module.exports = {
 
   isLiteral: true,
-
   bind: function () {
+    // 绑定. 将组件直接绑到该 ID 上
     var vm = this.el.__vue__
     if (!vm) {
       process.env.NODE_ENV !== 'production' && _.warn(
@@ -7695,10 +7736,14 @@ function isPrimitive (value) {
 /* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * v-show 指令
+ */
 var transition = __webpack_require__(12)
 
 module.exports = function (value) {
   var el = this.el
+  // 执行过渡动画. 来回切换
   transition.apply(el, value ? 1 : -1, function () {
     el.style.display = value ? '' : 'none'
   }, this.vm)
@@ -7825,6 +7870,9 @@ function prefix (prop) {
 /* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * v-text 指令
+ */
 var _ = __webpack_require__(0)
 
 module.exports = {
@@ -7845,6 +7893,9 @@ module.exports = {
 /* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 过渡指令
+ */
 var _ = __webpack_require__(0)
 var Transition = __webpack_require__(59)
 

@@ -1,3 +1,6 @@
+/**
+ * 过渡指令
+ */
 var _ = require('../util')
 var Transition = require('../transition/transition')
 

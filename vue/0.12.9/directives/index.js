@@ -1,3 +1,6 @@
+/**
+ *  导出所有指令
+ */
 // manipulation directives
 exports.text = require('./text')
 exports.html = require('./html')
