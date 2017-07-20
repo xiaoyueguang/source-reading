@@ -1,3 +1,6 @@
+/**
+ * v-model 双向绑定
+ */
 var _ = require('../../util')
 
 var handlers = {
@@ -28,6 +31,7 @@ module.exports = {
   bind: function () {
     // friendly warning...
     this.checkFilters()
+    // 判断是否允许读写
     if (this.hasRead && !this.hasWrite) {
       process.env.NODE_ENV !== 'production' && _.warn(
         'It seems you are using a read-only filter with ' +
@@ -38,6 +42,7 @@ module.exports = {
     var el = this.el
     var tag = el.tagName
     var handler
+    // 对表单元素的区分处理
     if (tag === 'INPUT') {
       handler = handlers[el.type] || handlers.text
     } else if (tag === 'SELECT') {
@@ -57,6 +62,7 @@ module.exports = {
 
   /**
    * Check read/write filter stats.
+   * 检查过滤
    */
 
   checkFilters: function () {

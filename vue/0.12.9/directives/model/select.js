@@ -1,3 +1,6 @@
+/**
+ * select
+ */
 var _ = require('../../util')
 var Watcher = require('../../watcher')
 var dirParser = require('../../parsers/directive')
@@ -19,6 +22,7 @@ module.exports = {
       initOptions.call(this, optionsParam)
     }
     this.number = this._checkParam('number') != null
+    // 是否多选
     this.multiple = el.hasAttribute('multiple')
     this.listener = function () {
       var value = self.multiple
@@ -31,15 +35,17 @@ module.exports = {
         : value
       self.set(value)
     }
+    // 监听 change
     _.on(el, 'change', this.listener)
     checkInitialValue.call(this)
     // All major browsers except Firefox resets
     // selectedIndex with value -1 to 0 when the element
     // is appended to a new parent, therefore we have to
     // force a DOM update whenever that happens...
+    // 监听刷新
     this.vm.$on('hook:attached', this.forceUpdate)
   },
-
+  // 更新值
   update: function (value) {
     var el = this.el
     el.selectedIndex = -1
@@ -56,7 +62,7 @@ module.exports = {
       /* eslint-enable eqeqeq */
     }
   },
-
+  // 解绑
   unbind: function () {
     _.off(this.el, 'change', this.listener)
     this.vm.$off('hook:attached', this.forceUpdate)

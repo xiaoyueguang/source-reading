@@ -1,3 +1,6 @@
+/**
+ * text input
+ */
 var _ = require('../../util')
 
 module.exports = {
@@ -6,6 +9,7 @@ module.exports = {
     var self = this
     var el = this.el
 
+    // input 标签有比较多的修饰符
     // check params
     // - lazy: update model on "change" instead of "input"
     var lazy = this._checkParam('lazy') != null
@@ -23,6 +27,7 @@ module.exports = {
     // suggestions... (see Discussion/#162)
     var composing = false
     if (!_.isAndroid) {
+      // 监听. 当节点更新时 光标不变
       this.onComposeStart = function () {
         composing = true
       }
@@ -36,7 +41,7 @@ module.exports = {
       _.on(el, 'compositionstart', this.onComposeStart)
       _.on(el, 'compositionend', this.onComposeEnd)
     }
-
+    // 同步 节点的值到 js 中
     function syncToModel () {
       var val = number
         ? _.toNumber(el.value)
@@ -49,6 +54,7 @@ module.exports = {
     // the input with the filtered value.
     // also force update for type="range" inputs to enable
     // "lock in range" (see #506)
+    // 只读或 range 类型
     if (this.hasRead || el.type === 'range') {
       this.listener = function () {
         if (composing) return
@@ -76,6 +82,7 @@ module.exports = {
           if (charsOffset != null) {
             var cursorPos =
               _.toString(newVal).length - charsOffset
+            // 设置值
             el.setSelectionRange(cursorPos, cursorPos)
           }
         })
@@ -86,13 +93,13 @@ module.exports = {
         syncToModel()
       }
     }
-
+    // 去抖
     if (debounce) {
       this.listener = _.debounce(this.listener, debounce)
     }
 
     // Now attach the main listener
-
+    // 根据 lazy 来控制监听事件
     this.event = lazy ? 'change' : 'input'
     // Support jQuery events, since jQuery.trigger() doesn't
     // trigger native events in some cases and some plugins
@@ -104,6 +111,7 @@ module.exports = {
     // store that check result on itself. This also allows
     // easier test coverage control by unsetting the global
     // jQuery variable in tests.
+    // jquery 监听方法时, 跟原生不同. 需要区别对待
     this.hasjQuery = typeof jQuery === 'function'
     if (this.hasjQuery) {
       jQuery(el).on(this.event, this.listener)
@@ -135,11 +143,11 @@ module.exports = {
         : el.value
     }
   },
-
+  // 更新值
   update: function (value) {
     this.el.value = _.toString(value)
   },
-
+  // 移除监听
   unbind: function () {
     var el = this.el
     if (this.hasjQuery) {

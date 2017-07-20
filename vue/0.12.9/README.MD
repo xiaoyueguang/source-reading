@@ -47,7 +47,7 @@ Vue
 - [x] directive
 - [x] watcher
 - [x] api
-- [ ] directives
+- [x] directives
 - [ ] element
 - [ ] filters
 - [ ] instance

@@ -13,16 +13,19 @@ module.exports = {
   bind: function () {
     var el = this.el
     if (!el.__vue__) {
+      // 将目标节点替换成注释锚点
       this.start = _.createAnchor('v-if-start')
       this.end = _.createAnchor('v-if-end')
       _.replace(el, this.end)
       _.before(this.start, this.end)
+      // 解析模板
       if (_.isTemplate(el)) {
         this.template = templateParser.parse(el, true)
       } else {
         this.template = document.createDocumentFragment()
         this.template.appendChild(templateParser.clone(el))
       }
+      // 编译
       // compile the nested partial
       var cacheId = (this.vm.constructor.cid || '') + el.outerHTML
       this.linker = cache.get(cacheId)
@@ -49,6 +52,7 @@ module.exports = {
     if (value) {
       // avoid duplicate compiles, since update() can be
       // called with different truthy values
+      // 更新显示
       if (!this.unlink) {
         this.link(
           templateParser.clone(this.template),
@@ -56,10 +60,11 @@ module.exports = {
         )
       }
     } else {
+      // 隐藏删除
       this.teardown()
     }
   },
-
+  // 显示的时候还得执行过渡
   link: function (frag, linker) {
     var vm = this.vm
     this.unlink = linker(vm, frag)
@@ -71,7 +76,7 @@ module.exports = {
       if (children) children.forEach(callAttach)
     }
   },
-
+  // 隐藏删除
   teardown: function () {
     if (!this.unlink) return
     // collect children beforehand
@@ -84,7 +89,7 @@ module.exports = {
     this.unlink()
     this.unlink = null
   },
-
+  // 获取里面的内容
   getContainedComponents: function () {
     var vm = this.vm
     var start = this.start.nextSibling
@@ -109,13 +114,13 @@ module.exports = {
     return vm.$children.length &&
       vm.$children.filter(contains)
   },
-
+  // 接触绑定
   unbind: function () {
     if (this.unlink) this.unlink()
   }
 
 }
-
+// 触发 if 标签里的钩子函数
 function callAttach (child) {
   if (!child._isAttached) {
     child._callHook('attached')

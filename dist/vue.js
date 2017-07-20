@@ -2683,16 +2683,19 @@ module.exports = {
   bind: function () {
     var el = this.el
     if (!el.__vue__) {
+      // 将目标节点替换成注释锚点
       this.start = _.createAnchor('v-if-start')
       this.end = _.createAnchor('v-if-end')
       _.replace(el, this.end)
       _.before(this.start, this.end)
+      // 解析模板
       if (_.isTemplate(el)) {
         this.template = templateParser.parse(el, true)
       } else {
         this.template = document.createDocumentFragment()
         this.template.appendChild(templateParser.clone(el))
       }
+      // 编译
       // compile the nested partial
       var cacheId = (this.vm.constructor.cid || '') + el.outerHTML
       this.linker = cache.get(cacheId)
@@ -2719,6 +2722,7 @@ module.exports = {
     if (value) {
       // avoid duplicate compiles, since update() can be
       // called with different truthy values
+      // 更新显示
       if (!this.unlink) {
         this.link(
           templateParser.clone(this.template),
@@ -2726,10 +2730,11 @@ module.exports = {
         )
       }
     } else {
+      // 隐藏删除
       this.teardown()
     }
   },
-
+  // 显示的时候还得执行过渡
   link: function (frag, linker) {
     var vm = this.vm
     this.unlink = linker(vm, frag)
@@ -2741,7 +2746,7 @@ module.exports = {
       if (children) children.forEach(callAttach)
     }
   },
-
+  // 隐藏删除
   teardown: function () {
     if (!this.unlink) return
     // collect children beforehand
@@ -2754,7 +2759,7 @@ module.exports = {
     this.unlink()
     this.unlink = null
   },
-
+  // 获取里面的内容
   getContainedComponents: function () {
     var vm = this.vm
     var start = this.start.nextSibling
@@ -2779,13 +2784,13 @@ module.exports = {
     return vm.$children.length &&
       vm.$children.filter(contains)
   },
-
+  // 接触绑定
   unbind: function () {
     if (this.unlink) this.unlink()
   }
 
 }
-
+// 触发 if 标签里的钩子函数
 function callAttach (child) {
   if (!child._isAttached) {
     child._callHook('attached')
@@ -2826,7 +2831,7 @@ module.exports = {
     var prop = this._descriptor
     var childKey = prop.path
     var parentKey = prop.parentPath
-    
+    // 建立父子值的关系
     this.parentWatcher = new Watcher(
       parent,
       parentKey,
@@ -2838,6 +2843,7 @@ module.exports = {
     )
 
     // set the child initial value.
+    // 设置子组件的初始值
     var value = this.parentWatcher.value
     if (childKey === '$data') {
       child._data = value
@@ -2846,6 +2852,7 @@ module.exports = {
     }
 
     // setup two-way binding
+    // 父子数据 是否双向绑定
     if (prop.mode === bindingModes.TWO_WAY) {
       // important: defer the child watcher creation until
       // the created hook (after data observation)
@@ -2861,7 +2868,7 @@ module.exports = {
       })
     }
   },
-
+  // 移除
   unbind: function () {
     this.parentWatcher.teardown()
     if (this.childWatcher) {
@@ -6355,10 +6362,13 @@ module.exports = {
 /* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * checkbox
+ */
 var _ = __webpack_require__(0)
 
 module.exports = {
-
+  // 监听 change
   bind: function () {
     var self = this
     var el = this.el
@@ -6370,7 +6380,7 @@ module.exports = {
       this._initValue = el.checked
     }
   },
-
+  // 修改 checked 更新节点.
   update: function (value) {
     this.el.checked = !!value
   },
@@ -6385,7 +6395,10 @@ module.exports = {
 /* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * v-model 双向绑定
+ */
+var _ = __webpack_require__(0)
 
 var handlers = {
   text: __webpack_require__(44),
@@ -6415,6 +6428,7 @@ module.exports = {
   bind: function () {
     // friendly warning...
     this.checkFilters()
+    // 判断是否允许读写
     if (this.hasRead && !this.hasWrite) {
       process.env.NODE_ENV !== 'production' && _.warn(
         'It seems you are using a read-only filter with ' +
@@ -6425,6 +6439,7 @@ module.exports = {
     var el = this.el
     var tag = el.tagName
     var handler
+    // 对表单元素的区分处理
     if (tag === 'INPUT') {
       handler = handlers[el.type] || handlers.text
     } else if (tag === 'SELECT') {
@@ -6444,6 +6459,7 @@ module.exports = {
 
   /**
    * Check read/write filter stats.
+   * 检查过滤
    */
 
   checkFilters: function () {
@@ -6468,10 +6484,13 @@ module.exports = {
 /* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * radio
+ */
 var _ = __webpack_require__(0)
 
 module.exports = {
-
+  // 监听change
   bind: function () {
     var self = this
     var el = this.el
@@ -6485,6 +6504,7 @@ module.exports = {
   },
 
   update: function (value) {
+    // 通过值是否相等更新节点
     /* eslint-disable eqeqeq */
     this.el.checked = value == this.el.value
     /* eslint-enable eqeqeq */
@@ -6500,7 +6520,10 @@ module.exports = {
 /* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * select
+ */
+var _ = __webpack_require__(0)
 var Watcher = __webpack_require__(10)
 var dirParser = __webpack_require__(7)
 
@@ -6521,6 +6544,7 @@ module.exports = {
       initOptions.call(this, optionsParam)
     }
     this.number = this._checkParam('number') != null
+    // 是否多选
     this.multiple = el.hasAttribute('multiple')
     this.listener = function () {
       var value = self.multiple
@@ -6533,15 +6557,17 @@ module.exports = {
         : value
       self.set(value)
     }
+    // 监听 change
     _.on(el, 'change', this.listener)
     checkInitialValue.call(this)
     // All major browsers except Firefox resets
     // selectedIndex with value -1 to 0 when the element
     // is appended to a new parent, therefore we have to
     // force a DOM update whenever that happens...
+    // 监听刷新
     this.vm.$on('hook:attached', this.forceUpdate)
   },
-
+  // 更新值
   update: function (value) {
     var el = this.el
     el.selectedIndex = -1
@@ -6558,7 +6584,7 @@ module.exports = {
       /* eslint-enable eqeqeq */
     }
   },
-
+  // 解绑
   unbind: function () {
     _.off(this.el, 'change', this.listener)
     this.vm.$off('hook:attached', this.forceUpdate)
@@ -6706,6 +6732,9 @@ function indexOf (arr, val) {
 /* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * text input
+ */
 var _ = __webpack_require__(0)
 
 module.exports = {
@@ -6714,6 +6743,7 @@ module.exports = {
     var self = this
     var el = this.el
 
+    // input 标签有比较多的修饰符
     // check params
     // - lazy: update model on "change" instead of "input"
     var lazy = this._checkParam('lazy') != null
@@ -6731,6 +6761,7 @@ module.exports = {
     // suggestions... (see Discussion/#162)
     var composing = false
     if (!_.isAndroid) {
+      // 监听. 当节点更新时 光标不变
       this.onComposeStart = function () {
         composing = true
       }
@@ -6744,7 +6775,7 @@ module.exports = {
       _.on(el, 'compositionstart', this.onComposeStart)
       _.on(el, 'compositionend', this.onComposeEnd)
     }
-
+    // 同步 节点的值到 js 中
     function syncToModel () {
       var val = number
         ? _.toNumber(el.value)
@@ -6757,6 +6788,7 @@ module.exports = {
     // the input with the filtered value.
     // also force update for type="range" inputs to enable
     // "lock in range" (see #506)
+    // 只读或 range 类型
     if (this.hasRead || el.type === 'range') {
       this.listener = function () {
         if (composing) return
@@ -6784,6 +6816,7 @@ module.exports = {
           if (charsOffset != null) {
             var cursorPos =
               _.toString(newVal).length - charsOffset
+            // 设置值
             el.setSelectionRange(cursorPos, cursorPos)
           }
         })
@@ -6794,13 +6827,13 @@ module.exports = {
         syncToModel()
       }
     }
-
+    // 去抖
     if (debounce) {
       this.listener = _.debounce(this.listener, debounce)
     }
 
     // Now attach the main listener
-
+    // 根据 lazy 来控制监听事件
     this.event = lazy ? 'change' : 'input'
     // Support jQuery events, since jQuery.trigger() doesn't
     // trigger native events in some cases and some plugins
@@ -6812,6 +6845,7 @@ module.exports = {
     // store that check result on itself. This also allows
     // easier test coverage control by unsetting the global
     // jQuery variable in tests.
+    // jquery 监听方法时, 跟原生不同. 需要区别对待
     this.hasjQuery = typeof jQuery === 'function'
     if (this.hasjQuery) {
       jQuery(el).on(this.event, this.listener)
@@ -6843,11 +6877,11 @@ module.exports = {
         : el.value
     }
   },
-
+  // 更新值
   update: function (value) {
     this.el.value = _.toString(value)
   },
-
+  // 移除监听
   unbind: function () {
     var el = this.el
     if (this.hasjQuery) {
@@ -7878,6 +7912,7 @@ var _ = __webpack_require__(0)
 module.exports = {
 
   bind: function () {
+    // 检查是内联还是 属性
     this.attr = this.el.nodeType === 3
       ? 'data'
       : 'textContent'
@@ -7915,10 +7950,13 @@ module.exports = {
     var vm = this.el.__vue__ || this.vm
     var hooks = _.resolveAsset(vm.$options, 'transitions', id)
     id = id || 'v'
+    // 过渡实例
     el.__v_trans = new Transition(el, id, hooks, vm)
     if (oldId) {
+      // 移除过渡
       _.removeClass(el, oldId + '-transition')
     }
+    // 添加过渡
     _.addClass(el, id + '-transition')
   }
 }

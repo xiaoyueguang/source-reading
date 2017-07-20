@@ -20,7 +20,7 @@ module.exports = {
     var prop = this._descriptor
     var childKey = prop.path
     var parentKey = prop.parentPath
-    
+    // 建立父子值的关系
     this.parentWatcher = new Watcher(
       parent,
       parentKey,
@@ -32,6 +32,7 @@ module.exports = {
     )
 
     // set the child initial value.
+    // 设置子组件的初始值
     var value = this.parentWatcher.value
     if (childKey === '$data') {
       child._data = value
@@ -40,6 +41,7 @@ module.exports = {
     }
 
     // setup two-way binding
+    // 父子数据 是否双向绑定
     if (prop.mode === bindingModes.TWO_WAY) {
       // important: defer the child watcher creation until
       // the created hook (after data observation)
@@ -55,7 +57,7 @@ module.exports = {
       })
     }
   },
-
+  // 移除
   unbind: function () {
     this.parentWatcher.teardown()
     if (this.childWatcher) {

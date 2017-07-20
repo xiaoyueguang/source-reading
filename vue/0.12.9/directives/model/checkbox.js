@@ -1,7 +1,10 @@
+/**
+ * checkbox
+ */
 var _ = require('../../util')
 
 module.exports = {
-
+  // 监听 change
   bind: function () {
     var self = this
     var el = this.el
@@ -13,7 +16,7 @@ module.exports = {
       this._initValue = el.checked
     }
   },
-
+  // 修改 checked 更新节点.
   update: function (value) {
     this.el.checked = !!value
   },
