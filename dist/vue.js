@@ -3791,6 +3791,9 @@ exports._prop = __webpack_require__(15)
 /* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 与元素节点有关的指令
+ */
 exports.content = __webpack_require__(52)
 exports.partial = __webpack_require__(53)
 
@@ -7966,6 +7969,9 @@ module.exports = {
 /* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * TODO:
+ */
 var _ = __webpack_require__(0)
 var clone = __webpack_require__(3).clone
 
@@ -8083,7 +8089,10 @@ function extractFragment (nodes, parent, main) {
 /* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 片段. v-partial 已作废
+ */
+var _ = __webpack_require__(0)
 var templateParser = __webpack_require__(3)
 var textParser = __webpack_require__(6)
 var compiler = __webpack_require__(5)
@@ -8101,6 +8110,7 @@ module.exports = {
 
   bind: function () {
     var el = this.el
+    // 插入到节点中
     this.start = _.createAnchor('v-partial-start')
     this.end = _.createAnchor('v-partial-end')
     _.replace(el, this.end)
@@ -8109,13 +8119,15 @@ module.exports = {
     var tokens = textParser.parse(id)
     if (tokens) {
       // dynamic partial
+      // 动态片段
       this.setupDynamic(tokens)
     } else {
       // static partial
+      // 静态片段
       this.insert(id)
     }
   },
-
+  // 片段里有动态更新的数据时, 需要进行 watch
   setupDynamic: function (tokens) {
     var self = this
     var exp = textParser.tokensToExp(tokens)
@@ -8127,7 +8139,7 @@ module.exports = {
       user: false
     })
   },
-
+  // 插入 并 vue 实例化
   insert: function (id) {
     var partial = _.resolveAsset(this.vm.$options, 'partials', id)
     if (process.env.NODE_ENV !== 'production') {
@@ -8142,7 +8154,7 @@ module.exports = {
       this.link(frag, linker)
     }
   },
-
+  // 实例化
   compile: function (frag, cacheId) {
     var hit = cache.get(cacheId)
     if (hit) return hit
@@ -8150,7 +8162,7 @@ module.exports = {
     cache.put(cacheId, linker)
     return linker
   },
-
+  // 移除该实例
   unbind: function () {
     if (this.unlink) this.unlink()
     if (this.unwatch) this.unwatch()
