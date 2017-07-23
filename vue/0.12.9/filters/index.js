@@ -1,3 +1,6 @@
+/**
+ * 自带 过滤器
+ */
 var _ = require('../util')
 
 /**
@@ -5,7 +8,7 @@ var _ = require('../util')
  *
  * @param {Number} indent
  */
-
+// 转为 json. 分读写两种
 exports.json = {
   read: function (value, indent) {
     return typeof value === 'string'
@@ -23,6 +26,7 @@ exports.json = {
 
 /**
  * 'abc' => 'Abc'
+ * 大驼峰
  */
 
 exports.capitalize = function (value) {
@@ -33,6 +37,7 @@ exports.capitalize = function (value) {
 
 /**
  * 'abc' => 'ABC'
+ * 全大写
  */
 
 exports.uppercase = function (value) {
@@ -43,6 +48,7 @@ exports.uppercase = function (value) {
 
 /**
  * 'AbC' => 'abc'
+ * 全小写
  */
 
 exports.lowercase = function (value) {
@@ -53,6 +59,7 @@ exports.lowercase = function (value) {
 
 /**
  * 12345 => $12,345.00
+ * 金钱格式化
  *
  * @param {String} sign
  */
@@ -77,7 +84,7 @@ exports.currency = function (value, currency) {
 
 /**
  * 'item' => 'items'
- *
+ * 将文字转为复数形式
  * @params
  *  an array of strings corresponding to
  *  the single, double, triple ... forms of the word to
@@ -99,7 +106,7 @@ exports.pluralize = function (value) {
  * A special filter that takes a handler function,
  * wraps it so it only gets triggered on specific
  * keypresses. v-on only.
- *
+ * v-on 修饰器. 修饰按键
  * @param {String} key
  */
 

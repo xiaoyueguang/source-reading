@@ -1,9 +1,12 @@
+/**
+ * 列表循环过滤处理
+ */
 var _ = require('../util')
 var Path = require('../parsers/path')
 
 /**
  * Filter filter for v-repeat
- *
+ * 列表循环 过滤器
  * @param {String} searchKey
  * @param {String} [delimiter]
  * @param {String} dataKey
@@ -12,6 +15,7 @@ var Path = require('../parsers/path')
 exports.filterBy = function (arr, search, delimiter, dataKey) {
   // allow optional `in` delimiter
   // because why not
+  // 检查 是否带有 in, 确定模式
   if (delimiter && delimiter !== 'in') {
     dataKey = delimiter
   }
@@ -20,6 +24,7 @@ exports.filterBy = function (arr, search, delimiter, dataKey) {
   }
   // cast to lowercase string
   search = ('' + search).toLowerCase()
+  // 利用数组的 filter 来过滤
   return arr.filter(function (item) {
     return dataKey
       ? contains(Path.get(item, dataKey), search)
@@ -29,7 +34,7 @@ exports.filterBy = function (arr, search, delimiter, dataKey) {
 
 /**
  * Filter filter for v-repeat
- *
+ * 列表循环 排序
  * @param {String} sortKey
  * @param {String} reverse
  */
@@ -47,6 +52,8 @@ exports.orderBy = function (arr, sortKey, reverse) {
     }
   }
   // sort on a copy to avoid mutating original array
+  // arr.slice 快速深复制.
+  // 在新的数组上进行排序
   return arr.slice().sort(function (a, b) {
     if (sortKey !== '$key' && sortKey !== '$value') {
       if (a && '$value' in a) a = a.$value
@@ -60,7 +67,7 @@ exports.orderBy = function (arr, sortKey, reverse) {
 
 /**
  * String contain helper
- *
+ * 确定 search 在待搜索的 val 中
  * @param {*} val
  * @param {String} search
  */

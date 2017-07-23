@@ -49,7 +49,7 @@ Vue
 - [x] api
 - [x] directives
 - [x] element
-- [ ] filters
+- [x] filters
 - [ ] instance
 - [ ] observer
 - [ ] parsers
