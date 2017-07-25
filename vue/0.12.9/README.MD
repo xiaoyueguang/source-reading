@@ -50,8 +50,8 @@ Vue
 - [x] directives
 - [x] element
 - [x] filters
-- [ ] instance
-- [ ] observer
+- [x] observer
 - [ ] parsers
 - [ ] transition
 - [ ] compiler
+- [ ] instance

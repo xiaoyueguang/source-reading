@@ -1,3 +1,6 @@
+/**
+ * 重新定义数组的操作方法.
+ */
 var _ = require('../util')
 var arrayProto = Array.prototype
 var arrayMethods = Object.create(arrayProto)
@@ -18,6 +21,7 @@ var arrayMethods = Object.create(arrayProto)
 .forEach(function (method) {
   // cache original method
   var original = arrayProto[method]
+  // 重新定义数组的方法
   _.define(arrayMethods, method, function mutator () {
     // avoid leaking arguments:
     // http://jsperf.com/closure-with-arguments
@@ -40,6 +44,7 @@ var arrayMethods = Object.create(arrayProto)
         inserted = args.slice(2)
         break
     }
+    // 某些方法会导致数据插入, 需要对新插入的数据进行转化
     if (inserted) ob.observeArray(inserted)
     // notify change
     ob.dep.notify()
@@ -50,7 +55,7 @@ var arrayMethods = Object.create(arrayProto)
 /**
  * Swap the element at the given index with a new value
  * and emits corresponding event.
- *
+ * 定义数组的 $set 方法
  * @param {Number} index
  * @param {*} val
  * @return {*} - replaced element
@@ -69,7 +74,7 @@ _.define(
 
 /**
  * Convenience method to remove the element at given index.
- *
+ * 定义数组的 $remove 方法
  * @param {Number} index
  * @param {*} val
  */

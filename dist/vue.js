@@ -2160,28 +2160,35 @@ module.exports = Watcher
 /* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 依赖管理
+ */
 var _ = __webpack_require__(0)
 
 /**
  * A dep is an observable that can have multiple
  * directives subscribing to it.
+ * 可订阅的依赖
  *
  * @constructor
  */
 
 function Dep () {
+  // 指令集合. 需要通知的指令
   this.subs = []
 }
 
 // the current target watcher being evaluated.
 // this is globally unique because there could be only one
 // watcher being evaluated at any time.
+// 任意时候只有一个观察者目标
 Dep.target = null
 
 var p = Dep.prototype
 
 /**
  * Add a directive subscriber.
+ * 添加需要通知的指令
  *
  * @param {Directive} sub
  */
@@ -2192,7 +2199,7 @@ p.addSub = function (sub) {
 
 /**
  * Remove a directive subscriber.
- *
+ * 移除需要通知的指令
  * @param {Directive} sub
  */
 
@@ -2202,6 +2209,7 @@ p.removeSub = function (sub) {
 
 /**
  * Add self as a dependency to the target watcher.
+ * 将自身添加到目标依赖中.
  */
 
 p.depend = function () {
@@ -2210,6 +2218,7 @@ p.depend = function () {
 
 /**
  * Notify all subscribers of a new value.
+ * 通知 更新依赖
  */
 
 p.notify = function () {
@@ -3802,6 +3811,9 @@ exports.partial = __webpack_require__(53)
 /* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 自带 过滤器
+ */
 var _ = __webpack_require__(0)
 
 /**
@@ -3809,7 +3821,7 @@ var _ = __webpack_require__(0)
  *
  * @param {Number} indent
  */
-
+// 转为 json. 分读写两种
 exports.json = {
   read: function (value, indent) {
     return typeof value === 'string'
@@ -3827,6 +3839,7 @@ exports.json = {
 
 /**
  * 'abc' => 'Abc'
+ * 大驼峰
  */
 
 exports.capitalize = function (value) {
@@ -3837,6 +3850,7 @@ exports.capitalize = function (value) {
 
 /**
  * 'abc' => 'ABC'
+ * 全大写
  */
 
 exports.uppercase = function (value) {
@@ -3847,6 +3861,7 @@ exports.uppercase = function (value) {
 
 /**
  * 'AbC' => 'abc'
+ * 全小写
  */
 
 exports.lowercase = function (value) {
@@ -3857,6 +3872,7 @@ exports.lowercase = function (value) {
 
 /**
  * 12345 => $12,345.00
+ * 金钱格式化
  *
  * @param {String} sign
  */
@@ -3881,7 +3897,7 @@ exports.currency = function (value, currency) {
 
 /**
  * 'item' => 'items'
- *
+ * 将文字转为复数形式
  * @params
  *  an array of strings corresponding to
  *  the single, double, triple ... forms of the word to
@@ -3903,7 +3919,7 @@ exports.pluralize = function (value) {
  * A special filter that takes a handler function,
  * wraps it so it only gets triggered on specific
  * keypresses. v-on only.
- *
+ * v-on 修饰器. 修饰按键
  * @param {String} key
  */
 
@@ -8175,12 +8191,15 @@ module.exports = {
 /* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 列表循环过滤处理
+ */
 var _ = __webpack_require__(0)
 var Path = __webpack_require__(9)
 
 /**
  * Filter filter for v-repeat
- *
+ * 列表循环 过滤器
  * @param {String} searchKey
  * @param {String} [delimiter]
  * @param {String} dataKey
@@ -8189,6 +8208,7 @@ var Path = __webpack_require__(9)
 exports.filterBy = function (arr, search, delimiter, dataKey) {
   // allow optional `in` delimiter
   // because why not
+  // 检查 是否带有 in, 确定模式
   if (delimiter && delimiter !== 'in') {
     dataKey = delimiter
   }
@@ -8197,6 +8217,7 @@ exports.filterBy = function (arr, search, delimiter, dataKey) {
   }
   // cast to lowercase string
   search = ('' + search).toLowerCase()
+  // 利用数组的 filter 来过滤
   return arr.filter(function (item) {
     return dataKey
       ? contains(Path.get(item, dataKey), search)
@@ -8206,7 +8227,7 @@ exports.filterBy = function (arr, search, delimiter, dataKey) {
 
 /**
  * Filter filter for v-repeat
- *
+ * 列表循环 排序
  * @param {String} sortKey
  * @param {String} reverse
  */
@@ -8224,6 +8245,8 @@ exports.orderBy = function (arr, sortKey, reverse) {
     }
   }
   // sort on a copy to avoid mutating original array
+  // arr.slice 快速深复制.
+  // 在新的数组上进行排序
   return arr.slice().sort(function (a, b) {
     if (sortKey !== '$key' && sortKey !== '$value') {
       if (a && '$value' in a) a = a.$value
@@ -8237,7 +8260,7 @@ exports.orderBy = function (arr, sortKey, reverse) {
 
 /**
  * String contain helper
- *
+ * 确定 search 在待搜索的 val 中
  * @param {*} val
  * @param {String} search
  */
@@ -8266,6 +8289,9 @@ function contains (val, search) {
 /* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 重新定义数组的操作方法.
+ */
 var _ = __webpack_require__(0)
 var arrayProto = Array.prototype
 var arrayMethods = Object.create(arrayProto)
@@ -8286,6 +8312,7 @@ var arrayMethods = Object.create(arrayProto)
 .forEach(function (method) {
   // cache original method
   var original = arrayProto[method]
+  // 重新定义数组的方法
   _.define(arrayMethods, method, function mutator () {
     // avoid leaking arguments:
     // http://jsperf.com/closure-with-arguments
@@ -8308,6 +8335,7 @@ var arrayMethods = Object.create(arrayProto)
         inserted = args.slice(2)
         break
     }
+    // 某些方法会导致数据插入, 需要对新插入的数据进行转化
     if (inserted) ob.observeArray(inserted)
     // notify change
     ob.dep.notify()
@@ -8318,7 +8346,7 @@ var arrayMethods = Object.create(arrayProto)
 /**
  * Swap the element at the given index with a new value
  * and emits corresponding event.
- *
+ * 定义数组的 $set 方法
  * @param {Number} index
  * @param {*} val
  * @return {*} - replaced element
@@ -8337,7 +8365,7 @@ _.define(
 
 /**
  * Convenience method to remove the element at given index.
- *
+ * 定义数组的 $remove 方法
  * @param {Number} index
  * @param {*} val
  */
@@ -8364,6 +8392,9 @@ module.exports = arrayMethods
 /* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * observer
+ */
 var _ = __webpack_require__(0)
 var config = __webpack_require__(2)
 var Dep = __webpack_require__(11)
@@ -8376,7 +8407,9 @@ __webpack_require__(57)
  * object. Once attached, the observer converts target
  * object's property keys into getter/setters that
  * collect dependencies and dispatches updates.
- *
+ * 观察者. 观察数据分两种情况.
+ * 一种是观察数组. 数组通过 array 的原型方法来监听
+ * 一种是观察对象. 对象通过 getter/setter 来监听
  * @param {Array|Object} value
  * @constructor
  */
@@ -8402,7 +8435,7 @@ function Observer (value) {
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
- *
+ * 创建一个待观察的值. 空的话 则创建一个观察值, 否则返回一个观察值 __ob__
  * @param {*} value
  * @param {Vue} [vm]
  * @return {Observer|undefined}
@@ -8439,7 +8472,7 @@ var p = Observer.prototype
  * getter/setters. This method should only be called when
  * value type is Object. Properties prefixed with `$` or `_`
  * and accessor properties are ignored.
- *
+ * 执行命令, 将对象上的值 转化为 可观察的
  * @param {Object} obj
  */
 
@@ -8450,7 +8483,9 @@ p.walk = function (obj) {
   while (i--) {
     key = keys[i]
     prefix = key.charCodeAt(0)
+    // 跳过私有属性(前缀为 $ 或 _)
     if (prefix !== 0x24 && prefix !== 0x5F) { // skip $ or _
+      // 转化
       this.convert(key, obj[key])
     }
   }
@@ -8459,7 +8494,7 @@ p.walk = function (obj) {
 /**
  * Try to carete an observer for a child value,
  * and if value is array, link dep to the array.
- *
+ * 创建观察者
  * @param {*} val
  * @return {Dep|undefined}
  */
@@ -8470,7 +8505,7 @@ p.observe = function (val) {
 
 /**
  * Observe a list of Array items.
- *
+ * 转化数组中的数据
  * @param {Array} items
  */
 
@@ -8484,7 +8519,7 @@ p.observeArray = function (items) {
 /**
  * Convert a property into getter/setter so we can emit
  * the events when the property is accessed/changed.
- *
+ * 将对象里的属性 转化为 getter/setter. 数据源保存到自身的 dep 依赖中
  * @param {String} key
  * @param {*} val
  */
@@ -8525,7 +8560,7 @@ p.convert = function (key, val) {
  * happen we can notify owner vms to proxy the keys and
  * digest the watchers. This is only called when the object
  * is observed as an instance's root $data.
- *
+ * 添加实例. 当监听数据有所变化时, 可及时通过该属性 vms 来通知
  * @param {Vue} vm
  */
 
@@ -8536,6 +8571,7 @@ p.addVm = function (vm) {
 /**
  * Remove an owner vm. This is called when the object is
  * swapped out as an instance's $data object.
+ * 从观察者上移除监听的实例
  *
  * @param {Vue} vm
  */
@@ -8549,7 +8585,7 @@ p.removeVm = function (vm) {
 /**
  * Augment an target Object or Array by intercepting
  * the prototype chain using __proto__
- *
+ * 通过调整自身 __proto__ 来增强自身
  * @param {Object|Array} target
  * @param {Object} proto
  */
@@ -8561,7 +8597,8 @@ function protoAugment (target, src) {
 /**
  * Augment an target Object or Array by defining
  * hidden properties.
- *
+ * 定义不可枚举的属性
+ * 
  * @param {Object|Array} target
  * @param {Object} proto
  */
@@ -8582,12 +8619,16 @@ module.exports = Observer
 /* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 观察者 对象操作方法
+ */
 var _ = __webpack_require__(0)
 var objProto = Object.prototype
 
 /**
  * Add a new property to an observed object
  * and emits corresponding event
+ * 定义 $add 方法. 添加监听的属性
  *
  * @param {String} key
  * @param {*} val
@@ -8620,6 +8661,7 @@ _.define(
 /**
  * Set a property on an observed object, calling add to
  * ensure the property is observed.
+ * 定义设置观察者数据的方法.
  *
  * @param {String} key
  * @param {*} val
@@ -8638,7 +8680,7 @@ _.define(
 /**
  * Deletes a property from an observed object
  * and emits corresponding event
- *
+ * 定义删除观察者属性的方法.
  * @param {String} key
  * @public
  */
