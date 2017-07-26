@@ -1,3 +1,7 @@
+/**
+ * 过渡
+ * DOM 操作时 执行过渡
+ */
 var _ = require('../util')
 
 /**
@@ -97,7 +101,7 @@ exports.blockRemove = function (start, end, vm) {
  * Apply transitions with an operation callback.
  *
  * @oaram {Element} el
- * @param {Number} direction
+ * @param {Number} direction 指令. 1进入 -1出去
  *                  1: enter
  *                 -1: leave
  * @param {Function} op - the actual DOM operation
@@ -111,6 +115,7 @@ var apply = exports.apply = function (el, direction, op, vm, cb) {
     !transition ||
     // skip if there are no js hooks and CSS transition is
     // not supported
+    // 不支持 js 过渡 或者 css 过渡, 则跳过
     (!transition.hooks && !_.transitionEndEvent) ||
     // skip transitions for initial compile
     !vm._isCompiled ||
@@ -123,6 +128,7 @@ var apply = exports.apply = function (el, direction, op, vm, cb) {
     if (cb) cb()
     return
   }
+  // 执行且执行回调
   var action = direction > 0 ? 'enter' : 'leave'
   transition[action](op, cb)
 }

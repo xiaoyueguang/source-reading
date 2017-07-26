@@ -51,7 +51,7 @@ Vue
 - [x] element
 - [x] filters
 - [x] observer
-- [ ] parsers
 - [ ] transition
+- [ ] parsers
 - [ ] compiler
 - [ ] instance

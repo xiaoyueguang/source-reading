@@ -1,3 +1,6 @@
+/**
+ * 过渡分为 css 过渡 和 js 过渡
+ */
 var _ = require('../util')
 var queue = require('./queue')
 var addClass = _.addClass
@@ -13,7 +16,7 @@ var TYPE_ANIMATION = 2
 /**
  * A Transition object that encapsulates the state and logic
  * of the transition.
- *
+ * 过渡 构造函数
  * @param {Element} el
  * @param {String} id
  * @param {Object} hooks
@@ -22,6 +25,7 @@ var TYPE_ANIMATION = 2
 
 function Transition (el, id, hooks, vm) {
   this.el = el
+  // 指定类名
   this.enterClass = id + '-enter'
   this.leaveClass = id + '-leave'
   this.hooks = hooks
@@ -64,7 +68,9 @@ var p = Transition.prototype
  *        done now if there's no explicit js callback.
  * 8. wait for either done or js callback, then call
  *    afterEnter hook.
- *
+ * 在执行插入之前, 先执行钩子
+ * 添加初始过渡, 而后添加类名(触发过渡)
+ * 过渡完成后执行回调并移除钩子
  * @param {Function} op - insert/show the element
  * @param {Function} [cb]
  */
@@ -84,6 +90,7 @@ p.enter = function (op, cb) {
  * The "nextTick" phase of an entering transition, which is
  * to be pushed into a queue and executed after a reflow so
  * that removing the class can trigger a CSS transition.
+ * 插入完成后 在恰当的地方执行回调
  */
 
 p.enterNextTick = function () {
@@ -102,6 +109,7 @@ p.enterNextTick = function () {
 
 /**
  * The "cleanup" phase of an entering transition.
+ * 在插入完成后需要执行回调
  */
 
 p.enterDone = function () {
@@ -127,7 +135,8 @@ p.enterDone = function () {
  *        done if there's no explicit js callback.
  * 7. wait for either done or js callback, then call
  *    afterLeave hook.
- *
+ * 在移除前, 先执行钩子, 而后添加移除类(触发过渡)
+ * 过渡完成后触发回调
  * @param {Function} op - remove/hide the element
  * @param {Function} [cb]
  */
@@ -149,6 +158,7 @@ p.leave = function (op, cb) {
 
 /**
  * The "nextTick" phase of a leaving transition.
+ * 移除后, 在恰当的时机执行过渡
  */
 
 p.leaveNextTick = function () {
@@ -165,6 +175,7 @@ p.leaveNextTick = function () {
 
 /**
  * The "cleanup" phase of a leaving transition.
+ * 执行移除完成钩子
  */
 
 p.leaveDone = function () {
@@ -178,6 +189,7 @@ p.leaveDone = function () {
 /**
  * Cancel any pending callbacks from a previously running
  * but not finished transition.
+ * 取消过渡, 并中止还没来得及触发完全的回调
  */
 
 p.cancelPending = function () {
@@ -205,7 +217,7 @@ p.cancelPending = function () {
 
 /**
  * Call a user-provided synchronous hook function.
- *
+ * 触发回调
  * @param {String} type
  */
 
@@ -222,7 +234,7 @@ p.callHook = function (type) {
  * will be determined by when the user calls that callback;
  * otherwise, the end is determined by the CSS transition or
  * animation.
- *
+ * 判断是否有 结束钩子. 没有则默认触发 css 过渡完成
  * @param {String} type
  */
 
@@ -239,7 +251,7 @@ p.callHookWithCb = function (type) {
 /**
  * Get an element's transition type based on the
  * calculated styles.
- *
+ * 通过样式来获取节点的过渡类型...
  * @param {String} className
  * @return {Number}
  */
@@ -284,7 +296,7 @@ p.getCssTransitionType = function (className) {
 
 /**
  * Setup a CSS transitionend/animationend callback.
- *
+ * 添加监听 css 过渡或动画完成回调
  * @param {String} event
  * @param {Function} cb
  */
