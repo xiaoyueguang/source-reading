@@ -1,3 +1,6 @@
+/**
+ * 指令解析
+ */
 var _ = require('../util')
 var Cache = require('../cache')
 var cache = new Cache(1000)
@@ -25,6 +28,7 @@ var arg
 
 /**
  * Push a directive object into the result Array
+ * 添加指令
  */
 
 function pushDir () {
@@ -41,6 +45,7 @@ function pushDir () {
 
 /**
  * Push a filter to the current directive object
+ * 添加过滤器
  */
 
 function pushFilter () {
@@ -62,7 +67,7 @@ function pushFilter () {
 
 /**
  * Check if an argument is dynamic and strip quotes.
- *
+ * 检查参数 是否为动态变量或字符串(带引号)
  * @param {String} arg
  * @return {Object}
  */
@@ -80,6 +85,7 @@ function processFilterArg (arg) {
 /**
  * Parse a directive string into an Array of AST-like
  * objects representing directives.
+ * 解析指令. 将指令解析为 指令, 表达式, 参数或过滤器等形式
  *
  * Example:
  *

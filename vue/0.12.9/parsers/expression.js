@@ -1,15 +1,22 @@
+/**
+ * 表达式解析
+ */
 var _ = require('../util')
 var Path = require('./path')
 var Cache = require('../cache')
 var expressionCache = new Cache(1000)
-
+/**
+ * 表达式中 需要解析为 JS 变量的值
+ */
 var allowedKeywords =
   'Math,Date,this,true,false,null,undefined,Infinity,NaN,' +
   'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,' +
   'encodeURIComponent,parseInt,parseFloat'
 var allowedKeywordsRE =
   new RegExp('^(' + allowedKeywords.replace(/,/g, '\\b|') + '\\b)')
-
+/**
+ * 表达式中 需要解析为 JS 的关键词
+ */
 // keywords that don't make sense inside expressions
 var improperKeywords =
   'break,case,class,catch,const,continue,debugger,default,' +
@@ -30,7 +37,7 @@ var booleanLiteralRE = /^(true|false)$/
 
 /**
  * Save / Rewrite / Restore
- *
+ * 表达式解析完成后 保存或重写或还原
  * When rewriting paths found in an expression, it is
  * possible for the same letter sequences to be found in
  * strings and Object literal property keys. Therefore we
@@ -49,7 +56,7 @@ var saved = []
  * If matched as a plain string, we need to escape its
  * newlines, since the string needs to be preserved when
  * generating the function body.
- *
+ * 保存
  * @param {String} str
  * @param {String} isString - str if matched as a string
  * @return {String} - placeholder with index
@@ -65,7 +72,7 @@ function save (str, isString) {
 
 /**
  * Path rewrite replacer
- *
+ * 重写表达式
  * @param {String} raw
  * @return {String}
  */
@@ -85,7 +92,7 @@ function rewrite (raw) {
 
 /**
  * Restore replacer
- *
+ * 还原表达式
  * @param {String} str
  * @param {String} i - matched save index
  * @return {String}
@@ -98,6 +105,7 @@ function restore (str, i) {
 /**
  * Rewrite an expression, prefixing all path accessors with
  * `scope.` and generate getter/setter functions.
+ * 重写表达式, 使用 scope 来控制数据范围
  *
  * @param {String} exp
  * @param {Boolean} needSet
@@ -135,7 +143,7 @@ function compileExpFns (exp, needSet) {
 
 /**
  * Compile getter setters for a simple path.
- *
+ * 将一个简单的路径获取值
  * @param {String} exp
  * @return {Function}
  */
@@ -166,7 +174,7 @@ function compilePathFns (exp) {
  *
  * We isolate the try/catch so it doesn't affect the
  * optimization of the parse function when it is not called.
- *
+ * 获取值
  * @param {String} body
  * @return {Function|undefined}
  */
@@ -191,7 +199,7 @@ function makeGetter (body) {
  * This setter function may throw error when called if the
  * expression body is not a valid left-hand expression in
  * assignment.
- *
+ * 设置值
  * @param {String} body
  * @return {Function|undefined}
  */
@@ -208,7 +216,7 @@ function makeSetter (body) {
 
 /**
  * Check for setter existence on a cache hit.
- *
+ * 表达式解析获取方法
  * @param {Function} hit
  */
 
@@ -220,7 +228,7 @@ function checkSetter (hit) {
 
 /**
  * Parse an expression into re-written getter/setters.
- *
+ * 解析
  * @param {String} exp
  * @param {Boolean} needSet
  * @return {Function}
@@ -250,7 +258,7 @@ exports.parse = function (exp, needSet) {
 
 /**
  * Check if an expression is a simple path.
- *
+ * 检查表达式是否为 较为简单的路径
  * @param {String} exp
  * @return {Boolean}
  */
