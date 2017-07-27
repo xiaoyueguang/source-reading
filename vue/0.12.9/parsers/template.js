@@ -1,8 +1,13 @@
+/**
+ *  模板解析
+ */
 var _ = require('../util')
 var Cache = require('../cache')
 var templateCache = new Cache(1000)
 var idSelectorCache = new Cache(1000)
-
+/**
+ * 定义特殊标签
+ */
 var map = {
   _default: [0, '', ''],
   legend: [1, '<fieldset>', '</fieldset>'],
@@ -63,6 +68,7 @@ var entityRE = /&\w+;/
  * Convert a string template to a DocumentFragment.
  * Determines correct wrapping by tag types. Wrapping
  * strategy found in jQuery & component/domify.
+ * 将字符串正确的解析为 fragment 标签
  *
  * @param {String} templateString
  * @return {DocumentFragment}
@@ -112,7 +118,7 @@ function stringToFragment (templateString) {
 
 /**
  * Convert a template node to a DocumentFragment.
- *
+ * 将模板节点 转为 fragment 标签
  * @param {Node} node
  * @return {DocumentFragment}
  */
@@ -144,6 +150,7 @@ function nodeToFragment (node) {
 
 // Test for the presence of the Safari template cloning bug
 // https://bugs.webkit.org/show_bug.cgi?id=137755
+// 检测 safari 错误
 var hasBrokenTemplate = _.inBrowser
   ? (function () {
       var a = document.createElement('div')
@@ -153,6 +160,7 @@ var hasBrokenTemplate = _.inBrowser
   : false
 
 // Test for IE10/11 textarea placeholder clone bug
+// 检测IE10/11错误
 var hasTextareaCloneBug = _.inBrowser
   ? (function () {
       var t = document.createElement('textarea')
@@ -166,7 +174,7 @@ var hasTextareaCloneBug = _.inBrowser
  *    manually cloning all template instances.
  * 2. Deal with IE10/11 textarea placeholder bug by setting
  *    the correct value after cloning.
- *
+ * 复制节点. 兼容 safari 和 IE10/11
  * @param {Element|DocumentFragment} node
  * @return {Element|DocumentFragment}
  */
@@ -213,7 +221,7 @@ exports.clone = function (node) {
  * Process the template option and normalizes it into a
  * a DocumentFragment that can be used as a partial or a
  * instance template.
- *
+ * 解析模板
  * @param {*} template
  *    Possible values include:
  *    - DocumentFragment object

@@ -1,3 +1,7 @@
+/**
+ * 路径
+ * TODO:
+ */
 var _ = require('../util')
 var Cache = require('../cache')
 var pathCache = new Cache(1000)

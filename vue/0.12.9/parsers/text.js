@@ -1,3 +1,6 @@
+/**
+ * 字符串 解析 {{}}
+ */
 var Cache = require('../cache')
 var config = require('../config')
 var dirParser = require('./directive')
@@ -17,7 +20,7 @@ function escapeRegex (str) {
 
 /**
  * Compile the interpolation tag regex.
- *
+ * 解析字符串
  * @return {RegExp}
  */
 
@@ -48,7 +51,7 @@ function compileRegex () {
 
 /**
  * Parse a template text string into an array of tokens.
- *
+ * 解析字符串为固定格式的tokens
  * @param {String} text
  * @return {Array<Object> | null}
  *               - {String} type
@@ -111,7 +114,7 @@ exports.parse = function (text) {
  * Format a list of tokens into an expression.
  * e.g. tokens parsed from 'a {{b}} c' can be serialized
  * into one single expression as '"a " + b + " c"'.
- *
+ * 将 tokens 格式化成表达式
  * @param {Array} tokens
  * @param {Vue} [vm]
  * @return {String}
@@ -127,7 +130,7 @@ exports.tokensToExp = function (tokens, vm) {
 
 /**
  * Format a single token.
- *
+ * 讲 token 解析成表达式
  * @param {Object} token
  * @param {Vue} [vm]
  * @param {Boolean} single
@@ -149,7 +152,7 @@ function formatToken (token, vm, single) {
  * have to inline those filters. This function does exactly
  * that. This is a bit hacky but it avoids heavy changes
  * to directive parser and watcher mechanism.
- *
+ * 内联字符串表达式的处理
  * @param {String} exp
  * @param {Boolean} single
  * @return {String}
