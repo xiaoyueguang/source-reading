@@ -1,3 +1,6 @@
+/**
+ * 事件处理
+ */
 var _ = require('../util')
 var inDoc = _.inDoc
 
@@ -5,6 +8,7 @@ var inDoc = _.inDoc
  * Setup the instance's option events & watchers.
  * If the value is a string, we pull it from the
  * instance's methods by name.
+ * 注册 $on $watch 方法
  */
 
 exports._initEvents = function () {
@@ -15,7 +19,7 @@ exports._initEvents = function () {
 
 /**
  * Register callbacks for option events and watchers.
- *
+ * 注册方法
  * @param {Vue} vm
  * @param {String} action
  * @param {Object} hash
@@ -38,7 +42,7 @@ function registerCallbacks (vm, action, hash) {
 
 /**
  * Helper to register an event/watch callback.
- *
+ * 注册方法
  * @param {Vue} vm
  * @param {String} action
  * @param {String} key
@@ -69,6 +73,7 @@ function register (vm, action, key, handler, options) {
 
 /**
  * Setup recursive attached/detached calls
+ * 监听hook attached/detached
  */
 
 exports._initDOMHooks = function () {
@@ -78,6 +83,7 @@ exports._initDOMHooks = function () {
 
 /**
  * Callback to recursively call attached hook on children
+ * 当自身插入到 DOM 节点的时候, 触发子组件所有的 attached 钩子
  */
 
 function onAttached () {
@@ -101,6 +107,7 @@ function callAttach (child) {
 
 /**
  * Callback to recursively call detached hook on children
+ * 当自身移除 DOM 节点的时候, 触发子组件所有的 detached 钩子
  */
 
 function onDetached () {
@@ -124,7 +131,7 @@ function callDetach (child) {
 
 /**
  * Trigger all handlers for a hook
- *
+ * 触发钩子
  * @param {String} hook
  */
 

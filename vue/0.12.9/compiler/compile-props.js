@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 var _ = require('../util')
 var textParser = require('../parsers/text')
 var propDef = require('../directives/prop')

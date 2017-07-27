@@ -1,3 +1,6 @@
+/**
+ * 杂项
+ */
 var _ = require('../util')
 
 /**
@@ -5,6 +8,7 @@ var _ = require('../util')
  * Using plain for loops here because this will be called in
  * the getter of any watcher with filters so it is very
  * performance sensitive.
+ * 应用过滤器 区分生产模式和开发模式. 生产模式性能做优化
  *
  * @param {*} value
  * @param {*} [oldValue]
@@ -45,7 +49,7 @@ exports._applyFilters = function (value, oldValue, filters, write) {
  * Resolves synchronously if already resolved, otherwise
  * resolves asynchronously and caches the resolved
  * constructor on the factory.
- *
+ * 解析组件. 使用组件之前先判断是否注册过该组件.
  * @param {String} id
  * @param {Function} cb
  */

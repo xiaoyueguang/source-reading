@@ -1,3 +1,6 @@
+/**
+ * 需要作用域的属性
+ */
 var _ = require('../util')
 var compiler = require('../compiler')
 var Observer = require('../observer')
@@ -10,6 +13,13 @@ var Watcher = require('../watcher')
  * - computed properties
  * - user methods
  * - meta properties
+ * 每个实例都需要自己的一些属性
+ * 即这些属性的作用域都将控制在自身实例内.
+ * 有:
+ * 监听观察者
+ * 可计算属性
+ * 自定义方法
+ * 自身属性
  */
 
 exports._initScope = function () {
@@ -22,6 +32,7 @@ exports._initScope = function () {
 
 /**
  * Initialize props.
+ * 初始化传参
  */
 
 exports._initProps = function () {
@@ -45,6 +56,7 @@ exports._initProps = function () {
 
 /**
  * Initialize the data.
+ * 初始化数据
  */
 
 exports._initData = function () {
@@ -79,7 +91,7 @@ exports._initData = function () {
 
 /**
  * Swap the isntance's $data. Called in $data's setter.
- *
+ * 定义个$data, 设置 $data的 setters. 使得可以观察
  * @param {Object} newData
  */
 
@@ -129,7 +141,7 @@ exports._setData = function (newData) {
 /**
  * Proxy a property, so that
  * vm.prop === vm._data.prop
- *
+ * 代理数据
  * @param {String} key
  */
 
@@ -152,7 +164,7 @@ exports._proxy = function (key) {
 
 /**
  * Unproxy a property.
- *
+ * 移除代理
  * @param {String} key
  */
 
@@ -162,6 +174,7 @@ exports._unproxy = function (key) {
 
 /**
  * Force update on every watcher in scope.
+ * 强制更新作用域内的 watcher
  */
 
 exports._digest = function () {
@@ -183,8 +196,11 @@ exports._digest = function () {
  * Setup computed properties. They are essentially
  * special getter/setters
  */
-
+// 空方法
 function noop () {}
+/**
+ * 初始化可计算的值. 需要分别设置 getter/setter
+ */
 exports._initComputed = function () {
   var computed = this.$options.computed
   if (computed) {
@@ -209,7 +225,7 @@ exports._initComputed = function () {
     }
   }
 }
-
+// 从可观察的数据上再进行封装.
 function makeComputedGetter (getter, owner) {
   var watcher = new Watcher(owner, getter, null, {
     lazy: true
@@ -229,6 +245,7 @@ function makeComputedGetter (getter, owner) {
  * Setup instance methods. Methods must be bound to the
  * instance since they might be called by children
  * inheriting them.
+ * 初始化方法
  */
 
 exports._initMethods = function () {
@@ -242,6 +259,7 @@ exports._initMethods = function () {
 
 /**
  * Initialize meta information like $index, $key & $value.
+ * 初始化元数据. 比如循环列表时所用到的 $index, $key, $value
  */
 
 exports._initMeta = function () {
@@ -256,7 +274,7 @@ exports._initMeta = function () {
 /**
  * Define a meta property, e.g $index, $key, $value
  * which only exists on the vm instance but not in $data.
- *
+ * 定义元数据, 仅存在在实例上
  * @param {String} key
  * @param {*} value
  */
