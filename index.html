@@ -17,6 +17,7 @@
   <body>
     <div id="app">
       <p class='{{classname}}' v-html="msg"></p>
+      {{test.test}}
     </div>
   </body>
   <script src="./dist/vue.js"></script>
@@ -39,13 +40,17 @@
       el: '#app',
       data: {
         msg: '<p><span>测试</span></p>',
-        classname: 'test'
+        classname: 'test',
+        test: {
+          test: 1
+        }
       },
       computed: {
       },
       methods: {
       },
       ready () {
+        // console.log(this.test.test)
       }
     })
 

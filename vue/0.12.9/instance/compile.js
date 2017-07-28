@@ -1,8 +1,12 @@
+/**
+ * 编译
+ */
 var _ = require('../util')
 var Directive = require('../directive')
 var compiler = require('../compiler')
 
 /**
+ * 编译
  * Transclude, compile and link element.
  *
  * If a pre-compiled linker is available, that means the
@@ -31,7 +35,6 @@ exports._compile = function (el) {
     var original = el
     el = compiler.transclude(el, options)
     this._initElement(el)
-
     // root is always compiled per-instance, because
     // container attrs and props can be different every time.
     var rootUnlinkFn =

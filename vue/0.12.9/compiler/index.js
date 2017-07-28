@@ -1,3 +1,6 @@
+/**
+ * 入口
+ */
 var _ = require('../util')
 
 _.extend(exports, require('./compile'))

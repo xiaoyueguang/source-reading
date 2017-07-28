@@ -428,11 +428,16 @@ Object.defineProperty(module.exports, 'delimiters', {
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ *  模板解析
+ */
 var _ = __webpack_require__(0)
 var Cache = __webpack_require__(4)
 var templateCache = new Cache(1000)
 var idSelectorCache = new Cache(1000)
-
+/**
+ * 定义特殊标签
+ */
 var map = {
   _default: [0, '', ''],
   legend: [1, '<fieldset>', '</fieldset>'],
@@ -493,6 +498,7 @@ var entityRE = /&\w+;/
  * Convert a string template to a DocumentFragment.
  * Determines correct wrapping by tag types. Wrapping
  * strategy found in jQuery & component/domify.
+ * 将字符串正确的解析为 fragment 标签
  *
  * @param {String} templateString
  * @return {DocumentFragment}
@@ -542,7 +548,7 @@ function stringToFragment (templateString) {
 
 /**
  * Convert a template node to a DocumentFragment.
- *
+ * 将模板节点 转为 fragment 标签
  * @param {Node} node
  * @return {DocumentFragment}
  */
@@ -574,6 +580,7 @@ function nodeToFragment (node) {
 
 // Test for the presence of the Safari template cloning bug
 // https://bugs.webkit.org/show_bug.cgi?id=137755
+// 检测 safari 错误
 var hasBrokenTemplate = _.inBrowser
   ? (function () {
       var a = document.createElement('div')
@@ -583,6 +590,7 @@ var hasBrokenTemplate = _.inBrowser
   : false
 
 // Test for IE10/11 textarea placeholder clone bug
+// 检测IE10/11错误
 var hasTextareaCloneBug = _.inBrowser
   ? (function () {
       var t = document.createElement('textarea')
@@ -596,7 +604,7 @@ var hasTextareaCloneBug = _.inBrowser
  *    manually cloning all template instances.
  * 2. Deal with IE10/11 textarea placeholder bug by setting
  *    the correct value after cloning.
- *
+ * 复制节点. 兼容 safari 和 IE10/11
  * @param {Element|DocumentFragment} node
  * @return {Element|DocumentFragment}
  */
@@ -643,7 +651,7 @@ exports.clone = function (node) {
  * Process the template option and normalizes it into a
  * a DocumentFragment that can be used as a partial or a
  * instance template.
- *
+ * 解析模板
  * @param {*} template
  *    Possible values include:
  *    - DocumentFragment object
@@ -826,6 +834,9 @@ module.exports = Cache
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 入口
+ */
 var _ = __webpack_require__(0)
 
 _.extend(exports, __webpack_require__(32))
@@ -836,6 +847,9 @@ _.extend(exports, __webpack_require__(33))
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 字符串 解析 {{}}
+ */
 var Cache = __webpack_require__(4)
 var config = __webpack_require__(2)
 var dirParser = __webpack_require__(7)
@@ -855,7 +869,7 @@ function escapeRegex (str) {
 
 /**
  * Compile the interpolation tag regex.
- *
+ * 解析字符串
  * @return {RegExp}
  */
 
@@ -886,7 +900,7 @@ function compileRegex () {
 
 /**
  * Parse a template text string into an array of tokens.
- *
+ * 解析字符串为固定格式的tokens
  * @param {String} text
  * @return {Array<Object> | null}
  *               - {String} type
@@ -949,7 +963,7 @@ exports.parse = function (text) {
  * Format a list of tokens into an expression.
  * e.g. tokens parsed from 'a {{b}} c' can be serialized
  * into one single expression as '"a " + b + " c"'.
- *
+ * 将 tokens 格式化成表达式
  * @param {Array} tokens
  * @param {Vue} [vm]
  * @return {String}
@@ -965,7 +979,7 @@ exports.tokensToExp = function (tokens, vm) {
 
 /**
  * Format a single token.
- *
+ * 讲 token 解析成表达式
  * @param {Object} token
  * @param {Vue} [vm]
  * @param {Boolean} single
@@ -987,7 +1001,7 @@ function formatToken (token, vm, single) {
  * have to inline those filters. This function does exactly
  * that. This is a bit hacky but it avoids heavy changes
  * to directive parser and watcher mechanism.
- *
+ * 内联字符串表达式的处理
  * @param {String} exp
  * @param {Boolean} single
  * @return {String}
@@ -1018,6 +1032,9 @@ function inlineFilters (exp, single) {
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 指令解析
+ */
 var _ = __webpack_require__(0)
 var Cache = __webpack_require__(4)
 var cache = new Cache(1000)
@@ -1045,6 +1062,7 @@ var arg
 
 /**
  * Push a directive object into the result Array
+ * 添加指令
  */
 
 function pushDir () {
@@ -1061,6 +1079,7 @@ function pushDir () {
 
 /**
  * Push a filter to the current directive object
+ * 添加过滤器
  */
 
 function pushFilter () {
@@ -1082,7 +1101,7 @@ function pushFilter () {
 
 /**
  * Check if an argument is dynamic and strip quotes.
- *
+ * 检查参数 是否为动态变量或字符串(带引号)
  * @param {String} arg
  * @return {Object}
  */
@@ -1100,6 +1119,7 @@ function processFilterArg (arg) {
 /**
  * Parse a directive string into an Array of AST-like
  * objects representing directives.
+ * 解析指令. 将指令解析为 指令, 表达式, 参数或过滤器等形式
  *
  * Example:
  *
@@ -1203,18 +1223,25 @@ exports.parse = function (s) {
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 表达式解析
+ */
+var _ = __webpack_require__(0)
 var Path = __webpack_require__(9)
 var Cache = __webpack_require__(4)
 var expressionCache = new Cache(1000)
-
+/**
+ * 表达式中 需要解析为 JS 变量的值
+ */
 var allowedKeywords =
   'Math,Date,this,true,false,null,undefined,Infinity,NaN,' +
   'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,' +
   'encodeURIComponent,parseInt,parseFloat'
 var allowedKeywordsRE =
   new RegExp('^(' + allowedKeywords.replace(/,/g, '\\b|') + '\\b)')
-
+/**
+ * 表达式中 需要解析为 JS 的关键词
+ */
 // keywords that don't make sense inside expressions
 var improperKeywords =
   'break,case,class,catch,const,continue,debugger,default,' +
@@ -1235,7 +1262,7 @@ var booleanLiteralRE = /^(true|false)$/
 
 /**
  * Save / Rewrite / Restore
- *
+ * 表达式解析完成后 保存或重写或还原
  * When rewriting paths found in an expression, it is
  * possible for the same letter sequences to be found in
  * strings and Object literal property keys. Therefore we
@@ -1254,7 +1281,7 @@ var saved = []
  * If matched as a plain string, we need to escape its
  * newlines, since the string needs to be preserved when
  * generating the function body.
- *
+ * 保存
  * @param {String} str
  * @param {String} isString - str if matched as a string
  * @return {String} - placeholder with index
@@ -1270,7 +1297,7 @@ function save (str, isString) {
 
 /**
  * Path rewrite replacer
- *
+ * 重写表达式
  * @param {String} raw
  * @return {String}
  */
@@ -1290,7 +1317,7 @@ function rewrite (raw) {
 
 /**
  * Restore replacer
- *
+ * 还原表达式
  * @param {String} str
  * @param {String} i - matched save index
  * @return {String}
@@ -1303,6 +1330,7 @@ function restore (str, i) {
 /**
  * Rewrite an expression, prefixing all path accessors with
  * `scope.` and generate getter/setter functions.
+ * 重写表达式, 使用 scope 来控制数据范围
  *
  * @param {String} exp
  * @param {Boolean} needSet
@@ -1340,7 +1368,7 @@ function compileExpFns (exp, needSet) {
 
 /**
  * Compile getter setters for a simple path.
- *
+ * 将一个简单的路径获取值
  * @param {String} exp
  * @return {Function}
  */
@@ -1371,7 +1399,7 @@ function compilePathFns (exp) {
  *
  * We isolate the try/catch so it doesn't affect the
  * optimization of the parse function when it is not called.
- *
+ * 获取值
  * @param {String} body
  * @return {Function|undefined}
  */
@@ -1396,7 +1424,7 @@ function makeGetter (body) {
  * This setter function may throw error when called if the
  * expression body is not a valid left-hand expression in
  * assignment.
- *
+ * 设置值
  * @param {String} body
  * @return {Function|undefined}
  */
@@ -1413,7 +1441,7 @@ function makeSetter (body) {
 
 /**
  * Check for setter existence on a cache hit.
- *
+ * 表达式解析获取方法
  * @param {Function} hit
  */
 
@@ -1425,7 +1453,7 @@ function checkSetter (hit) {
 
 /**
  * Parse an expression into re-written getter/setters.
- *
+ * 解析
  * @param {String} exp
  * @param {Boolean} needSet
  * @return {Function}
@@ -1455,7 +1483,7 @@ exports.parse = function (exp, needSet) {
 
 /**
  * Check if an expression is a simple path.
- *
+ * 检查表达式是否为 较为简单的路径
  * @param {String} exp
  * @return {Boolean}
  */
@@ -1474,7 +1502,10 @@ exports.isSimplePath = function (exp) {
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 对象路径解析...
+ */
+var _ = __webpack_require__(0)
 var Cache = __webpack_require__(4)
 var pathCache = new Cache(1000)
 var identRE = exports.identRE = /^[$_a-zA-Z]+[\w$]*$/
@@ -1586,7 +1617,7 @@ function getPathCharType (ch) {
   if (ch === undefined) {
     return 'eof'
   }
-
+  // 解析大部分特殊符号
   var code = ch.charCodeAt(0)
 
   switch (code) {
@@ -1601,7 +1632,7 @@ function getPathCharType (ch) {
     case 0x5F: // _
     case 0x24: // $
       return 'ident'
-
+    // 缩进
     case 0x20: // Space
     case 0x09: // Tab
     case 0x0A: // Newline
@@ -1632,11 +1663,12 @@ function getPathCharType (ch) {
 /**
  * Parse a string path into an array of segments
  * Todo implement cache
- *
+ * 将 字符串路径 解析成数组
+ * parsePath('a.b')
+ * ["a", "b", raw: "a.b"]
  * @param {String} path
  * @return {Array|undefined}
  */
-
 function parsePath (path) {
   var keys = []
   var index = -1
@@ -1727,7 +1759,7 @@ function formatAccessor (key) {
 /**
  * Compiles a getter function with a fixed path.
  * The fixed path getter supresses errors.
- *
+ * 根据路径, 生成一个对应的 getters. 通过该方法能直接获取值
  * @param {Array} path
  * @return {Function}
  */
@@ -1739,7 +1771,7 @@ exports.compileGetter = function (path) {
 
 /**
  * External parse that check for a cache hit first
- *
+ * 解析路径
  * @param {String} path
  * @return {Array|undefined}
  */
@@ -1758,7 +1790,7 @@ exports.parse = function (path) {
 
 /**
  * Get from an object from a path string
- *
+ * 获取值
  * @param {Object} obj
  * @param {String} path
  */
@@ -1772,7 +1804,7 @@ exports.get = function (obj, path) {
 
 /**
  * Set on an object from a path
- *
+ * 设置值
  * @param {Object} obj
  * @param {String | Array} path
  * @param {*} val
@@ -1813,7 +1845,7 @@ exports.set = function (obj, path, val) {
   }
   return true
 }
-
+// 报错
 function warnNonExistent (path) {
   process.env.NODE_ENV !== 'production' && _.warn(
     'You are setting a non-existent path "' + path.raw + '" ' +
@@ -2236,6 +2268,10 @@ module.exports = Dep
 /* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 过渡
+ * DOM 操作时 执行过渡
+ */
 var _ = __webpack_require__(0)
 
 /**
@@ -2335,7 +2371,7 @@ exports.blockRemove = function (start, end, vm) {
  * Apply transitions with an operation callback.
  *
  * @oaram {Element} el
- * @param {Number} direction
+ * @param {Number} direction 指令. 1进入 -1出去
  *                  1: enter
  *                 -1: leave
  * @param {Function} op - the actual DOM operation
@@ -2349,6 +2385,7 @@ var apply = exports.apply = function (el, direction, op, vm, cb) {
     !transition ||
     // skip if there are no js hooks and CSS transition is
     // not supported
+    // 不支持 js 过渡 或者 css 过渡, 则跳过
     (!transition.hooks && !_.transitionEndEvent) ||
     // skip transitions for initial compile
     !vm._isCompiled ||
@@ -2361,6 +2398,7 @@ var apply = exports.apply = function (el, direction, op, vm, cb) {
     if (cb) cb()
     return
   }
+  // 执行且执行回调
   var action = direction > 0 ? 'enter' : 'leave'
   transition[action](op, cb)
 }
@@ -3961,11 +3999,15 @@ _.extend(exports, __webpack_require__(54))
 /* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 编译
+ */
 var _ = __webpack_require__(0)
 var Directive = __webpack_require__(34)
 var compiler = __webpack_require__(5)
 
 /**
+ * 编译
  * Transclude, compile and link element.
  *
  * If a pre-compiled linker is available, that means the
@@ -3994,7 +4036,6 @@ exports._compile = function (el) {
     var original = el
     el = compiler.transclude(el, options)
     this._initElement(el)
-
     // root is always compiled per-instance, because
     // container attrs and props can be different every time.
     var rootUnlinkFn =
@@ -4163,13 +4204,17 @@ exports._cleanup = function () {
 /* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 事件处理
+ */
+var _ = __webpack_require__(0)
 var inDoc = _.inDoc
 
 /**
  * Setup the instance's option events & watchers.
  * If the value is a string, we pull it from the
  * instance's methods by name.
+ * 注册 $on $watch 方法
  */
 
 exports._initEvents = function () {
@@ -4180,7 +4225,7 @@ exports._initEvents = function () {
 
 /**
  * Register callbacks for option events and watchers.
- *
+ * 注册方法
  * @param {Vue} vm
  * @param {String} action
  * @param {Object} hash
@@ -4203,7 +4248,7 @@ function registerCallbacks (vm, action, hash) {
 
 /**
  * Helper to register an event/watch callback.
- *
+ * 注册方法
  * @param {Vue} vm
  * @param {String} action
  * @param {String} key
@@ -4234,6 +4279,7 @@ function register (vm, action, key, handler, options) {
 
 /**
  * Setup recursive attached/detached calls
+ * 监听hook attached/detached
  */
 
 exports._initDOMHooks = function () {
@@ -4243,6 +4289,7 @@ exports._initDOMHooks = function () {
 
 /**
  * Callback to recursively call attached hook on children
+ * 当自身插入到 DOM 节点的时候, 触发子组件所有的 attached 钩子
  */
 
 function onAttached () {
@@ -4266,6 +4313,7 @@ function callAttach (child) {
 
 /**
  * Callback to recursively call detached hook on children
+ * 当自身移除 DOM 节点的时候, 触发子组件所有的 detached 钩子
  */
 
 function onDetached () {
@@ -4289,7 +4337,7 @@ function callDetach (child) {
 
 /**
  * Trigger all handlers for a hook
- *
+ * 触发钩子
  * @param {String} hook
  */
 
@@ -4309,13 +4357,16 @@ exports._callHook = function (hook) {
 /* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * Vue 实例化
+ */
 var mergeOptions = __webpack_require__(0).mergeOptions
 
 /**
  * The main init sequence. This is called for every
  * instance, including ones that are created from extended
  * constructors.
- *
+ * 主要的 构造方法. 定义私有方法
  * @param {Object} options - this options object should be
  *                           the result of merging class
  *                           options and the options passed
@@ -4325,31 +4376,46 @@ var mergeOptions = __webpack_require__(0).mergeOptions
 exports._init = function (options) {
 
   options = options || {}
-
+  // 自身
   this.$el = null
+  // 父 vm
   this.$parent = options._parent
+  // 根 vm
   this.$root = options._root || this
+  // 子 vm
   this.$children = []
+  // 
   this.$ = {}           // child vm references
   this.$$ = {}          // element references
+  // 观察者 watchers 集合
   this._watchers = []   // all watchers as an array
+  // 指令
   this._directives = [] // all directives
+  // 子vm
   this._childCtors = {} // inherit:true constructors
 
   // a flag to avoid this being observed
+  // 为 vue
   this._isVue = true
 
   // events bookkeeping
+  // 事件
   this._events = {}            // registered callbacks
+  // 广播次数
   this._eventsCount = {}       // for $broadcast optimization
+  // 可中止事件. 阻止
   this._eventCancelled = false // for event cancellation
 
   // fragment instance properties
+  // 是否为标签
   this._isFragment = false
+  // 开始
   this._fragmentStart =    // @type {CommentNode}
+  // 结束
   this._fragmentEnd = null // @type {CommentNode}
 
   // lifecycle state
+  // 生命周期状态
   this._isCompiled =
   this._isDestroyed =
   this._isReady =
@@ -4360,19 +4426,22 @@ exports._init = function (options) {
   // context: the scope in which the component was used,
   // and the scope in which props and contents of this
   // instance should be compiled in.
+  // 当前上下文
   this._context =
     options._context ||
     options._parent
 
   // push self into parent / transclusion host
+  // 如果本身有父组件, 则在父组件的子组件集合中传入自己
   if (this.$parent) {
     this.$parent.$children.push(this)
   }
 
   // props used in v-repeat diffing
+  // v-repeat 指令专用
   this._reused = false
   this._staggerOp = null
-
+  // 生成一个 options
   // merge options.
   options = this.$options = mergeOptions(
     this.constructor.options,
@@ -4382,8 +4451,9 @@ exports._init = function (options) {
 
   // initialize data as empty object.
   // it will be filled up in _initScope().
+  // 原本空 data
   this._data = {}
-
+  // 初始化
   // initialize data observation and scope inheritance.
   this._initScope()
 
@@ -4391,9 +4461,11 @@ exports._init = function (options) {
   this._initEvents()
 
   // call created hook
+  // 触发钩子
   this._callHook('created')
 
   // if `el` option is passed, start compilation.
+  // 挂载到 DOM 节点中
   if (options.el) {
     this.$mount(options.el)
   }
@@ -4404,13 +4476,17 @@ exports._init = function (options) {
 /* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 杂项
+ */
+var _ = __webpack_require__(0)
 
 /**
  * Apply a list of filter (descriptors) to a value.
  * Using plain for loops here because this will be called in
  * the getter of any watcher with filters so it is very
  * performance sensitive.
+ * 应用过滤器 区分生产模式和开发模式. 生产模式性能做优化
  *
  * @param {*} value
  * @param {*} [oldValue]
@@ -4451,7 +4527,7 @@ exports._applyFilters = function (value, oldValue, filters, write) {
  * Resolves synchronously if already resolved, otherwise
  * resolves asynchronously and caches the resolved
  * constructor on the factory.
- *
+ * 解析组件. 使用组件之前先判断是否注册过该组件.
  * @param {String} id
  * @param {Function} cb
  */
@@ -4504,7 +4580,10 @@ exports._resolveComponent = function (id, cb) {
 /* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 需要作用域的属性
+ */
+var _ = __webpack_require__(0)
 var compiler = __webpack_require__(5)
 var Observer = __webpack_require__(56)
 var Dep = __webpack_require__(11)
@@ -4516,6 +4595,13 @@ var Watcher = __webpack_require__(10)
  * - computed properties
  * - user methods
  * - meta properties
+ * 每个实例都需要自己的一些属性
+ * 即这些属性的作用域都将控制在自身实例内.
+ * 有:
+ * 监听观察者
+ * 可计算属性
+ * 自定义方法
+ * 自身属性
  */
 
 exports._initScope = function () {
@@ -4528,6 +4614,7 @@ exports._initScope = function () {
 
 /**
  * Initialize props.
+ * 初始化传参
  */
 
 exports._initProps = function () {
@@ -4551,6 +4638,7 @@ exports._initProps = function () {
 
 /**
  * Initialize the data.
+ * 初始化数据
  */
 
 exports._initData = function () {
@@ -4585,7 +4673,7 @@ exports._initData = function () {
 
 /**
  * Swap the isntance's $data. Called in $data's setter.
- *
+ * 定义个$data, 设置 $data的 setters. 使得可以观察
  * @param {Object} newData
  */
 
@@ -4635,7 +4723,7 @@ exports._setData = function (newData) {
 /**
  * Proxy a property, so that
  * vm.prop === vm._data.prop
- *
+ * 代理数据
  * @param {String} key
  */
 
@@ -4658,7 +4746,7 @@ exports._proxy = function (key) {
 
 /**
  * Unproxy a property.
- *
+ * 移除代理
  * @param {String} key
  */
 
@@ -4668,6 +4756,7 @@ exports._unproxy = function (key) {
 
 /**
  * Force update on every watcher in scope.
+ * 强制更新作用域内的 watcher
  */
 
 exports._digest = function () {
@@ -4689,8 +4778,11 @@ exports._digest = function () {
  * Setup computed properties. They are essentially
  * special getter/setters
  */
-
+// 空方法
 function noop () {}
+/**
+ * 初始化可计算的值. 需要分别设置 getter/setter
+ */
 exports._initComputed = function () {
   var computed = this.$options.computed
   if (computed) {
@@ -4715,7 +4807,7 @@ exports._initComputed = function () {
     }
   }
 }
-
+// 从可观察的数据上再进行封装.
 function makeComputedGetter (getter, owner) {
   var watcher = new Watcher(owner, getter, null, {
     lazy: true
@@ -4735,6 +4827,7 @@ function makeComputedGetter (getter, owner) {
  * Setup instance methods. Methods must be bound to the
  * instance since they might be called by children
  * inheriting them.
+ * 初始化方法
  */
 
 exports._initMethods = function () {
@@ -4748,6 +4841,7 @@ exports._initMethods = function () {
 
 /**
  * Initialize meta information like $index, $key & $value.
+ * 初始化元数据. 比如循环列表时所用到的 $index, $key, $value
  */
 
 exports._initMeta = function () {
@@ -4762,7 +4856,7 @@ exports._initMeta = function () {
 /**
  * Define a meta property, e.g $index, $key, $value
  * which only exists on the vm instance but not in $data.
- *
+ * 定义元数据, 仅存在在实例上
  * @param {String} key
  * @param {*} value
  */
@@ -4913,7 +5007,10 @@ exports.push = function (watcher) {
 /* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ *  编译 props
+ */
+var _ = __webpack_require__(0)
 var textParser = __webpack_require__(6)
 var propDef = __webpack_require__(15)
 var propBindingModes = __webpack_require__(2)._propBindingModes
@@ -4927,7 +5024,7 @@ var literalValueRE = /^(true|false)$|^\d.*/
 /**
  * Compile param attributes on a root element and return
  * a props link function.
- *
+ * 在组件里编译并且创建链接 props 方法
  * @param {Element|DocumentFragment} el
  * @param {Array} propOptions
  * @return {Function} propsLinkFn
@@ -4955,9 +5052,11 @@ module.exports = function compileProps (el, propOptions) {
     value = el.getAttribute(attr)
     if (value === null) {
       attr = 'data-' + attr
+      // 收集
       value = el.getAttribute(attr)
     }
     // create a prop descriptor
+    // 生成一个完整的 props 描述
     prop = {
       name: name,
       raw: value,
@@ -4976,7 +5075,7 @@ module.exports = function compileProps (el, propOptions) {
         // check prop binding type.
         single = tokens.length === 1
         literal = literalValueRE.test(prop.parentPath)
-        // one time: {{* prop}}
+        // one time: {{* prop}} 执行一次的
         if (literal || (single && tokens[0].oneTime)) {
           prop.mode = propBindingModes.ONE_TIME
         } else if (
@@ -5014,7 +5113,7 @@ module.exports = function compileProps (el, propOptions) {
 
 /**
  * Build a function that applies props to a vm.
- *
+ * 创建个方法 将 props 应用到实例上
  * @param {Array} props
  * @return {Function} propsLinkFn
  */
@@ -5032,6 +5131,7 @@ function makePropsLinkFn (props) {
       options = prop.options
       if (prop.raw === null) {
         // initialize absent prop
+        // 初始化
         _.initProp(vm, prop, getDefault(options))
       } else if (prop.dynamic) {
         // dynamic prop
@@ -5069,7 +5169,7 @@ function makePropsLinkFn (props) {
 
 /**
  * Get the default value of a prop.
- *
+ * props 获取标准的值
  * @param {Object} options
  * @return {*}
  */
@@ -5103,7 +5203,10 @@ function getDefault (options) {
 /* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var _ = __webpack_require__(0)
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * 解析
+ */
+var _ = __webpack_require__(0)
 var compileProps = __webpack_require__(31)
 var config = __webpack_require__(2)
 var textParser = __webpack_require__(6)
@@ -5112,7 +5215,9 @@ var templateParser = __webpack_require__(3)
 var resolveAsset = _.resolveAsset
 var componentDef = __webpack_require__(13)
 
-// terminal directives
+// terminal directives.
+// 优先指令.
+// 该指令没被执行时, 指令对应的节点里的所有元素都可不执行编译
 var terminalDirectives = [
   'repeat',
   'if'
@@ -5128,7 +5233,7 @@ var terminalDirectives = [
  * The returned composite link function, when called, will
  * return an unlink function that tearsdown all directives
  * created during the linking phase.
- *
+ * 编译主方法
  * @param {Element|DocumentFragment} el
  * @param {Object} options
  * @param {Boolean} partial
@@ -5174,7 +5279,7 @@ exports.compile = function (el, options, partial, host) {
 /**
  * Apply a linker to a vm/element pair and capture the
  * directives created during the process.
- *
+ * 从 $vm/节点上捕获所有的指令
  * @param {Function} linker
  * @param {Vue} vm
  */
@@ -5192,6 +5297,7 @@ function linkAndCapture (linker, vm) {
  *
  * We create unlink functions with only the necessary
  * information to avoid retaining additional closures.
+ * 创建个取消链接方法,执行后会得到一个反编译的方法
  *
  * @param {Vue} vm
  * @param {Array} dirs
@@ -5211,7 +5317,7 @@ function makeUnlinkFn (vm, dirs, context, contextDirs) {
 
 /**
  * Teardown partial linked directives.
- *
+ * 取消指令并移除指令
  * @param {Vue} vm
  * @param {Array} dirs
  * @param {Boolean} destroying
@@ -5229,6 +5335,7 @@ function teardownDirs (vm, dirs, destroying) {
 
 /**
  * Compile link props on an instance.
+ * 在实例上 链接 props
  *
  * @param {Vue} vm
  * @param {Element} el
@@ -5257,6 +5364,7 @@ exports.compileAndLinkProps = function (vm, el, props) {
  * since root linkers can not be reused. It returns the
  * unlink function for potential context directives on the
  * container.
+ * 编译实例.
  *
  * @param {Vue} vm
  * @param {Element} el
@@ -5311,6 +5419,7 @@ exports.compileAndLinkRoot = function (vm, el, options) {
 /**
  * Compile a node and return a nodeLinkFn based on the
  * node type.
+ * 编译节点 并返回 节点链接方法
  *
  * @param {Node} node
  * @param {Object} options
@@ -5330,6 +5439,7 @@ function compileNode (node, options) {
 
 /**
  * Compile an element and return a nodeLinkFn.
+ * 编译元素节点, 且返回链接方法
  *
  * @param {Element} el
  * @param {Object} options
@@ -5357,6 +5467,7 @@ function compileElement (el, options) {
   }
   // if the element is a textarea, we need to interpolate
   // its content on initial render.
+  // 标签另外处理
   if (el.tagName === 'TEXTAREA') {
     var realLinkFn = linkFn
     linkFn = function (vm, el) {
@@ -5370,7 +5481,7 @@ function compileElement (el, options) {
 
 /**
  * Compile a textNode and return a nodeLinkFn.
- *
+ * 编译 文字节点, 返回链接方法
  * @param {TextNode} node
  * @param {Object} options
  * @return {Function|null} textNodeLinkFn
@@ -5395,7 +5506,7 @@ function compileTextNode (node, options) {
 
 /**
  * Process a single text token.
- *
+ * 处理文字token
  * @param {Object} token
  * @param {Object} options
  * @return {Node}
@@ -5427,7 +5538,7 @@ function processTextToken (token, options) {
 
 /**
  * Build a function that processes a textNode.
- *
+ * 创建个方法, 处理文字节点
  * @param {Array<Object>} tokens
  * @param {DocumentFragment} frag
  */
@@ -5461,7 +5572,7 @@ function makeTextNodeLinkFn (tokens, frag) {
 
 /**
  * Compile a node list and return a childLinkFn.
- *
+ * 编译节点列表, 返回子链接方法
  * @param {NodeList} nodeList
  * @param {Object} options
  * @return {Function|undefined}
@@ -5488,7 +5599,7 @@ function compileNodeList (nodeList, options) {
 
 /**
  * Make a child link function for a node's childNodes.
- *
+ * 为子节点创建子链接方法
  * @param {Array<Function>} linkFns
  * @return {Function} childLinkFn
  */
@@ -5515,7 +5626,7 @@ function makeChildLinkFn (linkFns) {
 /**
  * Check for element directives (custom elements that should
  * be resovled as terminal directives).
- *
+ * 检查收集 指令
  * @param {Element} el
  * @param {Object} options
  */
@@ -5532,6 +5643,7 @@ function checkElementDirectives (el, options) {
 /**
  * Check if an element is a component. If yes, return
  * a component link function.
+ * 检查节点是否为组件. 组件需返回组件链接方法
  *
  * @param {Element} el
  * @param {Object} options
@@ -5555,6 +5667,7 @@ function checkComponent (el, options, hasAttrs) {
 /**
  * Check an element for terminal directives in fixed order.
  * If it finds one, return a terminal link function.
+ * 检查指令, 返回一个链接方法
  *
  * @param {Element} el
  * @param {Object} options
@@ -5605,6 +5718,7 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 
 /**
  * Compile the directives on an element and return a linker.
+ * 编译一个节点上的指令.
  *
  * @param {Array|NamedNodeMap} attrs
  * @param {Object} options
@@ -5648,6 +5762,7 @@ function compileDirectives (attrs, options) {
 
 /**
  * Build a link function for all directives on a single node.
+ * 创建链接方法, 绑定所有的指令
  *
  * @param {Array} directives
  * @return {Function} directivesLinkFn
@@ -5681,6 +5796,7 @@ function makeNodeLinkFn (directives) {
  * Special case: class interpolations are translated into
  * v-class instead v-attr, so that it can work with user
  * provided v-class bindings.
+ * 收集所有的指令
  *
  * @param {String} name
  * @param {String} value
@@ -5724,6 +5840,7 @@ function collectAttrDirective (name, value, options) {
 
 /**
  * Directive priority sort comparator
+ * 指令优先级排序
  *
  * @param {Object} a
  * @param {Object} b
@@ -8712,13 +8829,16 @@ _.define(
 /* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 队列执行过渡
+ */
 var _ = __webpack_require__(0)
 var queue = []
 var queued = false
 
 /**
  * Push a job into the queue.
- *
+ * 待执行的回调推入队列
  * @param {Function} job
  */
 
@@ -8733,11 +8853,13 @@ exports.push = function (job) {
 /**
  * Flush the queue, and do one forced reflow before
  * triggering transitions.
+ * 冲刷队列
  */
 
 function flush () {
   // Force layout
   var f = document.documentElement.offsetHeight
+  // 循环后一个个执行
   for (var i = 0; i < queue.length; i++) {
     queue[i]()
   }
@@ -8753,6 +8875,9 @@ function flush () {
 /* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * 过渡分为 css 过渡 和 js 过渡
+ */
 var _ = __webpack_require__(0)
 var queue = __webpack_require__(58)
 var addClass = _.addClass
@@ -8768,7 +8893,7 @@ var TYPE_ANIMATION = 2
 /**
  * A Transition object that encapsulates the state and logic
  * of the transition.
- *
+ * 过渡 构造函数
  * @param {Element} el
  * @param {String} id
  * @param {Object} hooks
@@ -8777,6 +8902,7 @@ var TYPE_ANIMATION = 2
 
 function Transition (el, id, hooks, vm) {
   this.el = el
+  // 指定类名
   this.enterClass = id + '-enter'
   this.leaveClass = id + '-leave'
   this.hooks = hooks
@@ -8819,7 +8945,9 @@ var p = Transition.prototype
  *        done now if there's no explicit js callback.
  * 8. wait for either done or js callback, then call
  *    afterEnter hook.
- *
+ * 在执行插入之前, 先执行钩子
+ * 添加初始过渡, 而后添加类名(触发过渡)
+ * 过渡完成后执行回调并移除钩子
  * @param {Function} op - insert/show the element
  * @param {Function} [cb]
  */
@@ -8839,6 +8967,7 @@ p.enter = function (op, cb) {
  * The "nextTick" phase of an entering transition, which is
  * to be pushed into a queue and executed after a reflow so
  * that removing the class can trigger a CSS transition.
+ * 插入完成后 在恰当的地方执行回调
  */
 
 p.enterNextTick = function () {
@@ -8857,6 +8986,7 @@ p.enterNextTick = function () {
 
 /**
  * The "cleanup" phase of an entering transition.
+ * 在插入完成后需要执行回调
  */
 
 p.enterDone = function () {
@@ -8882,7 +9012,8 @@ p.enterDone = function () {
  *        done if there's no explicit js callback.
  * 7. wait for either done or js callback, then call
  *    afterLeave hook.
- *
+ * 在移除前, 先执行钩子, 而后添加移除类(触发过渡)
+ * 过渡完成后触发回调
  * @param {Function} op - remove/hide the element
  * @param {Function} [cb]
  */
@@ -8904,6 +9035,7 @@ p.leave = function (op, cb) {
 
 /**
  * The "nextTick" phase of a leaving transition.
+ * 移除后, 在恰当的时机执行过渡
  */
 
 p.leaveNextTick = function () {
@@ -8920,6 +9052,7 @@ p.leaveNextTick = function () {
 
 /**
  * The "cleanup" phase of a leaving transition.
+ * 执行移除完成钩子
  */
 
 p.leaveDone = function () {
@@ -8933,6 +9066,7 @@ p.leaveDone = function () {
 /**
  * Cancel any pending callbacks from a previously running
  * but not finished transition.
+ * 取消过渡, 并中止还没来得及触发完全的回调
  */
 
 p.cancelPending = function () {
@@ -8960,7 +9094,7 @@ p.cancelPending = function () {
 
 /**
  * Call a user-provided synchronous hook function.
- *
+ * 触发回调
  * @param {String} type
  */
 
@@ -8977,7 +9111,7 @@ p.callHook = function (type) {
  * will be determined by when the user calls that callback;
  * otherwise, the end is determined by the CSS transition or
  * animation.
- *
+ * 判断是否有 结束钩子. 没有则默认触发 css 过渡完成
  * @param {String} type
  */
 
@@ -8994,7 +9128,7 @@ p.callHookWithCb = function (type) {
 /**
  * Get an element's transition type based on the
  * calculated styles.
- *
+ * 通过样式来获取节点的过渡类型...
  * @param {String} className
  * @return {Number}
  */
@@ -9039,7 +9173,7 @@ p.getCssTransitionType = function (className) {
 
 /**
  * Setup a CSS transitionend/animationend callback.
- *
+ * 添加监听 css 过渡或动画完成回调
  * @param {String} event
  * @param {Function} cb
  */

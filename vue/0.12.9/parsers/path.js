@@ -1,6 +1,5 @@
 /**
- * 路径
- * TODO:
+ * 对象路径解析...
  */
 var _ = require('../util')
 var Cache = require('../cache')
@@ -114,7 +113,7 @@ function getPathCharType (ch) {
   if (ch === undefined) {
     return 'eof'
   }
-
+  // 解析大部分特殊符号
   var code = ch.charCodeAt(0)
 
   switch (code) {
@@ -129,7 +128,7 @@ function getPathCharType (ch) {
     case 0x5F: // _
     case 0x24: // $
       return 'ident'
-
+    // 缩进
     case 0x20: // Space
     case 0x09: // Tab
     case 0x0A: // Newline
@@ -160,11 +159,12 @@ function getPathCharType (ch) {
 /**
  * Parse a string path into an array of segments
  * Todo implement cache
- *
+ * 将 字符串路径 解析成数组
+ * parsePath('a.b')
+ * ["a", "b", raw: "a.b"]
  * @param {String} path
  * @return {Array|undefined}
  */
-
 function parsePath (path) {
   var keys = []
   var index = -1
@@ -255,7 +255,7 @@ function formatAccessor (key) {
 /**
  * Compiles a getter function with a fixed path.
  * The fixed path getter supresses errors.
- *
+ * 根据路径, 生成一个对应的 getters. 通过该方法能直接获取值
  * @param {Array} path
  * @return {Function}
  */
@@ -267,7 +267,7 @@ exports.compileGetter = function (path) {
 
 /**
  * External parse that check for a cache hit first
- *
+ * 解析路径
  * @param {String} path
  * @return {Array|undefined}
  */
@@ -286,7 +286,7 @@ exports.parse = function (path) {
 
 /**
  * Get from an object from a path string
- *
+ * 获取值
  * @param {Object} obj
  * @param {String} path
  */
@@ -300,7 +300,7 @@ exports.get = function (obj, path) {
 
 /**
  * Set on an object from a path
- *
+ * 设置值
  * @param {Object} obj
  * @param {String | Array} path
  * @param {*} val
@@ -341,7 +341,7 @@ exports.set = function (obj, path, val) {
   }
   return true
 }
-
+// 报错
 function warnNonExistent (path) {
   process.env.NODE_ENV !== 'production' && _.warn(
     'You are setting a non-existent path "' + path.raw + '" ' +

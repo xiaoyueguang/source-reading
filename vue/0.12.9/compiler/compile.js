@@ -1,3 +1,6 @@
+/**
+ * 解析
+ */
 var _ = require('../util')
 var compileProps = require('./compile-props')
 var config = require('../config')
@@ -7,7 +10,9 @@ var templateParser = require('../parsers/template')
 var resolveAsset = _.resolveAsset
 var componentDef = require('../directives/component')
 
-// terminal directives
+// terminal directives.
+// 优先指令.
+// 该指令没被执行时, 指令对应的节点里的所有元素都可不执行编译
 var terminalDirectives = [
   'repeat',
   'if'
@@ -23,7 +28,7 @@ var terminalDirectives = [
  * The returned composite link function, when called, will
  * return an unlink function that tearsdown all directives
  * created during the linking phase.
- *
+ * 编译主方法
  * @param {Element|DocumentFragment} el
  * @param {Object} options
  * @param {Boolean} partial
@@ -69,7 +74,7 @@ exports.compile = function (el, options, partial, host) {
 /**
  * Apply a linker to a vm/element pair and capture the
  * directives created during the process.
- *
+ * 从 $vm/节点上捕获所有的指令
  * @param {Function} linker
  * @param {Vue} vm
  */
@@ -87,6 +92,7 @@ function linkAndCapture (linker, vm) {
  *
  * We create unlink functions with only the necessary
  * information to avoid retaining additional closures.
+ * 创建个取消链接方法,执行后会得到一个反编译的方法
  *
  * @param {Vue} vm
  * @param {Array} dirs
@@ -106,7 +112,7 @@ function makeUnlinkFn (vm, dirs, context, contextDirs) {
 
 /**
  * Teardown partial linked directives.
- *
+ * 取消指令并移除指令
  * @param {Vue} vm
  * @param {Array} dirs
  * @param {Boolean} destroying
@@ -124,6 +130,7 @@ function teardownDirs (vm, dirs, destroying) {
 
 /**
  * Compile link props on an instance.
+ * 在实例上 链接 props
  *
  * @param {Vue} vm
  * @param {Element} el
@@ -152,6 +159,7 @@ exports.compileAndLinkProps = function (vm, el, props) {
  * since root linkers can not be reused. It returns the
  * unlink function for potential context directives on the
  * container.
+ * 编译实例.
  *
  * @param {Vue} vm
  * @param {Element} el
@@ -206,6 +214,7 @@ exports.compileAndLinkRoot = function (vm, el, options) {
 /**
  * Compile a node and return a nodeLinkFn based on the
  * node type.
+ * 编译节点 并返回 节点链接方法
  *
  * @param {Node} node
  * @param {Object} options
@@ -225,6 +234,7 @@ function compileNode (node, options) {
 
 /**
  * Compile an element and return a nodeLinkFn.
+ * 编译元素节点, 且返回链接方法
  *
  * @param {Element} el
  * @param {Object} options
@@ -252,6 +262,7 @@ function compileElement (el, options) {
   }
   // if the element is a textarea, we need to interpolate
   // its content on initial render.
+  // 标签另外处理
   if (el.tagName === 'TEXTAREA') {
     var realLinkFn = linkFn
     linkFn = function (vm, el) {
@@ -265,7 +276,7 @@ function compileElement (el, options) {
 
 /**
  * Compile a textNode and return a nodeLinkFn.
- *
+ * 编译 文字节点, 返回链接方法
  * @param {TextNode} node
  * @param {Object} options
  * @return {Function|null} textNodeLinkFn
@@ -290,7 +301,7 @@ function compileTextNode (node, options) {
 
 /**
  * Process a single text token.
- *
+ * 处理文字token
  * @param {Object} token
  * @param {Object} options
  * @return {Node}
@@ -322,7 +333,7 @@ function processTextToken (token, options) {
 
 /**
  * Build a function that processes a textNode.
- *
+ * 创建个方法, 处理文字节点
  * @param {Array<Object>} tokens
  * @param {DocumentFragment} frag
  */
@@ -356,7 +367,7 @@ function makeTextNodeLinkFn (tokens, frag) {
 
 /**
  * Compile a node list and return a childLinkFn.
- *
+ * 编译节点列表, 返回子链接方法
  * @param {NodeList} nodeList
  * @param {Object} options
  * @return {Function|undefined}
@@ -383,7 +394,7 @@ function compileNodeList (nodeList, options) {
 
 /**
  * Make a child link function for a node's childNodes.
- *
+ * 为子节点创建子链接方法
  * @param {Array<Function>} linkFns
  * @return {Function} childLinkFn
  */
@@ -410,7 +421,7 @@ function makeChildLinkFn (linkFns) {
 /**
  * Check for element directives (custom elements that should
  * be resovled as terminal directives).
- *
+ * 检查收集 指令
  * @param {Element} el
  * @param {Object} options
  */
@@ -427,6 +438,7 @@ function checkElementDirectives (el, options) {
 /**
  * Check if an element is a component. If yes, return
  * a component link function.
+ * 检查节点是否为组件. 组件需返回组件链接方法
  *
  * @param {Element} el
  * @param {Object} options
@@ -450,6 +462,7 @@ function checkComponent (el, options, hasAttrs) {
 /**
  * Check an element for terminal directives in fixed order.
  * If it finds one, return a terminal link function.
+ * 检查指令, 返回一个链接方法
  *
  * @param {Element} el
  * @param {Object} options
@@ -500,6 +513,7 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 
 /**
  * Compile the directives on an element and return a linker.
+ * 编译一个节点上的指令.
  *
  * @param {Array|NamedNodeMap} attrs
  * @param {Object} options
@@ -543,6 +557,7 @@ function compileDirectives (attrs, options) {
 
 /**
  * Build a link function for all directives on a single node.
+ * 创建链接方法, 绑定所有的指令
  *
  * @param {Array} directives
  * @return {Function} directivesLinkFn
@@ -576,6 +591,7 @@ function makeNodeLinkFn (directives) {
  * Special case: class interpolations are translated into
  * v-class instead v-attr, so that it can work with user
  * provided v-class bindings.
+ * 收集所有的指令
  *
  * @param {String} name
  * @param {String} value
@@ -619,6 +635,7 @@ function collectAttrDirective (name, value, options) {
 
 /**
  * Directive priority sort comparator
+ * 指令优先级排序
  *
  * @param {Object} a
  * @param {Object} b

@@ -1,5 +1,5 @@
 /**
- * 
+ *  编译 props
  */
 var _ = require('../util')
 var textParser = require('../parsers/text')
@@ -15,7 +15,7 @@ var literalValueRE = /^(true|false)$|^\d.*/
 /**
  * Compile param attributes on a root element and return
  * a props link function.
- *
+ * 在组件里编译并且创建链接 props 方法
  * @param {Element|DocumentFragment} el
  * @param {Array} propOptions
  * @return {Function} propsLinkFn
@@ -43,9 +43,11 @@ module.exports = function compileProps (el, propOptions) {
     value = el.getAttribute(attr)
     if (value === null) {
       attr = 'data-' + attr
+      // 收集
       value = el.getAttribute(attr)
     }
     // create a prop descriptor
+    // 生成一个完整的 props 描述
     prop = {
       name: name,
       raw: value,
@@ -64,7 +66,7 @@ module.exports = function compileProps (el, propOptions) {
         // check prop binding type.
         single = tokens.length === 1
         literal = literalValueRE.test(prop.parentPath)
-        // one time: {{* prop}}
+        // one time: {{* prop}} 执行一次的
         if (literal || (single && tokens[0].oneTime)) {
           prop.mode = propBindingModes.ONE_TIME
         } else if (
@@ -102,7 +104,7 @@ module.exports = function compileProps (el, propOptions) {
 
 /**
  * Build a function that applies props to a vm.
- *
+ * 创建个方法 将 props 应用到实例上
  * @param {Array} props
  * @return {Function} propsLinkFn
  */
@@ -120,6 +122,7 @@ function makePropsLinkFn (props) {
       options = prop.options
       if (prop.raw === null) {
         // initialize absent prop
+        // 初始化
         _.initProp(vm, prop, getDefault(options))
       } else if (prop.dynamic) {
         // dynamic prop
@@ -157,7 +160,7 @@ function makePropsLinkFn (props) {
 
 /**
  * Get the default value of a prop.
- *
+ * props 获取标准的值
  * @param {Object} options
  * @return {*}
  */
