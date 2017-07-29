@@ -73,7 +73,7 @@ exports._compile = function (el) {
 /**
  * Initialize instance element. Called in the public
  * $mount() method.
- *
+ * 初始化实例节点. 调用$mount 方法
  * @param {Element} el
  */
 
@@ -96,7 +96,7 @@ exports._initElement = function (el) {
 
 /**
  * Create and bind a directive to an element.
- *
+ * 创建指令
  * @param {String} name - directive name
  * @param {Node} node   - target node
  * @param {Object} desc - parsed directive descriptor
@@ -113,7 +113,7 @@ exports._bindDir = function (name, node, desc, def, host) {
 /**
  * Teardown an instance, unobserves the data, unbind all the
  * directives, turn off all the event listeners, etc.
- *
+ * 摧毁
  * @param {Boolean} remove - whether to remove the DOM node.
  * @param {Boolean} deferCleanup - if true, defer cleanup to
  *                                 be called later
@@ -169,6 +169,7 @@ exports._destroy = function (remove, deferCleanup) {
  * Clean up to ensure garbage collection.
  * This is called after the leave transition if there
  * is any.
+ * 确保清除垃圾.
  */
 
 exports._cleanup = function () {
