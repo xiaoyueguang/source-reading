@@ -1,3 +1,6 @@
+/**
+ * 基础指令
+ */
 // text & html
 import text from './text'
 import html from './html'

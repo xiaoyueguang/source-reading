@@ -1,3 +1,6 @@
+/**
+ * 设置过滤器.
+ */
 import { toArray, debounce as _debounce } from '../util/index'
 import { orderBy, filterBy, limitBy } from './array-filters'
 const digitsRE = /(\d{3})(?=\d)/g

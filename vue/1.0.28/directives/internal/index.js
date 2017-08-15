@@ -1,3 +1,6 @@
+/**
+ * 内置的指令
+ */
 import style from './style'
 import vClass from './class'
 import component from './component'

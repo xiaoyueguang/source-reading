@@ -1,3 +1,6 @@
+/**
+ * 数组方法 过滤器
+ */
 import { getPath } from '../parsers/path'
 import vFor from '../directives/public/for'
 import {

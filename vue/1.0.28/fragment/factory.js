@@ -1,3 +1,6 @@
+/**
+ * 片段 工厂方法
+ */
 import { compile } from '../compiler/index'
 import { isTemplate, getOuterHTML } from '../util/index'
 import { parseTemplate, cloneNode } from '../parsers/template'

@@ -1,3 +1,6 @@
+/**
+ * Vue 实例方法
+ */
 import initMixin from './internal/init'
 import stateMixin from './internal/state'
 import eventsMixin from './internal/events'

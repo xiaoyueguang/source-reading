@@ -1,3 +1,6 @@
+/**
+ * Observer 观察者
+ */
 import Dep from './dep'
 import { arrayMethods } from './array'
 import {

@@ -1,3 +1,6 @@
+/**
+ * 解析指令
+ */
 import { toNumber, stripQuotes } from '../util/index'
 import Cache from '../cache'
 
