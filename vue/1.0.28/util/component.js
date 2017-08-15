@@ -29,7 +29,7 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Check if an element is a component, if yes return its
  * component id.
- *
+ * 检查组件属性
  * @param {Element} el
  * @param {Object} options
  * @return {Object|undefined}

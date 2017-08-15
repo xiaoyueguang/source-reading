@@ -4,14 +4,16 @@
 export const hasProto = '__proto__' in {}
 
 // Browser environment sniffing
+// 浏览器环境
 export const inBrowser =
   typeof window !== 'undefined' &&
   Object.prototype.toString.call(window) !== '[object Object]'
 
-// detect devtools
+// detect devtools 定义 devtools
 export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
 // UA sniffing for working around browser-specific quirks
+// UA 获取
 const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 export const isIE = UA && UA.indexOf('trident') > 0
 export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
@@ -24,6 +26,7 @@ let animationProp
 let animationEndEvent
 
 // Transition property/event sniffing
+// 动画过渡 命名
 if (inBrowser && !isIE9) {
   const isWebkitTrans =
     window.ontransitionend === undefined &&
@@ -53,6 +56,7 @@ export {
 }
 
 /* istanbul ignore next */
+// 是否为原生方法
 function isNative (Ctor) {
   return /native code/.test(Ctor.toString())
 }
@@ -62,7 +66,7 @@ function isNative (Ctor) {
  * should be executed as a microtask, so we leverage
  * MutationObserver if it's available, and fallback to
  * setTimeout(0).
- *
+ * 异步更新
  * @param {Function} cb
  * @param {Object} ctx
  */
@@ -88,6 +92,7 @@ export const nextTick = (function () {
   // completely stops working after triggering a few times... so, if native
   // Promise is available, we will use it:
   /* istanbul ignore if */
+  // 原生Promise
   if (typeof Promise !== 'undefined' && isNative(Promise)) {
     var p = Promise.resolve()
     var noop = function () {}
@@ -104,6 +109,7 @@ export const nextTick = (function () {
     // use MutationObserver where native Promise is not available,
     // e.g. IE11, iOS7, Android 4.4
     var counter = 1
+    // 在 ios > 9.3.3上有很大的性能问题
     var observer = new MutationObserver(nextTickHandler)
     var textNode = document.createTextNode(String(counter))
     observer.observe(textNode, {
@@ -137,6 +143,7 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
   _Set = Set
 } else {
   // a non-standard Set polyfill that only works with primitive keys.
+  // 模范ES6的set方法
   _Set = function () {
     this.set = Object.create(null)
   }

@@ -1,3 +1,6 @@
+/**
+ * 警告调试语句
+ */
 import config from '../config'
 import { hyphenate } from './lang'
 

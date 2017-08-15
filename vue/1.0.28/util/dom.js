@@ -1,3 +1,6 @@
+/**
+ * DOM相关操作
+ */
 import config from '../config'
 import { isIE9 } from './env'
 import { warn } from './debug'

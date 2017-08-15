@@ -1,3 +1,6 @@
+/**
+ * 冲刷. 跟之前差不多
+ */
 import config from './config'
 import {
   warn,

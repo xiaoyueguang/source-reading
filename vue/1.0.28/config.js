@@ -1,3 +1,6 @@
+/**
+ * 设置
+ */
 import { compileRegex } from './parsers/text'
 
 let delimiters = ['{{', '}}']

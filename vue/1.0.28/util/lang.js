@@ -1,4 +1,8 @@
 /**
+ * 语法操作
+ */
+
+/**
  * Set a property on an object. Adds the new property and
  * triggers change notification if the property doesn't
  * already exist.

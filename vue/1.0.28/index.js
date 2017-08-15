@@ -1,3 +1,6 @@
+/**
+ * 入口文件
+ */
 import Vue from './instance/vue'
 import installGlobalAPI from './global-api'
 import { inBrowser, devtools } from './util/index'
@@ -11,6 +14,9 @@ export default Vue
 
 // devtools global hook
 /* istanbul ignore next */
+/**
+ * 引入 devtools
+ */
 setTimeout(() => {
   if (config.devtools) {
     if (devtools) {

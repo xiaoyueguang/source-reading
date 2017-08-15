@@ -1,3 +1,6 @@
+/**
+ * Vue的属性操作
+ */
 import Vue from '../instance/vue'
 import config from '../config'
 import {

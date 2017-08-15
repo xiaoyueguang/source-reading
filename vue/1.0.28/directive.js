@@ -1,3 +1,6 @@
+/**
+ * 指令
+ */
 import {
   extend,
   bind,

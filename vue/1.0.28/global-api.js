@@ -1,3 +1,6 @@
+/**
+ * 添加全局方法或属性
+ */
 import config from './config'
 import directives from './directives/public/index'
 import elementDirectives from './directives/element/index'
