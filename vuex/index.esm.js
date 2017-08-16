@@ -1,3 +1,6 @@
+/**
+ * 入口文件. 兼容 ES6模块
+ */
 import { Store, install } from './store'
 import { mapState, mapMutations, mapGetters, mapActions, createNamespacedHelpers } from './helpers'
 

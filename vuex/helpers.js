@@ -1,3 +1,7 @@
+/**
+ * 本文件里包含辅助函数
+ */
+// state 辅助函数
 export const mapState = normalizeNamespace((namespace, states) => {
   const res = {}
   normalizeMap(states).forEach(({ key, val }) => {
@@ -17,11 +21,12 @@ export const mapState = normalizeNamespace((namespace, states) => {
         : state[val]
     }
     // mark vuex getter for devtools
+    // 标记为 vuex
     res[key].vuex = true
   })
   return res
 })
-
+// mutation 辅助函数
 export const mapMutations = normalizeNamespace((namespace, mutations) => {
   const res = {}
   normalizeMap(mutations).forEach(({ key, val }) => {
@@ -35,7 +40,7 @@ export const mapMutations = normalizeNamespace((namespace, mutations) => {
   })
   return res
 })
-
+// getters 辅助函数
 export const mapGetters = normalizeNamespace((namespace, getters) => {
   const res = {}
   normalizeMap(getters).forEach(({ key, val }) => {
@@ -55,7 +60,7 @@ export const mapGetters = normalizeNamespace((namespace, getters) => {
   })
   return res
 })
-
+// actions 辅助函数
 export const mapActions = normalizeNamespace((namespace, actions) => {
   const res = {}
   normalizeMap(actions).forEach(({ key, val }) => {
@@ -69,20 +74,29 @@ export const mapActions = normalizeNamespace((namespace, actions) => {
   })
   return res
 })
-
+/**
+ * 根据命名空间创建辅助
+ * @param {命名空间} namespace 
+ */
 export const createNamespacedHelpers = (namespace) => ({
   mapState: mapState.bind(null, namespace),
   mapGetters: mapGetters.bind(null, namespace),
   mapMutations: mapMutations.bind(null, namespace),
   mapActions: mapActions.bind(null, namespace)
 })
-
+/**
+ * 展开 map. 辅助函数可以通过数组来展开, 也可通过对象来展开
+ * @param {array} map 
+ */
 function normalizeMap (map) {
   return Array.isArray(map)
     ? map.map(key => ({ key, val: key }))
     : Object.keys(map).map(key => ({ key, val: map[key] }))
 }
-
+/**
+ * 规范命名空间
+ * @param {function} fn 
+ */
 function normalizeNamespace (fn) {
   return (namespace, map) => {
     if (typeof namespace !== 'string') {
@@ -94,7 +108,12 @@ function normalizeNamespace (fn) {
     return fn(namespace, map)
   }
 }
-
+/**
+ * 通过命名空间获取模块
+ * @param {Store} store 实例
+ * @param {string} helper 辅助方法
+ * @param {string} namespace 命名空间
+ */
 function getModuleByNamespace (store, helper, namespace) {
   const module = store._modulesNamespaceMap[namespace]
   if (process.env.NODE_ENV !== 'production' && !module) {
