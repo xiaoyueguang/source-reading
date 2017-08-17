@@ -1032,3 +1032,5 @@ export const createNamespacedHelpers = (namespace) => ({
 根据命名空间,来创建对应的助手方法
 
 ## 总结
+`Vuex`将`state`交给`Vue`处理, 并用`computed`来处理`getters`数据. 这就是为什么`Vuex`不能适用于除了`Vue`之外的其它框架  
+在解读的过程中, 对`Vuex`的熟悉, 能很好的帮我读懂源码, 读了源码, 也让我更加理解`Vuex`的一些设计. 比如`action`为什么总是返回`Promise`, `commit`如何去通知其它插件.
