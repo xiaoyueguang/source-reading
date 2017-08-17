@@ -3,7 +3,7 @@
  * @param {Vue} Vue 
  */
 export default function (Vue) {
-  // 判断 Vue 版本
+  // 获取 Vue 版本
   const version = Number(Vue.version.split('.')[0])
   // vue 版本为2时, 在创建之前先执行 vuexInit
   if (version >= 2) {

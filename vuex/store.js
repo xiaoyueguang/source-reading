@@ -41,8 +41,11 @@ export class Store {
      */
     // 提交状态. 用来确保 state 不被非法提交修改
     this._committing = false
+    // 保存 actions
     this._actions = Object.create(null)
+    // 保存 mutations
     this._mutations = Object.create(null)
+    // 保存所有 getters
     this._wrappedGetters = Object.create(null)
     // 模块
     this._modules = new ModuleCollection(options)
@@ -291,6 +294,7 @@ function resetStoreVM (store, state, hot) {
   // 清空getters
   store.getters = {}
   const wrappedGetters = store._wrappedGetters
+  // 可计算属性
   const computed = {}
   forEachValue(wrappedGetters, (fn, key) => {
     // use computed to leverage its lazy-caching mechanism
@@ -309,6 +313,9 @@ function resetStoreVM (store, state, hot) {
   const silent = Vue.config.silent
   // 取消所有的日志和警告
   Vue.config.silent = true
+  // 将实例的单一状态树作为Vue的 data.
+  // getters 作为可计算.
+  // 从而实现监听数据
   store._vm = new Vue({
     data: {
       $$state: state
@@ -351,13 +358,13 @@ function installModule (store, rootState, path, module, hot) {
   const namespace = store._modules.getNamespace(path)
 
   // register in namespace map
-  // 开启命名空间时,
+  // 开启命名空间时, 注册命名空间的模块
   if (module.namespaced) {
     store._modulesNamespaceMap[namespace] = module
   }
 
   // set state
-  // 非根目录
+  // 非根路径
   if (!isRoot && !hot) {
     // 获取父状态
     const parentState = getNestedState(rootState, path.slice(0, -1))
@@ -398,10 +405,10 @@ function installModule (store, rootState, path, module, hot) {
  * 定义是否存在命名空间时 不同的dispatch commit getters 和 state
  */
 function makeLocalContext (store, namespace, path) {
+  // 是否有命名空间
   const noNamespace = namespace === ''
 
   const local = {
-    // 
     dispatch: noNamespace ? store.dispatch : (_type, _payload, _options) => {
       const args = unifyObjectStyle(_type, _payload, _options)
       const { payload, options } = args
@@ -450,21 +457,28 @@ function makeLocalContext (store, namespace, path) {
 
   return local
 }
-
+/**
+ * 根据命名空间, 返回对应的getters
+ * @param {Store} store 当前实例
+ * @param {string} namespace 命名空间
+ */
 function makeLocalGetters (store, namespace) {
   const gettersProxy = {}
 
   const splitPos = namespace.length
   Object.keys(store.getters).forEach(type => {
     // skip if the target getter is not match this namespace
+    // 当获取到的 getters 不符合命名空间时候跳过
     if (type.slice(0, splitPos) !== namespace) return
 
     // extract local getter type
+    // 提取当前的 getters
     const localType = type.slice(splitPos)
 
     // Add a port to the getters proxy.
     // Define as getter property because
     // we do not want to evaluate the getters in this time.
+    // 重新定义, 返回当前方法
     Object.defineProperty(gettersProxy, localType, {
       get: () => store.getters[type],
       enumerable: true
@@ -473,17 +487,35 @@ function makeLocalGetters (store, namespace) {
 
   return gettersProxy
 }
-
+/**
+ * 注册 mutation
+ * @param {Store} store 实例
+ * @param {string} type 类型
+ * @param {function} handler 处理方法
+ * @param {object} local 根据命名空间返回的上下文
+ */
 function registerMutation (store, type, handler, local) {
+  // mutations 为一个数组, 里面包括所有模块中重名的 mutation.
+  // 从而实现调用一次 mutations, 调用所有模块中的 mutation
   const entry = store._mutations[type] || (store._mutations[type] = [])
   entry.push(function wrappedMutationHandler (payload) {
+    // mutation 只能处理本地的 state
     handler.call(store, local.state, payload)
   })
 }
-
+/**
+ * 注册 actions
+ * @param {Store} store 实例
+ * @param {string} type 类型
+ * @param {function} handler 处理方法
+ * @param {object} local  上下文
+ */
 function registerAction (store, type, handler, local) {
+  // actions 为一个数组, 包含所有模块重名的 action.
+  // 从而实现调用一次 actions, 触发所有模块的 action
   const entry = store._actions[type] || (store._actions[type] = [])
   entry.push(function wrappedActionHandler (payload, cb) {
+    // 第一个参数为上下文, 传入的数据, 保证能从本地或全局中获取状态或 getters
     let res = handler.call(store, {
       dispatch: local.dispatch,
       commit: local.commit,
@@ -492,21 +524,32 @@ function registerAction (store, type, handler, local) {
       rootGetters: store.getters,
       rootState: store.state
     }, payload, cb)
+    // 判断是否为 Promise, 保证返回的为 Promise
     if (!isPromise(res)) {
       res = Promise.resolve(res)
     }
     if (store._devtoolHook) {
+      // 有 devtool 工具则监听报错信息
       return res.catch(err => {
+        // 有报错则触发 error
         store._devtoolHook.emit('vuex:error', err)
         throw err
       })
     } else {
+      // 返回 Promise
       return res
     }
   })
 }
-
+/**
+ * 注册getter
+ * @param {Store} store 实例
+ * @param {string} type 类型
+ * @param {function} rawGetter getters 方法
+ * @param {object} local 上下文
+ */
 function registerGetter (store, type, rawGetter, local) {
+  // getters 不允许全局重名. 不然 vuex 也不好确定要返回哪个模块的 getter
   if (store._wrappedGetters[type]) {
     if (process.env.NODE_ENV !== 'production') {
       console.error(`[vuex] duplicate getter key: ${type}`)
@@ -514,6 +557,7 @@ function registerGetter (store, type, rawGetter, local) {
     return
   }
   store._wrappedGetters[type] = function wrappedGetter (store) {
+    // getters 允许从本地或全局获取 state 或 getters
     return rawGetter(
       local.state, // local state
       local.getters, // local getters
