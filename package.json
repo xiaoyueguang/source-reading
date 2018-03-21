@@ -4,6 +4,7 @@
   "description": "源码阅读, 旨在提高自己的编码水平, 丰富自己的见闻.",
   "main": "index.js",
   "dependencies": {
+    "depd": "^1.1.2",
     "webpack": "^2.3.3"
   },
   "devDependencies": {
