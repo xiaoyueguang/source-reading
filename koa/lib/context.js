@@ -20,7 +20,7 @@ const proto = module.exports = {
   /**
    * util.inspect() implementation, which
    * just returns the JSON output.
-   *
+   * 返回JSON输出
    * @return {Object}
    * @api public
    */
@@ -37,7 +37,7 @@ const proto = module.exports = {
    * object, as iteration will otherwise fail due
    * to the getters and cause utilities such as
    * clone() to fail.
-   *
+   * 将参数转成json输出
    * @return {Object}
    * @api public
    */
@@ -60,6 +60,7 @@ const proto = module.exports = {
    *    this.assert(this.user, 401, 'Please login!');
    *
    * See: https://github.com/jshttp/http-assert
+   * 断言库调用http-assert
    *
    * @param {Mixed} test
    * @param {Number} status
@@ -82,6 +83,7 @@ const proto = module.exports = {
    *    this.throw(400, new Error('invalid'));
    *
    * See: https://github.com/jshttp/http-errors
+   * 利用 http-error 来抛出错误
    *
    * @param {String|Number|Error} err, msg or status
    * @param {String|Number|Error} [err, msg or status]
@@ -95,7 +97,8 @@ const proto = module.exports = {
 
   /**
    * Default error handling.
-   *
+   * 默认的错误处理
+   * 
    * @param {Error} err
    * @api private
    */
@@ -114,6 +117,7 @@ const proto = module.exports = {
     }
 
     // delegate
+    // 触发错误
     this.app.emit('error', err, this);
 
     // nothing we can do here other
@@ -155,6 +159,7 @@ const proto = module.exports = {
 
 /**
  * Response delegation.
+ * 委托. 将上下文中的 response 对象里的属性, 委托到上下文上
  */
 
 delegate(proto, 'response')

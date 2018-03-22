@@ -17,6 +17,7 @@ const only = require('only');
 
 /**
  * Prototype.
+ * 请求头的处理
  */
 
 module.exports = {
@@ -34,7 +35,7 @@ module.exports = {
 
   /**
    * Set request header.
-   *
+   * 
    * @api public
    */
 
@@ -44,7 +45,7 @@ module.exports = {
 
   /**
    * Return request header, alias as request.header
-   *
+   * 
    * @return {Object}
    * @api public
    */
@@ -55,7 +56,7 @@ module.exports = {
 
   /**
    * Set request header, alias as request.header
-   *
+   * 
    * @api public
    */
 

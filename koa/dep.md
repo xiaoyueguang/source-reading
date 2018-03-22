@@ -54,3 +54,24 @@ module:name stop +5ms
 ## depd
 > 接收模块名后, 返回一个匿名方法, 调用后可打印出  
 > 模块名, 值, 调用的文件以及行数
+
+## http-errors
+> 快速创建http报错
+
+## http-assert
+> 对状态码断言
+
+## delegates
+> 委托. 将对象上的某个属性的属性代理到该对象上
+
+## content-type
+> 处理http头的 content-type
+
+## parseurl
+> 格式化URL
+
+## type-is
+> 推断请求的数据类型
+
+## fresh
+> 检查响应是否有缓存.

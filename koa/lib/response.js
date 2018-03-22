@@ -21,6 +21,7 @@ const only = require('only');
 
 /**
  * Prototype.
+ * 响应头的处理
  */
 
 module.exports = {
