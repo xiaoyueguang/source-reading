@@ -59,7 +59,7 @@
     return server.listen(...args);
   }
 ```
-可以看到, `Koa`还是基于`Node.js`的`http`原生模块, 来实现一个服务器.  
+`Koa`是基于`Node.js`的`http`原生模块, 来实现一个服务器.  
 利用ES6的扩展运算符`...`, 将获得传入的参数集合传入到`http`实例的`listen`中来实现监听.  
 
 
@@ -90,3 +90,144 @@ TODO:
   }
 ```
 `Koa`通过`use`将方法传入到自己的中间件集合中, 并对方法做了转换, 将`Generator`方法转成所需要的格式.
+
+而后通过`callback`生成一个给`http`模块使用的回调, 对`http`的错误监听, 结束等做了处理, 对中间件的处理就在这关键的`compose`方法中.
+
+### `compose`
+```es6
+  function compose (middleware) {
+    // 检查中间件集合中是否符合
+    if (!Array.isArray(middleware)) throw new TypeError('Middleware stack must be an array!')
+    for (const fn of middleware) {
+      if (typeof fn !== 'function') throw new TypeError('Middleware must be composed of functions!')
+    }
+
+    return function (context, next) {
+      // 当前索引位置
+      let index = -1
+      return dispatch(0)
+      /**
+       * 这个方法主要是处理如何调用中间件
+       * 本质上是一个递归, 并且将递归执行下一个中间件的方法,
+       * 赋值给next, 将控制权交给用户处理.
+       * 而每次在next上await, 本质上就是对中间件方法await,
+       * 从而形成, 在第一个中间件中执行到一半, 就等待第二个中间件执行
+       * 直到最终所有的中间件都执行完毕, 再继续next之后的代码,
+       * 待一个中间件里的方法执行完毕后, 返回一个Promise,
+       * 从而让上一个中间件捕获到, 之后回到第一个中间件.
+      */
+      function dispatch (i) {
+        // 防止执行多次
+        if (i <= index) return Promise.reject(new Error('next() called multiple times'))
+        index = i
+        let fn = middleware[i]
+        if (i === middleware.length) fn = next
+        if (!fn) return Promise.resolve()
+        try {
+          return Promise.resolve(fn(context, function next () {
+            // await next, 本质上就是 await dispatch. 也就是 await 中间件方法 fn
+            return dispatch(i + 1)
+          }))
+        } catch (err) {
+          return Promise.reject(err)
+        }
+      }
+    }
+  }
+```
+`compose`中, 最关键的就是属于`dispatch`方法, 上面的可能会比较抽象, 配合以下代码可能会更容易理解.
+
+```es6
+  const middleware = [
+    async (ctx, next) => {
+      console.log(1)
+      await sleep()
+      await next()
+      console.log(5)
+      await sleep()
+      console.log(6)
+    },
+    async (ctx, next) => {
+      console.log(2)
+      await sleep()
+      await next()
+      console.log(3)
+      await sleep()
+      console.log(4)
+    }
+  ]
+  function compose (middleware) {
+    return function (context, next) {
+      return dispatch(0)
+      function dispatch (i) {
+        let fn = middleware[i]
+        return fn(ctx, function next () {
+          return dispatch(i + 1)
+        })
+      }
+    }
+  }
+  compose(middleware)
+```
+等同于
+```es6
+  function compose () {
+    return function (context, next) {
+      return dispatch(0)
+      function dispatch (i) {
+        let fn = async (ctx, next) => {
+          console.log(1)
+          await sleep()
+          await next()
+          console.log(5)
+          await sleep()
+          console.log(6)
+        }
+        return fn(ctx, function next () {
+          return async (ctx, next) => {
+            console.log(2)
+            await sleep()
+            await next()
+            console.log(3)
+            await sleep()
+            console.log(4)
+          }
+        })
+      }
+    }
+  }
+  compose()
+```
+当`fn`执行之后, 声明的`next`被`await`后, 又会等同于以下代码
+```es6
+  function compose () {
+    return function (context, next) {
+      function dispatch (0) {
+        let fn = async (ctx, next) => {
+          console.log(1)
+          await sleep()
+
+          // 这里开始是等待第二个中间件执行完成
+          await Promise.resolve((async (ctx, next) => {
+            console.log(2)
+            await sleep()
+            await next()
+            console.log(3)
+            await sleep()
+            console.log(4)
+          })())
+
+          // 回到上一个中间件
+          console.log(5)
+          await sleep()
+          console.log(6)
+        }
+        return fn(ctx, function next () {
+          
+        })
+      }
+    }
+  }
+  compose()
+```
+因此, 代码就会按照顺序, 将数字打印出来, 从而实现了洋葱圈模型式.
