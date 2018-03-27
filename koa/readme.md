@@ -65,9 +65,55 @@
 
 
 ## 兼容上个版本的中间件
-TODO:
+`Koa`通过`koa-convert`来实现转换, 将上个版本的中间件, 转换成`Koa2`所需的中间件.  
+这里需要了解下两个版本的中间件方法有什么区别.
+上个版本的中间件
+```es6
+app.use(function *(next) {
+  yield next()
+  this.response.type = 'text/html'
+  this.response.body = '<h1>Hello, koa2!</h1>'
+});
+```
 
-
+当前版本的中间件
+```es6
+app.use(async (ctx, next) => {
+  await next()
+  ctx.response.type = 'text/html'
+  ctx.response.body = '<h1>Hello, koa2!</h1>'
+});
+```
+能看到两者的区别, 一个在于作用域的变化, 一个是参数的变化.  
+同时, 一个`Generator`方法, 每次执行后, 都会在`yield`中断,  
+而`async/await`执行后, 不会中断,  
+要使得两种方法表现一致, 需要通过`co`模块来确保`Generator`自动执行.
+```es6
+  /**
+   * @param {function} 生成器中间件
+   */
+  function convert (mw) {
+    /**
+     * @param {object} ctx 上下文
+     * @param {function} next 中间件. `async/await`
+     * @return {promise} 转换后的中间件
+     */
+    function converted (ctx, next) {
+      // 处理上个版本
+      return co.call(
+        // 绑定co作用域
+        ctx,
+        // 绑定作用域, 同时传入回调, 即中间件中调用的next方法
+        mw.call(ctx, function *() {
+          // 调用下个中间件方法, 因为是 Promise, 所以能够被yield
+          return yield next()
+      }))
+    }
+    return converted
+  }
+```
+转换的思路主要就是将一个`Generator`方法变成自执行, 改变上下文作用域, 以及调整传参,  
+返回一个全新的匿名方法, 使得该方法能够被当前版本的`Koa`所使用.
 
 ## 洋葱圈模型
 在一开始的代码中, 浏览器访问后, 会按照顺序打印出数字, 这就是`Koa`的洋葱圈模型.  
